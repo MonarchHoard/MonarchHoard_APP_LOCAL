@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+	<link rel="icon" href="/static/wallpaper/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Monarch Hoard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="login-body">
+
+    <div class="login-panel">
+        <div class="login-logo">
+            <img src="/static/wallpaper/logo_monarchhoard.png" alt="Logo Monarch Hoard">
+        </div>
+
+        <!-- Sostituito il testo con l'immagine del titolo -->
+        <h1>
+            <img src="/static/wallpaper/Scritta_MonarchHoard.png" alt="Monarch Hoard">
+        </h1>
+        
+        <p class="login-subtitle">Accesso Hunter</p>
+
+        {% if error %}
+            <div class="login-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST" class="login-form">
+            <input type="text" name="username" placeholder="Username" autocomplete="username" aria-label="Username" required>
+            <input type="password" name="password" placeholder="Password" autocomplete="current-password" aria-label="Password" required>
+
+            <button type="submit">Entra</button>
+        </form>
+
+		<div class="login-hint">
+			Non hai un account? 
+			<a href="{{ url_for('register') }}">Registrati qui</a>
+		</div>
+
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <link rel="icon" href="/static/wallpaper/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indovina la Carta - Monarch Hoard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="app-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="/static/wallpaper/logo_monarchhoard.png" alt="Monarch Hoard Logo">
+            <img class="sidebar-wordmark" src="/static/wallpaper/Scritta_MonarchHoard.png" alt="Monarch Hoard">
+        </div>
+
+        <nav class="sidebar-nav">
+            <button class="side-nav-btn" onclick="location.href='/'">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_collection.png">
+                <span>Collezione</span>
+            </button>
+
+            <button class="side-nav-btn" onclick="location.href='/games/memory'">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_memory.png">
+                <span>Memory</span>
+            </button>
+
+            <button class="side-nav-btn active">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_cardquiz.png">
+                <span>Indovina la Carta</span>
+            </button>
+			
+            <button class="side-nav-btn" onclick="location.href='/games/leaderboard'">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_leaderboard.png">
+                <span>Classifiche</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-player">
+            <div class="player-avatar"></div>
+            <div>
+                <div class="player-name">Hunter</div>
+                <div class="player-rank">Quiz Mode</div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="main-content">
+
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <img src="/static/wallpaper/Solo_Leveling_Title.png" class="top-bar-img" alt="Solo Leveling Title">
+            </div>
+            <div class="top-bar-right">
+                <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+            </div>
+        </div>
+
+        <main class="main-area">
+
+            <!-- BARRA CONTROLLI -->
+            <section class="search-bar">
+                <div class="filters-row">
+
+                    <div class="dropdown-filter">
+                        <button id="quiz-difficulty-button" class="dropdown-button" onclick="toggleDropdown('quiz-difficulty-dropdown')">
+                            Difficolta': Normale &#9660;
+                        </button>
+                        <div id="quiz-difficulty-dropdown" class="dropdown-content">
+                            <div class="filter-chip" onclick="setQuizDifficulty(event, 1, 'Facile')">Facile &middot; sfocatura leggera</div>
+                            <div class="filter-chip active" onclick="setQuizDifficulty(event, 2, 'Normale')">Normale &middot; sfocatura forte</div>
+                            <div class="filter-chip" onclick="setQuizDifficulty(event, 3, 'Monarca')">Monarca &middot; silhouette</div>
+                        </div>
+                    </div>
+
+                    <button id="btn-new-game" class="set-toggle-btn" onclick="startQuiz()">Nuova partita</button>
+                    <button id="btn-pause" class="game-ctrl-btn" onclick="togglePause()" disabled>Pausa</button>
+                    <button id="btn-stop" class="game-ctrl-btn danger" onclick="stopQuiz()" disabled>Ferma</button>
+
+                    <div class="memory-hud">
+                        <div class="memory-hud-item">
+                            <span class="memory-hud-label">Domanda</span>
+                            <span class="memory-hud-value" id="quiz-progress">0 / 10</span>
+                        </div>
+                        <div class="memory-hud-item">
+                            <span class="memory-hud-label">Punti</span>
+                            <span class="memory-hud-value" id="quiz-score">0</span>
+                        </div>
+                        <div class="memory-hud-item">
+                            <span class="memory-hud-label">Streak</span>
+                            <span class="memory-hud-value" id="quiz-streak">x1</span>
+                        </div>
+                        <div class="memory-hud-item">
+                            <span class="memory-hud-label">Record</span>
+                            <span class="memory-hud-value" id="quiz-best">&mdash;</span>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- AREA DI GIOCO -->
+            <div class="game-area">
+                <div id="quiz-stage" class="quiz-stage">
+
+                    <div class="quiz-image-panel">
+                        <div class="quiz-timer-bar">
+                            <div class="quiz-timer-fill" id="quiz-timer-fill"></div>
+                        </div>
+                        <div class="quiz-image-frame">
+                            <img id="quiz-card-img" class="quiz-card-img" src="" alt="">
+                        </div>
+                        <div class="quiz-hint" id="quiz-hint"></div>
+                    </div>
+
+                    <div class="quiz-answer-panel">
+                        <div class="quiz-question" id="quiz-question">Di quale carta si tratta?</div>
+                        <div class="quiz-options" id="quiz-options"></div>
+                        <div class="quiz-feedback" id="quiz-feedback"></div>
+                    </div>
+
+                </div>
+
+                <!-- Schermata iniziale / pausa -->
+                <div id="game-overlay" class="game-overlay">
+                    <div class="game-overlay-inner">
+                        <div class="game-overlay-icon" id="overlay-icon">&#9670;</div>
+                        <h2 id="overlay-title">Indovina la Carta</h2>
+                        <p id="overlay-text">Scegli la difficolta' e premi Nuova partita per iniziare.</p>
+                        <button id="overlay-btn" class="overlay-action-btn" onclick="startQuiz()">Nuova partita</button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- MODALE FINE PARTITA -->
+<div id="quiz-win" class="modal">
+    <div class="modal-content memory-win-content">
+        <h2 id="quiz-win-title">Quiz Completato</h2>
+        <p id="quiz-win-stats"></p>
+        <div id="quiz-win-detail" class="quiz-win-detail"></div>
+        <div id="quiz-win-record" class="memory-record-badge" style="display:none;">NUOVO RECORD</div>
+        <div class="modal-footer">
+            <button class="close-btn" onclick="closeQuizModal()">Chiudi</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="/static/js/quiz.js"></script>
+</body>
+</html>

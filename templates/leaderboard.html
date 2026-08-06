@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <link rel="icon" href="/static/wallpaper/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classifiche - Monarch Hoard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="app-shell">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="/static/wallpaper/logo_monarchhoard.png" alt="Monarch Hoard Logo">
+            <img class="sidebar-wordmark" src="/static/wallpaper/Scritta_MonarchHoard.png" alt="Monarch Hoard">
+        </div>
+        <nav class="sidebar-nav">
+            <button class="side-nav-btn" onclick="location.href='/'">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_collection.png">
+                <span>Collezione</span>
+            </button>
+            <button class="side-nav-btn" onclick="location.href='/games/memory'">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_memory.png">
+                <span>Memory</span>
+            </button>
+            <button class="side-nav-btn" onclick="location.href='/games/quiz'">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_cardquiz.png">
+                <span>Indovina la Carta</span>
+            </button>
+            <button class="side-nav-btn active">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_leaderboard.png">
+                <span>Classifiche</span>
+            </button>
+        </nav>
+        <div class="sidebar-player">
+            <div class="player-avatar"></div>
+            <div>
+                <div class="player-name">Hunter</div>
+                <div class="player-rank">Hall of Fame</div>
+            </div>
+        </div>
+    </aside>
+    <div class="main-content">
+        <!-- TOP BAR -->
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <img src="/static/wallpaper/Solo_Leveling_Title.png" class="top-bar-img" alt="Solo Leveling Title">
+            </div>
+            <div class="top-bar-right">
+                <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+            </div>
+        </div>
+        <main class="main-area">
+            <!-- BARRA CONTROLLI -->
+            <section class="search-bar">
+                <div class="filters-row">
+                    <div class="lb-tabs">
+                        <button id="tab-memory" class="lb-tab active" onclick="selectGame('memory')">Memory</button>
+                        <button id="tab-quiz" class="lb-tab" onclick="selectGame('quiz')">Indovina la Carta</button>
+                    </div>
+                    <div class="dropdown-filter">
+                        <button id="lb-difficulty-button" class="dropdown-button" onclick="toggleDropdown('lb-difficulty-dropdown')">
+                            Difficolta': Normale &#9660;
+                        </button>
+                        <div id="lb-difficulty-dropdown" class="dropdown-content">
+                            <div id="lb-difficulty-list"></div>
+                        </div>
+                    </div>
+                    <button class="set-toggle-btn" onclick="loadLeaderboard()">Aggiorna</button>
+                    <div class="memory-hud">
+                        <div class="memory-hud-item">
+                            <span class="memory-hud-label">Giocatori</span>
+                            <span class="memory-hud-value" id="lb-count">0</span>
+                        </div>
+                        <div class="memory-hud-item">
+                            <span class="memory-hud-label">La tua posizione</span>
+                            <span class="memory-hud-value" id="lb-myrank">&mdash;</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PODIO -->
+            <div id="lb-podium" class="lb-podium"></div>
+
+            <!-- TABELLA -->
+            <div class="lb-panel">
+                <div class="lb-table-head">
+                    <div class="lb-col-pos">#</div>
+                    <div class="lb-col-player">Hunter</div>
+                    <div class="lb-col-score" id="lb-head-score">Punteggio</div>
+                    <div class="lb-col-detail" id="lb-head-detail">Dettaglio</div>
+                    <div class="lb-col-date">Data</div>
+                </div>
+                <div id="lb-rows" class="lb-rows"></div>
+            </div>
+        </main>
+    </div>
+</div>
+<div id="toast-container"></div>
+<script src="/static/js/leaderboard.js"></script>
+</body>
+</html>

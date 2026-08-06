@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+
+	<link rel="icon" href="/static/wallpaper/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monarch Hoard – La tua collezione</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+
+</head>
+<body>
+
+<div class="app-shell">
+
+    <!-- SIDEBAR SINISTRA -->
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+            <img src="/static/wallpaper/logo_monarchhoard.png" alt="Monarch Hoard Logo">
+            <img class="sidebar-wordmark" src="/static/wallpaper/Scritta_MonarchHoard.png" alt="Monarch Hoard">
+        </div>
+
+		<nav class="sidebar-nav">
+		
+			<button id="btn-view-dashboard" class="side-nav-btn" onclick="switchView('DASHBOARD')">
+				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_dashboard.png">
+				<span>Dashboard</span>
+			</button>
+		
+			<button id="btn-view-collezione" class="side-nav-btn active" onclick="switchView('COLLEZIONE')">
+				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_collection.png">
+				<span>Collezione</span>
+			</button>
+		
+			<button id="btn-view-wishlist" class="side-nav-btn" onclick="switchView('WISHLIST')">
+				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_wishlist.png">
+				<span>Wishlist</span>
+			</button>
+		
+			<button class="side-nav-btn disabled" disabled> 
+				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_statistics.png">
+				<span>Statistiche</span>
+			</button>
+		
+			<button class="side-nav-btn disabled" disabled>
+				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_progressionset.png">
+				<span>Progressione Set</span>
+			</button>
+		
+			<button class="side-nav-btn disabled" disabled>
+				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_exchanges.png">
+				<span>Scambi</span>
+			</button>
+		
+			<button id="btn-view-giochi" class="side-nav-btn" onclick="location.href='/games/memory'">
+				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_games.png">
+				<span>Giochi</span>
+			</button>
+		
+			<button class="side-nav-btn disabled" disabled>
+				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_settings.png">
+				<span>Impostazioni</span>
+			</button>
+		
+		</nav>
+
+        <div class="sidebar-player">
+            <div class="player-avatar"></div>
+            <div>
+                <div class="player-name">Hunter</div>
+                <div class="player-rank" id="player-rank">Rank E</div>
+            </div>
+            <div class="player-xp">
+                <div class="xp-row">
+                    <span id="player-level">Lv. 1</span>
+                    <span id="player-xp-text">0 / 1.000 XP</span>
+                </div>
+                <div class="xp-bar">
+                    <div class="xp-fill" id="xp-fill"></div>
+                </div>
+            </div>
+        </div>
+
+    </aside>
+
+	<div class="main-content"> 
+    <div class="top-bar">
+		<div class="top-bar-left">
+			<img src="/static/wallpaper/Solo_Leveling_Title.png" class="top-bar-img" alt="Solo Leveling Title">
+		</div>
+
+		<div class="top-bar-right">
+			<a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+		</div>
+	</div>
+
+    <!-- AREA CENTRALE -->
+    <main class="main-area">
+
+        <!-- HERO TOP -->
+        <section class="hero-panel">
+
+            <div class="hero-stats">
+
+                <div class="hero-stat-card">
+
+					<div class="hero-stat-icon">
+						<img src="/static/wallpaper/icon_total_cards.png" alt="Totale Carte">
+					</div>
+
+                    <div>
+                        <div class="hero-stat-label">Totale Carte</div>
+                        <div class="hero-stat-value" id="total-cards">0</div>
+                    </div>
+                </div>
+
+                <div class="hero-stat-card">
+
+					<div class="hero-stat-icon">
+						<img src="/static/wallpaper/icon_owned_cards.png" alt="Possedute">
+					</div>
+
+                    <div>
+                        <div class="hero-stat-label">Possedute</div>
+                        <div class="hero-stat-value" id="owned-cards">0</div>
+                    </div>
+                </div>
+
+                <div class="hero-stat-card">
+					<div class="hero-stat-icon">
+						<img src="/static/wallpaper/icon_total_copies.png" alt="Copie Totali">
+					</div>
+                    <div>
+                        <div class="hero-stat-label">Copie Totali</div>
+                        <div class="hero-stat-value" id="total-copies">0</div>
+                    </div>
+                </div>
+
+                <div class="hero-stat-card">
+
+					<div class="hero-stat-icon">
+						<img src="/static/wallpaper/icon_completed_sets.png" alt="Set Completati">
+					</div>
+
+                    <div>
+                        <div class="hero-stat-label">Set Completati</div>
+                        <div class="hero-stat-value" id="completed-sets">0 / 0</div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- FILTRI -->
+        <section class="search-bar">
+
+            <div class="search-row">
+                <input
+                    type="text"
+                    id="search-input"
+                    class="search-input"
+                    placeholder="Cerca nome o codice..."
+                    oninput="handleSearch()">
+            </div>
+
+            <div class="filters-row">
+
+                <div class="dropdown-filter">
+                    <button id="rarity-button" class="dropdown-button" onclick="toggleDropdown('rarity-dropdown')">
+                        Rarità ▼
+                    </button>
+
+                    <div id="rarity-dropdown" class="dropdown-content">
+                        <div id="rarity-filter"></div>
+
+                        <div class="dropdown-footer">
+                            <button class="dropdown-action" onclick="selectAllInDropdown('rarity-filter')">Seleziona tutte</button>
+                            <button class="dropdown-action" onclick="clearDropdown('rarity-filter')">Deseleziona</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dropdown-filter">
+                    <button id="set-button" class="dropdown-button" onclick="toggleDropdown('set-dropdown')">
+                        Set ▼
+                    </button>
+
+                    <div id="set-dropdown" class="dropdown-content">
+                        <div id="set-filter"></div>
+
+                        <div class="dropdown-footer">
+                            <button class="dropdown-action" onclick="selectAllInDropdown('set-filter')">Seleziona tutti</button>
+                            <button class="dropdown-action" onclick="clearDropdown('set-filter')">Deseleziona</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dropdown-filter">
+                    <button id="owned-button" class="dropdown-button" onclick="toggleDropdown('owned-dropdown')">
+                        <span id="owned-button-text">Tutte</span>
+                        <span class="dropdown-arrow">▼</span>
+                    </button>
+
+                    <div id="owned-dropdown" class="dropdown-content">
+                        <div id="owned-filter"></div>
+
+                        <div class="dropdown-footer">
+                            <button class="dropdown-action" onclick="selectAllInDropdown('owned-filter')">Seleziona tutte</button>
+                            <button class="dropdown-action" onclick="clearDropdown('owned-filter')">Deseleziona</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dropdown-filter">
+                    <button id="sort-cards-button" class="dropdown-button" onclick="toggleDropdown('sort-cards-dropdown')">
+                        Ordina Carte: ID ▼
+                    </button>
+
+                    <div id="sort-cards-dropdown" class="dropdown-content">
+                        <div id="sort-cards-filter">
+                            <div class="filter-chip active" data-value="id" onclick="selectSortCard(event, 'id', 'Ordina Carte: ID')">ID</div>
+                            <div class="filter-chip" data-value="name" onclick="selectSortCard(event, 'name', 'Ordina Carte: Nome (A-Z)')">Nome (A-Z)</div>
+							<div class="filter-chip" data-value="rarity-asc" onclick="selectSortCard(event, 'rarity-asc', 'Ordina Carte: Rarità Min-Max')">Rarità Min-Max</div>
+							<div class="filter-chip" data-value="rarity-desc" onclick="selectSortCard(event, 'rarity-desc', 'Ordina Carte: Rarità Max-Min')">Rarità Max-Min</div>
+                            <div class="filter-chip" data-value="qty-desc" onclick="selectSortCard(event, 'qty-desc', 'Ordina Carte: Quantità Max-Min')">Quantità Max-Min</div>
+							<div class="filter-chip" data-value="qty-asc" onclick="selectSortCard(event, 'qty-asc', 'Ordina Carte: Quantità Min-Max')">Quantità Min-Max</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dropdown-filter">
+                    <button id="sort-set-button" class="dropdown-button" onclick="toggleDropdown('sort-set-dropdown')">
+                        Ordina Set: Crescente ▼
+                    </button>
+
+                    <div id="sort-set-dropdown" class="dropdown-content">
+                        <div id="sort-set-filter">
+                            <div class="filter-chip active" data-value="asc" onclick="selectSortSet(event, 'asc', 'Ordina Set: Crescente')">Crescente</div>
+                            <div class="filter-chip" data-value="desc" onclick="selectSortSet(event, 'desc', 'Ordina Set: Decrescente')">Decrescente</div>
+                        </div>
+                    </div>
+                </div>
+
+				<button class="set-toggle-btn" onclick="openAllSets()">
+					Espandi tutti
+				</button>
+				
+				<button class="set-toggle-btn" onclick="closeAllSets()">
+					Comprimi tutti
+				</button>
+				
+				<button class="set-toggle-btn csv-open-btn" onclick="openCsvModal()">
+					Backup CSV
+				</button>
+				
+				<button class="action-filter-btn" onclick="resetAllFilters()">
+					Reset filtri
+				</button>
+
+            </div>
+
+        </section>
+
+        <!-- CONTENUTI -->
+        <div id="dashboard-container" class="hidden"></div>
+		<div id="results-counter" class="results-counter"></div>
+        <div id="sets-container"></div>
+
+    </main>
+
+</div>
+
+<!-- MODAL CARTA -->
+<div id="card-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-img-container">
+            <button id="modal-nav-prev" class="modal-nav-btn modal-nav-prev" type="button" onclick="navigateModal(-1)" aria-label="Precedente"></button>
+            <span id="modal-card-rarity" class="collection-card-rarity"></span>
+            <span id="modal-duplicate-badge" class="duplicate-badge" style="display:none;"></span>
+            <img id="modal-card-img" class="modal-img" src>
+            <button id="modal-nav-next" class="modal-nav-btn modal-nav-next" type="button" onclick="navigateModal(1)" aria-label="Successiva"></button>
+        </div>
+
+        <div class="modal-title-row">
+            <div class="modal-title-texts">
+                <h2 id="modal-card-name"></h2>
+                <p id="modal-card-code"></p>
+            </div>
+        </div>
+
+        <div class="quantity-control modal-quantity-control">
+            <button class="btn-qty" id="modal-btn-minus" type="button">-</button>
+            <input class="qty-input" id="modal-qty-input" type="number" min="0" value="0">
+            <button class="btn-qty" id="modal-btn-plus" type="button">+</button>
+        </div>
+
+        <div id="modal-serial-block" class="serial-block" style="display:none;">
+            <div class="serial-title">Numerazione SG · 001 – 300</div>
+            <div id="modal-serial-inputs" class="serial-inputs"></div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="close-btn" onclick="closeModal()">Chiudi</button>
+            <button id="modal-wishlist-btn" class="wishlist-btn modal-wishlist-btn" type="button" onclick="toggleWishlistFromModal()">🤍</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- MODAL BACKUP CSV -->
+<div id="csv-modal" class="modal">
+    <div class="modal-content csv-modal-content">
+        <h2>Backup Collezione</h2>
+
+        <div class="csv-section">
+            <div class="csv-section-title">Esporta</div>
+            <p class="csv-section-text">
+                Scarica un file CSV con tutte le carte, quantita', wishlist e numerazioni.
+                Aprilo con Excel o conservalo come backup.
+            </p>
+            <button class="overlay-action-btn csv-export-btn" onclick="exportCsv()">
+                Scarica CSV
+            </button>
+        </div>
+
+        <div class="csv-divider"></div>
+
+        <div class="csv-section">
+            <div class="csv-section-title">Importa</div>
+            <p class="csv-section-text">
+                Scarica il modello con tutte le carte esistenti, compila la
+                colonna <b>Quantity</b> con Excel e reimportalo.
+                Le colonne <b>Wishlist</b> e <b>Serials</b> sono facoltative.
+                Non modificare mai la colonna <b>CardCode</b>.
+            </p>
+            <button class="csv-example-btn" onclick="downloadExampleCsv()">
+                Scarica modello vuoto
+            </button>
+
+            <div id="csv-dropzone" class="csv-dropzone" onclick="triggerCsvFilePicker()">
+                <div class="csv-dropzone-icon">&#8681;</div>
+                <div class="csv-dropzone-text">Trascina qui il file oppure clicca per sceglierlo</div>
+                <div id="csv-file-name" class="csv-file-name">Nessun file selezionato</div>
+            </div>
+
+            <input type="file" id="csv-file-input" accept=".csv,text/csv" style="display:none;">
+
+            <button id="csv-import-btn" class="overlay-action-btn csv-import-btn" onclick="importCsv()" disabled>
+                Importa
+            </button>
+
+            <div id="csv-report" class="csv-report"></div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="close-btn" onclick="closeCsvModal()">Chiudi</button>
+        </div>
+    </div>
+</div>
+
+<!-- Container per le notifiche toast -->
+<div id="toast-container"></div>
+
+<script src="/static/js/main.js"></script>
+
+<script src="/static/js/csvtools.js"></script>
+
+</body>
+</html>

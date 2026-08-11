@@ -1703,3 +1703,44 @@ function observeImages() {
     document.querySelectorAll('img[data-src]').forEach(img => imgObserver.observe(img));
 }
 
+// =========================================================
+//  SWIPE MODALE CARTA (mobile)  ·  Monarch Hoard
+//  ---------------------------------------------------------
+//  DOVE: incolla questo blocco IN FONDO al file
+//        static/js/main.js  (e' un file .js, nessun tag da rompere)
+//
+//  COSA FA: nella modale di una carta, su telefono/tablet
+//  scorri con il dito verso SINISTRA = carta successiva,
+//  verso DESTRA = carta precedente. Usa la funzione
+//  navigateModal() che hai gia'.
+// =========================================================
+(function () {
+    const modal = document.getElementById('card-modal');
+    if (!modal) return;
+
+    let startX = 0, startY = 0, tracking = false;
+
+    modal.addEventListener('touchstart', function (e) {
+        if (e.touches.length !== 1) return;      // ignora pinch/zoom
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        tracking = true;
+    }, { passive: true });
+
+    modal.addEventListener('touchend', function (e) {
+        if (!tracking) return;
+        tracking = false;
+
+        const dx = e.changedTouches[0].clientX - startX;
+        const dy = e.changedTouches[0].clientY - startY;
+
+        // swipe valido: spostamento > 50px e piu' orizzontale che verticale
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+            if (dx < 0) {
+                navigateModal(1);    // dito verso sinistra -> successiva
+            } else {
+                navigateModal(-1);   // dito verso destra  -> precedente
+            }
+        }
+    }, { passive: true });
+})();

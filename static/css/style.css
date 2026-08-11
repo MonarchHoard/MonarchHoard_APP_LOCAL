@@ -3829,3 +3829,55 @@ body:has(#memory-board) .search-bar {
         flex: 1 1 100%;
     }
 }
+
+/* =========================================================
+   37. FRECCE MODALE VISIBILI SU MOBILE + AREA SWIPE
+   ---------------------------------------------------------
+   Incolla questo blocco in FONDO a style.css
+   (dopo il blocco 36 responsive che hai gia' aggiunto).
+   Su PC non cambia nulla: agisce solo sotto i 600px.
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    /* Le frecce non sono piu' "fixed" fuori schermo:
+       diventano due pulsanti tondi DENTRO l'immagine, ai lati. */
+    .modal-nav-btn {
+        position: absolute !important;
+        top: 50% !important;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: rgba(12, 8, 29, 0.72);
+        border: 1px solid rgba(155, 77, 255, 0.55);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5),
+                    0 0 14px rgba(155, 77, 255, 0.35);
+        backdrop-filter: blur(2px);
+        cursor: pointer;
+    }
+
+    /* Riposiziona ai bordi dell'immagine (non piu' a 380px dal centro) */
+    .modal-nav-prev {
+        left: 10px !important;
+        right: auto !important;
+    }
+    .modal-nav-next {
+        right: 10px !important;
+        left: auto !important;
+    }
+
+    /* Suggerimento visivo: piccola scritta sotto l'immagine */
+    .modal-img-container::after {
+        content: "‹ scorri per cambiare carta ›";
+        position: absolute;
+        bottom: 6px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        color: rgba(185, 140, 255, 0.75);
+        font-size: 0.62rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        pointer-events: none;
+    }
+}

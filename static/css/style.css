@@ -3612,3 +3612,220 @@ body:has(#memory-board) .search-bar {
     box-shadow: 0 0 14px rgba(255, 209, 102, 0.35);
     transform: translateY(-1px);
 }
+
+/* =========================================================
+   36. RESPONSIVE MOBILE / TABLET  ·  Monarch Hoard
+   ---------------------------------------------------------
+   ISTRUZIONI:
+   - Incolla TUTTO questo blocco in FONDO a style.css
+     (dopo la sezione 35 - Backup CSV).
+   - NON devi cancellare nulla: queste regole si attivano solo
+     su schermi piccoli e sovrascrivono i "blocchi" desktop
+     (min-width 1180px ecc.). Su PC il sito resta identico.
+   ========================================================= */
+
+
+/* =========================================================
+   TABLET E SMARTPHONE  ·  fino a 1024px
+   Da qui in giu' il layout si "impila" (sidebar in alto).
+   ========================================================= */
+@media (max-width: 1024px) {
+
+    /* --- SBLOCCA i vincoli desktop --- */
+    html, body {
+        min-width: 0 !important;
+        overflow-x: hidden;
+    }
+    .app-shell {
+        min-width: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    .main-area {
+        min-width: 0 !important;
+        max-width: 100% !important;
+        padding: 18px !important;
+    }
+
+    /* --- SIDEBAR: da colonna laterale a barra orizzontale in alto --- */
+    .sidebar {
+        position: static !important;
+        height: auto !important;
+        min-width: 0 !important;
+        width: 100% !important;
+        flex-direction: row !important;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px !important;
+        border-right: none;
+        border-bottom: 1px solid rgba(155, 77, 255, 0.22);
+    }
+    /* nasconde la decorazione in basso della sidebar (non serve da orizzontale) */
+    .sidebar::after { display: none !important; }
+
+    .sidebar-logo {
+        flex-direction: row;
+        gap: 10px;
+        margin: 0;
+    }
+    .sidebar-logo img:first-child { width: 46px; }
+    .sidebar-wordmark { width: 150px; }
+
+    /* Menu: riga scorrevole in orizzontale */
+    .sidebar-nav {
+        flex-direction: row !important;
+        flex-wrap: nowrap;
+        width: 100%;
+        overflow-x: auto;
+        gap: 8px;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+    .side-nav-btn {
+        width: auto !important;
+        flex: 0 0 auto;
+        height: auto;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 74px;
+        padding: 8px 8px !important;
+        font-size: 0.62rem;
+        text-align: center;
+    }
+    .side-nav-icon {
+        width: 26px !important;
+        height: 26px !important;
+        min-width: 26px;
+    }
+
+    /* Box giocatore a tutta larghezza */
+    .sidebar-player {
+        margin-top: 0;
+        width: 100%;
+    }
+
+    /* --- TOP BAR --- */
+    .top-bar {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 12px 16px;
+    }
+
+    /* --- STATISTICHE: da 4 a 2 colonne --- */
+    .hero-stats {
+        grid-template-columns: repeat(2, 1fr) !important;
+        max-width: 100% !important;
+    }
+    /* toglie il bordo destro fisso (creava linee strane in griglia 2x2) */
+    .hero-stat-card { border-right: none; }
+
+    /* --- RICERCA: il campo non deve piu' essere largo 540px fisso --- */
+    .search-row {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    /* I menu a tendina non escono dallo schermo */
+    .dropdown-content {
+        width: min(280px, 92vw);
+        max-width: 92vw;
+    }
+
+    /* Reset filtri torna in linea (non spinto a destra) */
+    .action-filter-btn { margin-left: 0; }
+}
+
+
+/* =========================================================
+   SMARTPHONE  ·  fino a 600px
+   ========================================================= */
+@media (max-width: 600px) {
+
+    /* Statistiche a 2 colonne restano, ma valori piu' piccoli */
+    .hero-stat-value { font-size: 1.2rem; }
+    .hero-stat-icon img { width: 54px; height: 54px; }
+
+    /* Filtri: ogni pulsante occupa meta' riga */
+    .filters-row { gap: 8px; }
+    .dropdown-filter,
+    .dropdown-button,
+    .set-toggle-btn,
+    .action-filter-btn,
+    .lb-tab,
+    .game-ctrl-btn {
+        flex: 1 1 46%;
+        min-width: 0;
+        font-size: 0.74rem;
+    }
+
+    /* HUD giochi va a capo */
+    .memory-hud {
+        margin-left: 0;
+        flex-wrap: wrap;
+        height: auto;
+        gap: 14px;
+        padding: 10px 14px;
+        width: 100%;
+    }
+
+    /* Campi input a 16px = niente zoom automatico su iPhone */
+    input, select, textarea { font-size: 16px; }
+
+    /* --- CLASSIFICHE: tabella semplificata ---
+       Nascondo "Dettaglio" e "Data" per dare spazio a #, Hunter, Punteggio */
+    .lb-table-head,
+    .lb-row {
+        grid-template-columns: 44px minmax(0, 1fr) 90px !important;
+        gap: 8px;
+        padding: 12px 14px;
+    }
+    #lb-head-detail,
+    .lb-col-detail,
+    .lb-col-date {
+        display: none !important;
+    }
+
+    /* Podio: incolonna i 3 slot */
+    .lb-podium {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* --- MODALI a tutta larghezza --- */
+    .modal-content,
+    .csv-modal-content,
+    .memory-win-content {
+        width: 94vw !important;
+        max-width: 94vw !important;
+    }
+    .modal-title-row { padding: 0 44px; }
+    #modal-card-name { font-size: 1.4rem; }
+
+    /* --- LOGIN / REGISTRAZIONE: non piu' 420px fisso --- */
+    .login-panel {
+        width: 92vw !important;
+        min-width: 0 !important;
+    }
+
+    /* Titoli generici piu' contenuti */
+    h1 { font-size: 1.4rem; }
+    h2 { font-size: 1.2rem; }
+}
+
+
+/* =========================================================
+   SMARTPHONE STRETTI  ·  fino a 430px
+   ========================================================= */
+@media (max-width: 430px) {
+
+    /* Statistiche in colonna singola */
+    .hero-stats { grid-template-columns: 1fr !important; }
+
+    /* Filtri a tutta larghezza (uno per riga) */
+    .dropdown-filter,
+    .dropdown-button,
+    .set-toggle-btn,
+    .action-filter-btn {
+        flex: 1 1 100%;
+    }
+}

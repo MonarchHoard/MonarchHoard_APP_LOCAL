@@ -3881,3 +3881,22 @@ body:has(#memory-board) .search-bar {
         pointer-events: none;
     }
 }
+
+/* =========================================================
+   38. BLOCCA LO SCROLL DELLO SFONDO QUANDO LA MODALE E' APERTA
+   ---------------------------------------------------------
+   Incolla in FONDO a style.css.
+   Quando una modale ha la classe .open, la pagina sotto
+   non scrolla piu'. Vale sia su PC che su mobile.
+   ========================================================= */
+
+body:has(.modal.open) {
+    overflow: hidden;
+    touch-action: none;   /* niente scroll da touch sullo sfondo */
+}
+
+/* La modale invece resta fluida al suo interno */
+.modal.open {
+    touch-action: pan-y;
+    overscroll-behavior: contain;   /* lo scroll non "sfonda" verso la pagina */
+}

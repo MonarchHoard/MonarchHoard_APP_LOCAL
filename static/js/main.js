@@ -1704,15 +1704,16 @@ function observeImages() {
 }
 
 // =========================================================
-//  SWIPE MODALE CARTA (mobile)  ·  Monarch Hoard
+//  SWIPE MODALE CARTA (mobile) - VERSIONE AGGIORNATA
+//  Monarch Hoard
 //  ---------------------------------------------------------
-//  DOVE: incolla questo blocco IN FONDO al file
-//        static/js/main.js  (e' un file .js, nessun tag da rompere)
+//  DOVE: SOSTITUISCI il blocco swipe che avevi incollato prima
+//        in fondo a static/js/main.js con QUESTO.
+//        (Se non l'avevi ancora messo, incolla direttamente questo.)
 //
-//  COSA FA: nella modale di una carta, su telefono/tablet
-//  scorri con il dito verso SINISTRA = carta successiva,
-//  verso DESTRA = carta precedente. Usa la funzione
-//  navigateModal() che hai gia'.
+//  NOVITA': durante lo swipe dentro la modale, la pagina sotto
+//  NON scrolla piu' (ne' in verticale ne' in orizzontale).
+//  Lo swipe orizzontale cambia carta come prima.
 // =========================================================
 (function () {
     const modal = document.getElementById('card-modal');
@@ -1727,6 +1728,13 @@ function observeImages() {
         tracking = true;
     }, { passive: true });
 
+    // NON passive: cosi' possiamo bloccare lo scroll della pagina sotto
+    modal.addEventListener('touchmove', function (e) {
+        if (!tracking) return;
+        // impedisce alla pagina di scrollare mentre il dito e' sulla modale
+        e.preventDefault();
+    }, { passive: false });
+
     modal.addEventListener('touchend', function (e) {
         if (!tracking) return;
         tracking = false;
@@ -1734,7 +1742,7 @@ function observeImages() {
         const dx = e.changedTouches[0].clientX - startX;
         const dy = e.changedTouches[0].clientY - startY;
 
-        // swipe valido: spostamento > 50px e piu' orizzontale che verticale
+        // swipe valido: > 50px e piu' orizzontale che verticale
         if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
             if (dx < 0) {
                 navigateModal(1);    // dito verso sinistra -> successiva

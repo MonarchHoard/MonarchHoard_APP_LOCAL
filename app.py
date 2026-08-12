@@ -6,6 +6,9 @@ import database
 import os
 import csv
 import io
+import secrets
+import re
+import email_sender
 
 app = Flask(__name__)
 
@@ -40,7 +43,7 @@ def create_default_user():
     existing_user = database.get_user_by_username("admin")
     if not existing_user:
         password_hash = generate_password_hash(admin_password)
-        database.create_user("admin", password_hash, "Hunter")
+        database.create_user("admin", password_hash, "Hunter", is_verified=1)
 
 create_default_user()
 
@@ -60,12 +63,14 @@ def login():
         user = database.get_user_by_username(username)
 
         if user and check_password_hash(user["PasswordHash"], password):
+            if not user["IsVerified"]:
+                error = "Devi prima confermare la tua email. Controlla la posta."
+                return render_template('login.html', error=error)
             session["user_id"] = user["Id"]
             session.permanent = True
             session["username"] = user["Username"]
             session["display_name"] = user["DisplayName"] or user["Username"]
             return redirect(url_for("index"))
-
         error = "Username o password non validi"
 
     return render_template('login.html', error=error)
@@ -74,22 +79,49 @@ def login():
 def register():
     error = None
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        password = request.form.get('password', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        username = email
         display_name = request.form.get('display_name', '').strip()
+        password = request.form.get('password', '').strip()
+        password2 = request.form.get('password2', '').strip()
 
-        if not username or not password:
-            error = "Username e password sono obbligatori"
+        if not email or not password:
+            error = "Email e password sono obbligatori"
+        elif not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            error = "Indirizzo email non valido"
+        elif password != password2:
+            error = "Le due password non coincidono"
+        elif len(password) < 6:
+            error = "La password deve avere almeno 6 caratteri"
         elif database.get_user_by_username(username):
-            error = "Username già esistente"
+            error = "Username gia' esistente"
+        elif database.get_user_by_email(email):
+            error = "Email gia' registrata"
         else:
             password_hash = generate_password_hash(password)
-            created = database.create_user(username, password_hash, display_name or username)
+            token = secrets.token_urlsafe(32)
+            created = database.create_user(
+                username, password_hash, display_name or username, email, token
+            )
             if created:
-                return redirect(url_for("login"))
-            error = "Username già esistente"
-
+                verify_link = url_for('verify_email', token=token, _external=True)
+                sent = email_sender.send_verification_email(email, verify_link)
+                if sent:
+                    return render_template('register.html', success=True)
+                else:
+                    # Se l'invio fallisce, mostriamo comunque il link a schermo
+                    # cosi' l'utente puo' confermare lo stesso.
+                    return render_template('register.html', success=True, verify_link=verify_link)
+            error = "Registrazione non riuscita, riprova"
     return render_template('register.html', error=error)
+
+@app.route('/verify/<token>', methods=['GET', 'POST'])
+def verify_email(token):
+    user = database.get_user_by_token(token)
+    if not user:
+        return render_template('login.html', error="Link di conferma non valido o gia' usato")
+    database.set_user_verified(user["Id"])
+    return render_template('login.html', success="Email confermata! Ora puoi accedere.")
 
 @app.route('/logout')
 def logout():

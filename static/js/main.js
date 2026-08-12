@@ -190,8 +190,6 @@ function populateDropdowns() {
 		ownedContainer.appendChild(chip);
 	});
 
-	updateDropdownTitles();
-	
 	// Assegnamo di default "Tutte" attiva all'avvio
 	const allChip = document.querySelector('#owned-filter .filter-chip[data-value="ALL"]');
 	if (allChip) allChip.classList.add("active");
@@ -564,7 +562,7 @@ function renderCards(cardsToRender) {
 				
 				${card.quantity > 1 ? `<div class="duplicate-badge">x${card.quantity}</div>` : ''}
 				<div class="card-image-container">
-					<img data-src="${card.image_url}" class="card-img" decoding="async" onerror="this.src='/static/No_Image_Available.jpg';">
+					<img data-src="${card.image_url}" class="card-img" decoding="async" onerror="this.src='/static/cards/TRANSPARENT/No_Image_Available.webp';">
 				</div>
 			
 				<div class="card-code">${highlightedCode}</div>
@@ -969,10 +967,6 @@ function clearDropdown(containerId){
 
 }
 
-function resetAllFilters() {
-	clearFilters();
-}
-
 function openAllSets() {
     collapsedSets.clear();
     localStorage.setItem('collapsedSets', JSON.stringify([]));
@@ -1185,7 +1179,7 @@ function renderDashboardSmallCard(card) {
     return `
         <div class="mh-small-card" onclick="openModalByCode('${safeCode}')">
             <div class="mh-small-rarity">${safeRarity}</div>
-            <img data-src="${card.image_url}" alt="${safeName}" decoding="async" onerror="this.src='/static/No_Image_Available.jpg';">
+            <img data-src="${card.image_url}" alt="${safeName}" decoding="async" onerror="this.src='/static/cards/TRANSPARENT/No_Image_Available.webp';">
             <div class="mh-small-card-name">${safeName}</div>
             <div class="mh-small-card-code">${safeCode}</div>
         </div>

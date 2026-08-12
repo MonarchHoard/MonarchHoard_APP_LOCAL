@@ -188,7 +188,6 @@ def get_set_progress(user_id):
 def check_users_schema():
     conn = get_connection()
     cursor = conn.cursor()
-
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS Users (
             Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -197,7 +196,21 @@ def check_users_schema():
             DisplayName TEXT
         )
     """)
-
+    # Aggiunge le colonne nuove se mancano (per DB gia' esistenti)
+    cursor.execute("PRAGMA table_info(Users)")
+    columns = [row[1] for row in cursor.fetchall()]
+    if "Email" not in columns:
+        cursor.execute("ALTER TABLE Users ADD COLUMN Email TEXT")
+    if "IsVerified" not in columns:
+        cursor.execute("ALTER TABLE Users ADD COLUMN IsVerified INTEGER DEFAULT 0")
+        # Gli utenti gia' esistenti vengono considerati gia' verificati
+        cursor.execute("UPDATE Users SET IsVerified = 1")
+    if "VerificationToken" not in columns:
+        cursor.execute("ALTER TABLE Users ADD COLUMN VerificationToken TEXT")
+    if "TokenCreatedAt" not in columns:
+        cursor.execute("ALTER TABLE Users ADD COLUMN TokenCreatedAt TEXT")
+    if "CreatedAt" not in columns:
+        cursor.execute("ALTER TABLE Users ADD COLUMN CreatedAt TEXT")
     conn.commit()
     conn.close()
 
@@ -205,32 +218,64 @@ def check_users_schema():
 def get_user_by_username(username):
     conn = get_connection()
     cursor = conn.cursor()
-
     cursor.execute("""
-        SELECT Id, Username, PasswordHash, DisplayName
+        SELECT Id, Username, PasswordHash, DisplayName, Email, IsVerified
         FROM Users
         WHERE Username = ?
     """, (username,))
-
     user = cursor.fetchone()
     conn.close()
     return user
 
 
-def create_user(username, password_hash, display_name):
+def create_user(username, password_hash, display_name, email=None, token=None, is_verified=0):
     conn = get_connection()
     cursor = conn.cursor()
     try:
         cursor.execute("""
-            INSERT INTO Users (Username, PasswordHash, DisplayName)
-            VALUES (?, ?, ?)
-        """, (username, password_hash, display_name))
+            INSERT INTO Users
+                (Username, PasswordHash, DisplayName, Email, IsVerified, VerificationToken, TokenCreatedAt, CreatedAt)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+        """, (username, password_hash, display_name, email, is_verified, token))
         conn.commit()
         return True
     except sqlite3.IntegrityError:
         return False
     finally:
         conn.close()
+        
+def get_user_by_email(email):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT Id, Username, PasswordHash, DisplayName, Email, IsVerified
+        FROM Users
+        WHERE Email = ?
+    """, (email,))
+    user = cursor.fetchone()
+    conn.close()
+    return user
+
+def get_user_by_token(token):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT Id, Username FROM Users WHERE VerificationToken = ?
+    """, (token,))
+    user = cursor.fetchone()
+    conn.close()
+    return user
+
+def set_user_verified(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE Users
+        SET IsVerified = 1, VerificationToken = NULL
+        WHERE Id = ?
+    """, (user_id,))
+    conn.commit()
+    conn.close()
 
 check_users_schema()
 

@@ -1114,18 +1114,6 @@ h3 {
     display: block;   /* sovrascrive il display:none precedente */
 }
 
-
-@keyframes ring-pulse {
-    0%, 100% {
-        filter: drop-shadow(0 0 8px rgba(200, 100, 255, 0.7))
-                drop-shadow(0 0 16px rgba(155, 77, 255, 0.4));
-    }
-    50% {
-        filter: drop-shadow(0 0 14px rgba(220, 130, 255, 1))
-                drop-shadow(0 0 28px rgba(200, 90, 255, 0.7));
-    }
-}
-
 .mh-progress-inner {
     width: 180px;
     height: 180px;
@@ -2800,11 +2788,6 @@ body:has(#memory-board) .search-bar {
 	filter: none;
 	transform: scale(1.03);
 	transform-origin: center center;
-}
-
-.quiz-card-img.revealed {
-    filter: none;
-    transform: scale(1.03);
 }
 
 .quiz-hint {

@@ -1,55 +1,59 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-	<link rel="icon" href="/static/wallpaper/favicon.ico">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- ===== PWA / Aggiungi a Home ===== -->
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#05020d">
-
-    <!-- iOS Safari: apri a schermo intero come app -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Monarch Hoard">
-
-    <!-- Icona sulla Home di iPhone (180x180 consigliata) -->
-    <link rel="apple-touch-icon" href="/static/wallpaper/icon-180.png">
-    <!-- ===== fine PWA ===== -->
-
-    <title>Registrazione - Monarch Hoard</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="/static/wallpaper/favicon.ico">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#05020d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Monarch Hoard">
+<link rel="apple-touch-icon" href="/static/wallpaper/icon-180.png">
+<title>Registrazione - Monarch Hoard</title>
+<link rel="stylesheet" href="/static/css/style.css">
 </head>
 <body class="login-body">
+<div class="login-panel">
+    <div class="login-logo">
+        <img src="/static/wallpaper/logo_monarchhoard.png" alt="Logo Monarch Hoard">
+    </div>
+    <h1>
+        <img src="/static/wallpaper/Scritta_MonarchHoard.png" alt="Monarch Hoard">
+    </h1>
 
-    <div class="login-panel">
-        <div class="login-logo">
-            <img src="/static/wallpaper/logo_monarchhoard.png" alt="Logo Monarch Hoard">
+    {% if success %}
+        <p class="login-subtitle">Registrazione completata</p>
+        <div class="login-error" style="background:rgba(77,255,155,0.12); border-color:rgba(77,255,155,0.35); color:#9bffcb;">
+            Account creato! Conferma la tua email per accedere.
         </div>
-
-        <h1>
-            <img src="/static/wallpaper/Scritta_MonarchHoard.png" alt="Monarch Hoard">
-        </h1>
-        
+        <!-- FASE 1: link mostrato a schermo per il test. In FASE 2 arrivera' via email. -->
+        {% if verify_link %}
+            <p class="login-hint" style="margin-top:14px;">Non hai ricevuto l'email? Usa questo link:</p>
+            <a class="login-link" style="word-break:break-all;" href="{{ verify_link }}">{{ verify_link }}</a>
+        {% else %}
+            <p class="login-hint" style="margin-top:14px;">Ti abbiamo inviato un'email di conferma. Controlla anche lo spam.</p>
+        {% endif %}
+        <div class="login-hint" style="margin-top:22px;">
+            <a href="{{ url_for('login') }}">Vai al login</a>
+        </div>
+    {% else %}
         <p class="login-subtitle">Nuovo Hunter</p>
-
         {% if error %}
             <div class="login-error">{{ error }}</div>
         {% endif %}
-
         <form method="POST" class="login-form">
-            <input type="text" name="username" placeholder="Username" autocomplete="username" aria-label="Username" required>
+            <input type="email" name="email" placeholder="Email" autocomplete="email" aria-label="Email" required>
             <input type="text" name="display_name" placeholder="Nome visualizzato (opzionale)" autocomplete="nickname" aria-label="Nome visualizzato">
             <input type="password" name="password" placeholder="Password" autocomplete="new-password" aria-label="Password" required>
+            <input type="password" name="password2" placeholder="Ripeti password" autocomplete="new-password" aria-label="Ripeti password" required>
             <button type="submit">Registrati</button>
         </form>
-
         <div class="login-hint">
-            Hai già un account? 
+            Hai gia' un account?
             <a href="{{ url_for('login') }}">Accedi</a>
         </div>
-    </div>
-
+    {% endif %}
+</div>
 </body>
 </html>

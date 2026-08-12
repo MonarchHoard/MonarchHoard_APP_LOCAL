@@ -3883,3 +3883,102 @@ body:has(.modal.open) {
     touch-action: pan-y;
     overscroll-behavior: contain;   /* lo scroll non "sfonda" verso la pagina */
 }
+/* =========================================================
+   39. GRIGLIA CARTE COMPATTA SU SMARTPHONE
+   ---------------------------------------------------------
+   ISTRUZIONI:
+   - Incolla TUTTO questo blocco in FONDO a static/css/style.css
+     (dopo la sezione 38, quella che blocca lo scroll con la modale).
+   - Non cancellare nulla: queste regole si attivano SOLO su
+     telefoni (max-width 600px). Su PC e tablet grandi non cambia niente.
+
+   COSA FA:
+   - Mostra 3 carte per riga sugli smartphone (invece di 1).
+   - Rende le carte piu' piccole e compatte (immagine bassa,
+     testi e pulsanti ridotti). Per i dettagli si apre la modale.
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    /* --- 3 carte per riga --- */
+    .set-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
+        padding: 10px !important;
+    }
+
+    /* --- Carta piu' bassa e compatta --- */
+    .card {
+        min-height: 0 !important;
+        padding: 22px 4px 8px 4px !important;
+        border-radius: 8px;
+    }
+
+    /* --- Immagine ridotta in altezza --- */
+    .card-image-container {
+        height: 118px !important;
+        margin: 4px 0 6px 0 !important;
+    }
+
+    /* --- Badge rarita' / doppioni piu' piccoli --- */
+    .collection-card-rarity,
+    .duplicate-badge {
+        top: 5px;
+        min-width: 24px;
+        height: 20px;
+        padding: 0 5px;
+        font-size: 0.56rem;
+    }
+    .collection-card-rarity { left: 5px; }
+    .duplicate-badge { right: 5px; }
+
+    /* --- Testi piu' piccoli --- */
+    .card-code { font-size: 0.55rem; }
+    .card-name {
+        font-size: 0.62rem;
+        margin: 4px 0 5px 0;
+    }
+
+    /* --- Cuore wishlist ridotto --- */
+    .card-wishlist-row {
+        min-height: 18px;
+        margin-top: 4px;
+    }
+    .card-wishlist-row .wishlist-btn {
+        font-size: 0.95rem;
+    }
+
+    /* --- Controlli quantita' compatti (+ / -) --- */
+    .quantity-control {
+        gap: 4px;
+        margin-top: 6px;
+    }
+    .btn-qty {
+        width: 22px;
+        height: 22px;
+        font-size: 0.75rem;
+    }
+    .qty-input {
+        width: 30px;
+        height: 22px;
+        font-size: 0.65rem;
+    }
+
+    /* --- Badge numerazione SG piu' piccolo --- */
+    .serial-tag {
+        bottom: 5px;
+        left: 5px;
+        padding: 2px 5px;
+        font-size: 0.52rem;
+    }
+
+    /* --- Skeleton di caricamento coerente con la nuova griglia --- */
+    .skeleton-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
+        padding: 10px !important;
+    }
+    .skeleton-card {
+        min-height: 190px !important;
+    }
+}

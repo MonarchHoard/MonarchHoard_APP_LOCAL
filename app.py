@@ -91,8 +91,16 @@ def register():
             error = "Indirizzo email non valido"
         elif password != password2:
             error = "Le due password non coincidono"
-        elif len(password) < 6:
-            error = "La password deve avere almeno 6 caratteri"
+        elif len(password) < 8:
+            error = "La password deve avere almeno 8 caratteri"
+        elif not re.search(r"[A-Z]", password):
+            error = "La password deve contenere almeno una lettera maiuscola"
+        elif not re.search(r"[a-z]", password):
+            error = "La password deve contenere almeno una lettera minuscola"
+        elif not re.search(r"[0-9]", password):
+            error = "La password deve contenere almeno un numero"
+        elif not re.search(r"[^A-Za-z0-9]", password):
+            error = "La password deve contenere almeno un carattere speciale (es. ! ? @ #)"
         elif database.get_user_by_username(username):
             error = "Username gia' esistente"
         elif database.get_user_by_email(email):

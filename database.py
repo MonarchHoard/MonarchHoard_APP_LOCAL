@@ -7,6 +7,7 @@ DB_PATH = os.path.join(BASE_DIR, "Database", "SoloLeveling.db")
 def get_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL;")
     return conn
 
 def check_db_schema():
@@ -57,7 +58,8 @@ def get_all_cards(user_id):
             cp.SetName AS SetName,
             s.DisplayOrder AS DisplayOrder,
             r.rarity_Order AS rarity_Order,
-            cp.cards_Display_Order AS cards_Display_Order  -- <-- AGGIUNGI QUESTA LINEA
+            cp.cards_Display_Order AS cards_Display_Order,
+            cp.cards_ID AS cards_ID
         FROM CardPool cp
         LEFT JOIN Cards c
             ON cp.CardCode = c.CardCode AND c.UserId = ?
@@ -211,6 +213,10 @@ def check_users_schema():
         cursor.execute("ALTER TABLE Users ADD COLUMN TokenCreatedAt TEXT")
     if "CreatedAt" not in columns:
         cursor.execute("ALTER TABLE Users ADD COLUMN CreatedAt TEXT")
+    if "ShowcasePublic" not in columns:
+        cursor.execute("ALTER TABLE Users ADD COLUMN ShowcasePublic INTEGER DEFAULT 0")
+    if "ShowcaseSlug" not in columns:
+        cursor.execute("ALTER TABLE Users ADD COLUMN ShowcaseSlug TEXT")
     conn.commit()
     conn.close()
 
@@ -547,3 +553,115 @@ def get_cardpool_rows():
     rows = cursor.fetchall()
     conn.close()
     return rows
+
+# =========================================================
+# VETRINA - Monarch Hoard
+# =========================================================
+def check_showcase_schema():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS Showcase (
+            Id INTEGER PRIMARY KEY AUTOINCREMENT,
+            UserId INTEGER NOT NULL,
+            CardCode TEXT NOT NULL,
+            SlotPosition INTEGER NOT NULL,
+            UNIQUE(UserId, SlotPosition),
+            UNIQUE(UserId, CardCode)
+        )
+    """)
+    conn.commit()
+    conn.close()
+check_showcase_schema()
+
+MAX_SHOWCASE_SLOTS = 9
+
+def get_showcase(user_id):
+    """Le carte attualmente in vetrina, con i dati del CardPool."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT
+            sc.SlotPosition AS SlotPosition,
+            cp.CardCode AS CardCode,
+            cp.CardName AS CardName,
+            cp.Rarity AS Rarity,
+            cp.image_name AS image_name,
+            cp.SetName AS SetName,
+            r.rarity_Order AS rarity_Order
+        FROM Showcase sc
+        JOIN CardPool cp ON cp.CardCode = sc.CardCode
+        LEFT JOIN Rarities r ON cp.Rarity = r.rarity_Description
+        WHERE sc.UserId = ?
+        ORDER BY sc.SlotPosition
+    """, (user_id,))
+    rows = cursor.fetchall()
+    conn.close()
+    return rows
+
+def add_to_showcase(user_id, card_code):
+    """Aggiunge una carta nel primo slot libero. Ritorna (ok, risultato)."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT 1 FROM Showcase WHERE UserId = ? AND CardCode = ?", (user_id, card_code))
+    if cursor.fetchone():
+        conn.close()
+        return False, "Carta gia' presente in vetrina"
+    cursor.execute("SELECT SlotPosition FROM Showcase WHERE UserId = ?", (user_id,))
+    occupied = {row["SlotPosition"] for row in cursor.fetchall()}
+    if len(occupied) >= MAX_SHOWCASE_SLOTS:
+        conn.close()
+        return False, "Vetrina piena (massimo 9 carte)"
+    free_slot = next(i for i in range(1, MAX_SHOWCASE_SLOTS + 1) if i not in occupied)
+    cursor.execute("""
+        INSERT INTO Showcase (UserId, CardCode, SlotPosition)
+        VALUES (?, ?, ?)
+    """, (user_id, card_code, free_slot))
+    conn.commit()
+    conn.close()
+    return True, free_slot
+
+def remove_from_showcase(user_id, card_code):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM Showcase WHERE UserId = ? AND CardCode = ?", (user_id, card_code))
+    conn.commit()
+    conn.close()
+
+def move_showcase(user_id, card_code, direction):
+    """direction: -1 sinistra, +1 destra, -3 su, +3 giu' (griglia 3x3)."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT SlotPosition FROM Showcase WHERE UserId = ? AND CardCode = ?", (user_id, card_code))
+    current = cursor.fetchone()
+    if not current:
+        conn.close()
+        return False, "Carta non trovata in vetrina"
+    current_pos = current["SlotPosition"]
+    row = (current_pos - 1) // 3
+    col = (current_pos - 1) % 3
+    if direction == -1 and col == 0:
+        conn.close()
+        return False, "Gia' al bordo sinistro"
+    if direction == 1 and col == 2:
+        conn.close()
+        return False, "Gia' al bordo destro"
+    if direction == -3 and row == 0:
+        conn.close()
+        return False, "Gia' in prima riga"
+    if direction == 3 and row == 2:
+        conn.close()
+        return False, "Gia' in ultima riga"
+    target_pos = current_pos + direction
+    cursor.execute("SELECT CardCode FROM Showcase WHERE UserId = ? AND SlotPosition = ?", (user_id, target_pos))
+    target = cursor.fetchone()
+    if target:
+        # Scambio: passa per lo slot 0 per evitare conflitti con il vincolo UNIQUE
+        cursor.execute("UPDATE Showcase SET SlotPosition = 0 WHERE UserId = ? AND SlotPosition = ?", (user_id, current_pos))
+        cursor.execute("UPDATE Showcase SET SlotPosition = ? WHERE UserId = ? AND CardCode = ?", (current_pos, user_id, target["CardCode"]))
+        cursor.execute("UPDATE Showcase SET SlotPosition = ? WHERE UserId = ? AND SlotPosition = 0", (target_pos, user_id))
+    else:
+        cursor.execute("UPDATE Showcase SET SlotPosition = ? WHERE UserId = ? AND CardCode = ?", (target_pos, user_id, card_code))
+    conn.commit()
+    conn.close()
+    return True, target_pos

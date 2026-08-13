@@ -6,6 +6,10 @@ let currentSortCard = 'id';
 let currentSortSet = 'asc';
 let savedCollapsedSets = localStorage.getItem('collapsedSets');
 let collapsedSets = new Set(savedCollapsedSets ? JSON.parse(savedCollapsedSets) : []);
+// Modalità di visualizzazione: 'bySet' (divisa per set) | 'flat' (tutte insieme)
+let collectionGroupMode = localStorage.getItem('groupMode') || 'bySet';
+let currentGroupMode = collectionGroupMode;
+let showcaseCodes = new Set(); // codici carta attualmente in vetrina
 
 async function fetchJSON(url, options = {}) {
     const response = await fetch(url, options);
@@ -79,6 +83,7 @@ async function loadCards() {
         renderCards(allCardsData);
 		updateResultsCounter(allCardsData.length);
 		updateHunterProgress();
+		updateGroupToggleLabel();
     } catch (error) {
         console.error(error);
         container.innerHTML = `<div class="mh-empty-message">Errore nel caricamento delle carte.</div>`;
@@ -329,7 +334,7 @@ function clearFilters() {
 	const sortCardIdChip = document.querySelector('#sort-cards-filter .filter-chip[data-value="id"]');
 	if (sortCardIdChip) sortCardIdChip.classList.add("active");
 	const sortCardsButton = document.getElementById("sort-cards-button");
-	if (sortCardsButton) sortCardsButton.innerText = "Ordina Carte: ID ▼";
+	if (sortCardsButton) sortCardsButton.innerText = "Ordina Carte: CardCode ▼";
 	currentSortCard = 'id';
 	
 	// Reset Ordinamento Set a Crescente
@@ -358,6 +363,13 @@ function switchView(viewName) {
     const searchBar = document.querySelector('.search-bar');
 
     const isDashboard = viewName === 'DASHBOARD';
+	// Imposta la vista in base alla sezione
+    if (viewName === 'WISHLIST') {
+        currentGroupMode = 'flat';               // Wishlist: sempre tutte insieme
+    } else if (viewName === 'COLLEZIONE') {
+        currentGroupMode = collectionGroupMode;  // Collezione: la tua preferenza salvata
+    }
+    updateGroupToggleLabel();
 
     if (heroPanel) heroPanel.classList.toggle('hidden', isDashboard);
     if (searchBar) searchBar.classList.toggle('hidden', isDashboard);
@@ -392,204 +404,206 @@ function highlightText(text, search) {
     return safeText.replace(regex, '<span class="search-highlight">$1</span>');
 }
 
+// ----- Cambio vista Per Set / Tutte insieme -----
+function toggleGroupMode() {
+    currentGroupMode = (currentGroupMode === 'bySet') ? 'flat' : 'bySet';
+    // In Wishlist il cambio è temporaneo: la preferenza salvata resta quella della Collezione
+    if (currentView !== 'WISHLIST') {
+        collectionGroupMode = currentGroupMode;
+        localStorage.setItem('groupMode', currentGroupMode);
+    }
+    updateGroupToggleLabel();
+    filterCards();
+}
+
+function updateGroupToggleLabel() {
+    const btn = document.getElementById('group-toggle-btn');
+    if (!btn) return;
+    btn.innerText = (currentGroupMode === 'flat') ? 'Vista: Tutte' : 'Vista: Per Set';
+}
+
+// Costruisce una singola card (usata da entrambe le viste)
+function buildCardElement(card) {
+    const searchText = document.getElementById('search-input').value.trim();
+    const safeRarity = escapeHTML(card.rarity);
+    const highlightedName = highlightText(card.card_name, searchText);
+    const highlightedCode = highlightText(card.card_code, searchText);
+
+    const cardEl = document.createElement('div');
+    cardEl.className = `card ${card.quantity === 0 ? 'not-owned' : ''}`;
+    cardEl.id = `card-${card.card_code}`;
+
+    cardEl.addEventListener('click', (e) => {
+        const isInteractive =
+            e.target.closest('.quantity-control') ||
+            e.target.tagName === 'INPUT' ||
+            e.target.classList.contains('btn-qty') ||
+            e.target.closest('.wishlist-btn');
+        if (isInteractive) return;
+        openModal(card);
+    });
+
+    cardEl.innerHTML = `
+        <div class="collection-card-rarity ${card.quantity > 0 && (card.rarity_Order || 0) >= 35 ? 'shine' : ''}">${safeRarity}</div>
+        ${card.quantity > 1 ? `<div class="duplicate-badge">x${card.quantity}</div>` : ''}
+        <div class="card-image-container">
+            <img data-src="${card.image_url}" class="card-img" decoding="async" onerror="this.src='/static/cards/TRANSPARENT/No_Image_Available.webp';">
+        </div>
+        <div class="card-code">${highlightedCode}</div>
+        <div class="card-name">${highlightedName}</div>
+        <div class="card-wishlist-row">
+            <button class="wishlist-btn ${card.is_wishlisted ? 'active' : ''}" data-code="${card.card_code}" onclick="toggleWishlist('${card.card_code}', event)">
+                ${card.is_wishlisted ? '❤️' : '🤍'}
+            </button>
+        </div>
+        <div class="quantity-control">
+            <button class="btn-qty" data-code="${card.card_code}" data-change="-1">-</button>
+            <input class="qty-input" id="qty-${card.card_code}" type="number" min="0" value="${card.quantity}" onchange="setQty('${card.card_code}', this.value)">
+            <button class="btn-qty" data-code="${card.card_code}" data-change="1">+</button>
+        </div>
+    `;
+
+    updateSerialTag(card.card_code, cardEl);
+    return cardEl;
+}
+
 function renderCards(cardsToRender) {
-	const container = document.getElementById('sets-container');
-	container.innerHTML = '';
+    const container = document.getElementById('sets-container');
+    container.innerHTML = '';
 
-	if (cardsToRender.length === 0) {
-		container.innerHTML = `<p style="text-align:center; color:#64748b; margin-top:40px;">Nessuna carta corrisponde ai criteri correnti.</p>`;
-		return;
-	}
+    if (cardsToRender.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color:#64748b; margin-top:40px;">Nessuna carta corrisponde ai criteri correnti.</p>`;
+        return;
+    }
 
-	// 1. Ordinamento delle CARTE
-	const sortedCards = [...cardsToRender];
-	const sortBy = currentSortCard || 'id';
-	sortedCards.sort((a, b) => {
-		if (sortBy === 'name') {
-			return (a.card_name || '').localeCompare(b.card_name || '');
-		} else if (sortBy === 'qty-desc') {
-			return (b.quantity || 0) - (a.quantity || 0);
-		}  else if (sortBy === 'qty-asc') {
-			return (a.quantity || 0) - (b.quantity || 0);
-		} else if (sortBy === 'rarity-asc') {
-			return (a.rarity_Order || 999) - (b.rarity_Order || 999);
-		} else if (sortBy === 'rarity-desc') {
-			return (b.rarity_Order || 999) - (a.rarity_Order || 999);
+    // 1. Ordinamento delle CARTE
+    const sortedCards = [...cardsToRender];
+    const sortBy = currentSortCard || 'id';
+    sortedCards.sort((a, b) => {
+        if (sortBy === 'name') {
+            return (a.card_name || '').localeCompare(b.card_name || '');
+        } else if (sortBy === 'qty-desc') {
+            return (b.quantity || 0) - (a.quantity || 0);
+        } else if (sortBy === 'qty-asc') {
+            return (a.quantity || 0) - (b.quantity || 0);
+        } else if (sortBy === 'rarity-asc') {
+            return (a.rarity_Order || 999) - (b.rarity_Order || 999);
+        } else if (sortBy === 'rarity-desc') {
+            return (b.rarity_Order || 999) - (a.rarity_Order || 999);
+		} else if (sortBy === 'db-id') {
+			return (a.cards_id || 999999) - (b.cards_id || 999999);
 		} else if (sortBy === 'id') {
-			return (a.cards_display_order || '').localeCompare(b.cards_display_order || '');
-		}
-		return 0;
-	});
+            return (a.cards_display_order || '').localeCompare(b.cards_display_order || '');
+        }
+        return 0;
+    });
 
-	// Raggruppamento per Set
-	const groups = {};
-	sortedCards.forEach(card => {
-		const setCode = card.set_name || "Altri";
-		if (!groups[setCode]) groups[setCode] = [];
-		groups[setCode].push(card);
-	});
+    // ===== VISTA "TUTTE INSIEME" (senza divisione per set) =====
+    if (currentGroupMode === 'flat') {
+        const grid = document.createElement('div');
+        grid.className = 'set-grid';
+        sortedCards.forEach(card => grid.appendChild(buildCardElement(card)));
+        container.appendChild(grid);
+        observeImages();
+        return;
+    }
 
-	// 2. Ordinamento dei SET (NUOVA PARTE)
-	const sortBySet = currentSortSet || 'asc';
-	const sortedSetCodes = Object.keys(groups).sort((a, b) => {
-	
-		const orderA = groups[a][0].set_order || 999;
-		const orderB = groups[b][0].set_order || 999;
-	
-		if (currentSortSet === 'desc') {
-			return orderB - orderA;
-		}
-	
-		return orderA - orderB;
-	
-	});
+    // ===== VISTA "DIVISA PER SET" (default attuale) =====
+    const groups = {};
+    sortedCards.forEach(card => {
+        const setCode = card.set_name || "Altri";
+        if (!groups[setCode]) groups[setCode] = [];
+        groups[setCode].push(card);
+    });
 
-	// Ora cicliamo usando l'array ordinato dei set, invece del vecchio "for...in"
-	sortedSetCodes.forEach(setCode => {
-		const setSection = document.createElement('div');
-		setSection.className = 'set-section';
-		
-		if (collapsedSets.has(setCode)) {
-			setSection.classList.add('collapsed');
-		}
-		
-		// Calcoliamo qui le statistiche del set
-		const setCards = groups[setCode];
-		const totalInSet = setCards.length;
-		const ownedInSet = setCards.filter(card => card.quantity > 0).length;
+    const sortedSetCodes = Object.keys(groups).sort((a, b) => {
+        const orderA = groups[a][0].set_order || 999;
+        const orderB = groups[b][0].set_order || 999;
+        if (currentSortSet === 'desc') {
+            return orderB - orderA;
+        }
+        return orderA - orderB;
+    });
 
-		const progressPercent = totalInSet > 0
-			? Math.round((ownedInSet / totalInSet) * 100)
-			: 0;
+    sortedSetCodes.forEach(setCode => {
+        const setSection = document.createElement('div');
+        setSection.className = 'set-section';
 
-		const wallpaperName = `sfondo_${setCode.toUpperCase()}.png`;
-		setSection.style.backgroundImage = `url('/static/wallpaper/${wallpaperName}')`;
-		
-		const header = document.createElement('div');
-		header.className = 'set-header';
-		
-		setSection.style.backgroundSize = 'cover';
-		setSection.style.backgroundPosition = 'center';
-		setSection.style.backgroundRepeat = 'no-repeat';
-		
-		const setImgName = `pacchetto_${setCode.toUpperCase()}.png`;
-		
-		header.innerHTML = `
-			<div style="display:flex; align-items:center; gap:15px; width:100%;">
-		
-				<img src="/static/wallpaper/${setImgName}"
-					alt="${setCode}"
-					style="width:60px; height:60px; object-fit:contain; border-radius:4px;"
-					onerror="this.style.display='none';">
-		
-				<div style="flex:1;">
-		
-					<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-		
-						<span class="set-title-text set-count" data-set-code="${setCode}">
-							Set: ${setCode} (${ownedInSet}/${totalInSet})
-						</span>
+        if (collapsedSets.has(setCode)) {
+            setSection.classList.add('collapsed');
+        }
 
-						<span class="set-percent" style="color:white; font-weight:bold;">
-							${progressPercent}%
-						</span>
+        const setCards = groups[setCode];
+        const totalInSet = setCards.length;
+        const ownedInSet = setCards.filter(card => card.quantity > 0).length;
+        const progressPercent = totalInSet > 0
+            ? Math.round((ownedInSet / totalInSet) * 100)
+            : 0;
 
-		
-					</div>
-		
-					<div style="height:10px; background:#222; border-radius:10px; overflow:hidden;">
-		
-						<div class="set-progress-fill" style="
-							width:${progressPercent}%;
-							height:100%;
-							background:linear-gradient(90deg, #bf00ff, #00d2ff);
-						"></div>
+        const wallpaperName = `sfondo_${setCode.toUpperCase()}.png`;
+        setSection.style.backgroundImage = `url('/static/wallpaper/${wallpaperName}')`;
 
-		
-					</div>
-		
-				</div>
-		
-				<span style="color:white; background:black; padding:6px 8px; border-radius:4px; border:1px solid #444; font-size:0.8rem;">
-					▼
-				</span>
-		
-			</div>
-		`;
-		header.onclick = () => {
-			setSection.classList.toggle('collapsed');
-			
-			if (setSection.classList.contains('collapsed')) {
-				collapsedSets.add(setCode);
-			} else {
-				collapsedSets.delete(setCode);
-			}
-		
-			localStorage.setItem('collapsedSets', JSON.stringify([...collapsedSets]));
-			observeImages();
-		};
-		const grid = document.createElement('div');
-		grid.className = 'set-grid';
+        const header = document.createElement('div');
+        header.className = 'set-header';
 
-		groups[setCode].forEach(card => {
-			
-			const searchText = document.getElementById('search-input').value.trim();
-			
-			const safeName = escapeHTML(card.card_name);
-			const safeCode = escapeHTML(card.card_code);
-			const safeRarity = escapeHTML(card.rarity);
+        setSection.style.backgroundSize = 'cover';
+        setSection.style.backgroundPosition = 'center';
+        setSection.style.backgroundRepeat = 'no-repeat';
 
-			const highlightedName = highlightText(card.card_name, searchText);
-			const highlightedCode = highlightText(card.card_code, searchText);
-			const cardEl = document.createElement('div');
-			cardEl.className = `card ${card.quantity === 0 ? 'not-owned' : ''}`;
-			cardEl.id = `card-${card.card_code}`;
-			
-			cardEl.addEventListener('click', (e) => {
-				const isInteractive =
-					e.target.closest('.quantity-control') ||
-					e.target.tagName === 'INPUT' ||
-					e.target.classList.contains('btn-qty') ||
-					e.target.closest('.wishlist-btn'); // Aggiunta questa riga per il cuore!
-			
-				if (isInteractive) return;
-			
-				openModal(card);
-			});
+        const setImgName = `pacchetto_${setCode.toUpperCase()}.png`;
 
-			cardEl.innerHTML = `
-				<div class="collection-card-rarity ${card.quantity > 0 && (card.rarity_Order || 0) >= 35 ? 'shine' : ''}">${safeRarity}</div>
-				
-				${card.quantity > 1 ? `<div class="duplicate-badge">x${card.quantity}</div>` : ''}
-				<div class="card-image-container">
-					<img data-src="${card.image_url}" class="card-img" decoding="async" onerror="this.src='/static/cards/TRANSPARENT/No_Image_Available.webp';">
-				</div>
-			
-				<div class="card-code">${highlightedCode}</div>
-				<div class="card-name">${highlightedName}</div>
-			
-				<div class="card-wishlist-row">
-					<button class="wishlist-btn ${card.is_wishlisted ? 'active' : ''}" data-code="${card.card_code}" onclick="toggleWishlist('${card.card_code}', event)">
-						${card.is_wishlisted ? '❤️' : '🤍'}
-					</button>
-				</div>
-			
-				<div class="quantity-control">
-					<button class="btn-qty" data-code="${card.card_code}" data-change="-1">-</button>
-					<input class="qty-input" id="qty-${card.card_code}" type="number" min="0" value="${card.quantity}" onchange="setQty('${card.card_code}', this.value)">
-					<button class="btn-qty" data-code="${card.card_code}" data-change="1">+</button>
-				</div>
-			`;
-			updateSerialTag(card.card_code, cardEl);
-			grid.appendChild(cardEl);
-		});
+        header.innerHTML = `
+            <div style="display:flex; align-items:center; gap:15px; width:100%;">
+                <img src="/static/wallpaper/${setImgName}"
+                    alt="${setCode}"
+                    style="width:60px; height:60px; object-fit:contain; border-radius:4px;"
+                    onerror="this.style.display='none';">
+                <div style="flex:1;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <span class="set-title-text set-count" data-set-code="${setCode}">
+                            Set: ${setCode} (${ownedInSet}/${totalInSet})
+                        </span>
+                        <span class="set-percent" style="color:white; font-weight:bold;">
+                            ${progressPercent}%
+                        </span>
+                    </div>
+                    <div style="height:10px; background:#222; border-radius:10px; overflow:hidden;">
+                        <div class="set-progress-fill" style="
+                            width:${progressPercent}%;
+                            height:100%;
+                            background:linear-gradient(90deg, #bf00ff, #00d2ff);
+                        "></div>
+                    </div>
+                </div>
+                <span style="color:white; background:black; padding:6px 8px; border-radius:4px; border:1px solid #444; font-size:0.8rem;">
+                    ▼
+                </span>
+            </div>
+        `;
 
-		setSection.appendChild(header);
-		setSection.appendChild(grid);
-		container.appendChild(setSection);
-	}); // <-- NOTA: questa chiusura è cambiata rispetto alla tua per via del forEach
-	
-	observeImages();
+        header.onclick = () => {
+            setSection.classList.toggle('collapsed');
+            if (setSection.classList.contains('collapsed')) {
+                collapsedSets.add(setCode);
+            } else {
+                collapsedSets.delete(setCode);
+            }
+            localStorage.setItem('collapsedSets', JSON.stringify([...collapsedSets]));
+            observeImages();
+        };
+
+        const grid = document.createElement('div');
+        grid.className = 'set-grid';
+        groups[setCode].forEach(card => {
+            grid.appendChild(buildCardElement(card));
+        });
+
+        setSection.appendChild(header);
+        setSection.appendChild(grid);
+        container.appendChild(setSection);
+    });
+
+    observeImages();
 }
 
 async function changeQty(cardCode, change, event) {
@@ -683,6 +697,24 @@ async function changeQty(cardCode, change, event) {
 
 function updateCardVisual(cardCode, newQty) {
     updateHunterProgress();
+    if (newQty === 0 && showcaseCodes.has(cardCode)) {
+        fetchJSON('/api/showcase/remove', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ card_code: cardCode })
+        }).then(function () {
+            showcaseCodes.delete(cardCode);
+            if (currentModalCardCode === cardCode) {
+                const btn = document.getElementById('modal-showcase-btn');
+                if (btn) {
+                    btn.classList.remove('active');
+                    btn.innerText = '+ Vetrina';
+                    btn.disabled = true;
+                }
+            }
+            showToast('Carta rimossa anche dalla vetrina (quantità a 0).', 'info');
+        }).catch(function (e) { console.error(e); });
+    }
     const cardEl = document.getElementById(`card-${cardCode}`);
     if (!cardEl) return;
 
@@ -840,6 +872,18 @@ function openModal(card) {
     } else {
         modalWishBtn.classList.remove('active');
         modalWishBtn.innerText = '🤍';
+    }
+
+    // Vetrina
+    const modalShowcaseBtn = document.getElementById('modal-showcase-btn');
+    if (modalShowcaseBtn) {
+        const inShowcase = showcaseCodes.has(fullCardData.card_code);
+        modalShowcaseBtn.classList.toggle('active', inShowcase);
+        modalShowcaseBtn.innerText = inShowcase ? '★ Nella Vetrina' : '+ Vetrina';
+        modalShowcaseBtn.disabled = (!inShowcase && currentQty === 0);
+        modalShowcaseBtn.title = (!inShowcase && currentQty === 0)
+            ? 'Devi possedere almeno una copia per aggiungerla alla vetrina'
+            : '';
     }
 
     document.getElementById('card-modal').classList.add('open');
@@ -1354,6 +1398,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadUserInfo();
     loadStats();
     loadCards();
+    loadShowcaseCodes();
 
     // Ripristina l'ultima vista usata (se diversa da COLLEZIONE, che è il default)
     const savedView = localStorage.getItem('lastView');
@@ -1458,6 +1503,7 @@ function navigateModal(direction) {
             if (sortBy === 'qty-asc')     return (a.quantity || 0) - (b.quantity || 0);
             if (sortBy === 'rarity-asc')  return (a.rarity_Order || 999) - (b.rarity_Order || 999);
             if (sortBy === 'rarity-desc') return (b.rarity_Order || 999) - (a.rarity_Order || 999);
+            if (sortBy === 'db-id')       return (a.cards_id || 999999) - (b.cards_id || 999999);
             return (a.cards_display_order || '').localeCompare(b.cards_display_order || '');
         });
 
@@ -1746,3 +1792,56 @@ function observeImages() {
         }
     }, { passive: true });
 })();
+
+// -------- Vetrina: stato + aggiunta/rimozione dal modal carta --------
+async function loadShowcaseCodes() {
+    try {
+        const data = await fetchJSON('/api/showcase');
+        showcaseCodes = new Set();
+        (data.slots || []).forEach(function (card) {
+            if (card) showcaseCodes.add(card.card_code);
+        });
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+async function toggleShowcaseFromModal() {
+    if (!currentModalCardCode) return;
+    const inShowcase = showcaseCodes.has(currentModalCardCode);
+    const btn = document.getElementById('modal-showcase-btn');
+    try {
+        if (inShowcase) {
+            const data = await fetchJSON('/api/showcase/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ card_code: currentModalCardCode })
+            });
+            if (data.status === 'success') {
+                showcaseCodes.delete(currentModalCardCode);
+                showToast('Rimossa dalla vetrina.', 'success');
+            }
+        } else {
+            const data = await fetchJSON('/api/showcase/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ card_code: currentModalCardCode })
+            });
+            if (data.status === 'success') {
+                showcaseCodes.add(currentModalCardCode);
+                showToast('Aggiunta alla vetrina!', 'success');
+            } else {
+                showToast(data.message || 'Impossibile aggiungere alla vetrina.', 'error');
+                return;
+            }
+        }
+        if (btn) {
+            const nowIn = showcaseCodes.has(currentModalCardCode);
+            btn.classList.toggle('active', nowIn);
+            btn.innerText = nowIn ? '★ Nella Vetrina' : '+ Vetrina';
+        }
+    } catch (e) {
+        console.error(e);
+        showToast('Errore di connessione.', 'error');
+    }
+}

@@ -53,9 +53,9 @@
 				<span>Wishlist</span>
 			</button>
 		
-			<button class="side-nav-btn disabled" disabled> 
-				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_statistics.png">
-				<span>Statistiche</span>
+			<button class="side-nav-btn" onclick="location.href='/showcase'">
+				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_vetrina.png">
+				<span>Vetrina</span>
 			</button>
 		
 			<button class="side-nav-btn disabled" disabled>
@@ -229,12 +229,13 @@
 
                 <div class="dropdown-filter">
                     <button id="sort-cards-button" class="dropdown-button" onclick="toggleDropdown('sort-cards-dropdown')">
-                        Ordina Carte: ID ▼
+                        Ordina Carte: CardCode ▼
                     </button>
 
                     <div id="sort-cards-dropdown" class="dropdown-content">
                         <div id="sort-cards-filter">
-                            <div class="filter-chip active" data-value="id" onclick="selectSortCard(event, 'id', 'Ordina Carte: ID')">ID</div>
+                            <div class="filter-chip" data-value="db-id" onclick="selectSortCard(event, 'db-id', 'Ordina Carte: ID')">ID</div>
+                            <div class="filter-chip active" data-value="id" onclick="selectSortCard(event, 'id', 'Ordina Carte: CardCode')">CardCode</div>
                             <div class="filter-chip" data-value="name" onclick="selectSortCard(event, 'name', 'Ordina Carte: Nome (A-Z)')">Nome (A-Z)</div>
 							<div class="filter-chip" data-value="rarity-asc" onclick="selectSortCard(event, 'rarity-asc', 'Ordina Carte: Rarità Min-Max')">Rarità Min-Max</div>
 							<div class="filter-chip" data-value="rarity-desc" onclick="selectSortCard(event, 'rarity-desc', 'Ordina Carte: Rarità Max-Min')">Rarità Max-Min</div>
@@ -263,6 +264,10 @@
 				
 				<button class="set-toggle-btn" onclick="closeAllSets()">
 					Comprimi tutti
+				</button>
+				
+				<button id="group-toggle-btn" class="set-toggle-btn" onclick="toggleGroupMode()">
+					Vista: Per Set
 				</button>
 				
 				<button class="set-toggle-btn csv-open-btn" onclick="openCsvModal()">
@@ -317,6 +322,7 @@
 
         <div class="modal-footer">
             <button class="close-btn" onclick="closeModal()">Chiudi</button>
+            <button id="modal-showcase-btn" class="showcase-toggle-btn" type="button" onclick="toggleShowcaseFromModal()">+ Vetrina</button>
             <button id="modal-wishlist-btn" class="wishlist-btn modal-wishlist-btn" type="button" onclick="toggleWishlistFromModal()">🤍</button>
         </div>
     </div>

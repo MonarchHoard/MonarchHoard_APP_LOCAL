@@ -165,7 +165,8 @@ def get_cards():
             "set_order": row["DisplayOrder"],
             "rarity_Order": row["rarity_Order"],
             "serials": row["Serials"] or "",
-            "cards_display_order": row["cards_Display_Order"]
+            "cards_display_order": row["cards_display_order"],
+            "cards_id": row["cards_ID"]
         })
     return jsonify(cards)
 
@@ -658,6 +659,82 @@ def import_csv():
         "errors": errors[:10],
         "error_count": len(errors)
     })
+
+
+# =========================================================
+# VETRINA - Monarch Hoard
+# =========================================================
+@app.route('/showcase')
+@login_required
+def showcase_page():
+    return render_template('showcase.html')
+
+@app.route('/api/showcase')
+@login_required
+def api_get_showcase():
+    user_id = session["user_id"]
+    rows = database.get_showcase(user_id)
+    slots = [None] * database.MAX_SHOWCASE_SLOTS
+    for row in rows:
+        pos = row["SlotPosition"]
+        if 1 <= pos <= database.MAX_SHOWCASE_SLOTS:
+            slots[pos - 1] = {
+                "card_code": row["CardCode"],
+                "card_name": row["CardName"],
+                "rarity": row["Rarity"],
+                "rarity_order": row["rarity_Order"],
+                "set_name": row["SetName"],
+                "image_url": f"/static/cards/TRANSPARENT/{row['image_name']}"
+            }
+    return jsonify({"slots": slots})
+
+@app.route('/api/showcase/add', methods=['POST'])
+@login_required
+def api_showcase_add():
+    user_id = session["user_id"]
+    data = request.json or {}
+    card_code = data.get('card_code')
+    if not card_code:
+        return jsonify({"status": "error", "message": "Codice mancante"}), 400
+    owned_rows = database.get_all_cards(user_id)
+    owned_codes = {r["CardCode"] for r in owned_rows if r["Quantity"] > 0}
+    if card_code not in owned_codes:
+        return jsonify({"status": "error", "message": "Devi possedere la carta per aggiungerla"}), 400
+    ok, result = database.add_to_showcase(user_id, card_code)
+    if not ok:
+        return jsonify({"status": "error", "message": result}), 400
+    return jsonify({"status": "success", "slot": result})
+
+@app.route('/api/showcase/remove', methods=['POST'])
+@login_required
+def api_showcase_remove():
+    user_id = session["user_id"]
+    data = request.json or {}
+    card_code = data.get('card_code')
+    if not card_code:
+        return jsonify({"status": "error", "message": "Codice mancante"}), 400
+    database.remove_from_showcase(user_id, card_code)
+    return jsonify({"status": "success"})
+
+@app.route('/api/showcase/move', methods=['POST'])
+@login_required
+def api_showcase_move():
+    user_id = session["user_id"]
+    data = request.json or {}
+    card_code = data.get('card_code')
+    try:
+        direction = int(data.get('direction'))
+    except (TypeError, ValueError):
+        return jsonify({"status": "error", "message": "Direzione non valida"}), 400
+    if direction not in (-1, 1, -3, 3):
+        return jsonify({"status": "error", "message": "Direzione non valida"}), 400
+    if not card_code:
+        return jsonify({"status": "error", "message": "Codice mancante"}), 400
+    ok, result = database.move_showcase(user_id, card_code, direction)
+    if not ok:
+        return jsonify({"status": "error", "message": result}), 400
+    return jsonify({"status": "success", "slot": result})
+
 
 
 if __name__ == '__main__':

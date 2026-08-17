@@ -735,6 +735,98 @@ def api_showcase_move():
         return jsonify({"status": "error", "message": result}), 400
     return jsonify({"status": "success", "slot": result})
 
+@app.route('/api/showcase/set', methods=['POST'])
+@login_required
+def api_showcase_set():
+    user_id = session["user_id"]
+    data = request.json or {}
+    card_code = data.get('card_code')
+    try:
+        slot_position = int(data.get('slot_position'))
+    except (TypeError, ValueError):
+        return jsonify({"status": "error", "message": "Posizione non valida"}), 400
+    if not card_code:
+        return jsonify({"status": "error", "message": "Codice mancante"}), 400
+    owned_rows = database.get_all_cards(user_id)
+    owned_codes = {r["CardCode"] for r in owned_rows if r["Quantity"] > 0}
+    if card_code not in owned_codes:
+        return jsonify({"status": "error", "message": "Devi possedere la carta per aggiungerla"}), 400
+    ok, result = database.set_showcase_slot(user_id, card_code, slot_position)
+    if not ok:
+        return jsonify({"status": "error", "message": result}), 400
+    return jsonify({"status": "success", "slot": result})
+
+# Elenco degli id sfondo validi (deve combaciare con la lista nel JS)
+VALID_SHOWCASE_BG = ('none', 'nebula')
+
+@app.route('/api/showcase/bg', methods=['GET'])
+@login_required
+def api_showcase_bg_get():
+    bg = database.get_showcase_bg(session["user_id"])
+    return jsonify({"status": "success", "bg": bg})
+
+@app.route('/api/showcase/bg', methods=['POST'])
+@login_required
+def api_showcase_bg_set():
+    data = request.json or {}
+    bg_id = str(data.get('bg') or '').strip()
+    if bg_id not in VALID_SHOWCASE_BG:
+        return jsonify({"status": "error", "message": "Sfondo non valido"}), 400
+    database.set_showcase_bg(session["user_id"], bg_id)
+    return jsonify({"status": "success", "bg": bg_id})
+
+@app.route('/settings')
+@login_required
+def settings_page():
+    return render_template('settings.html')
+
+@app.route('/api/settings/profile', methods=['GET'])
+@login_required
+def api_settings_profile():
+    user = database.get_user_by_id(session["user_id"])
+    if not user:
+        return jsonify({"status": "error", "message": "Utente non trovato"}), 404
+    return jsonify({
+        "status": "success",
+        "email": user["Email"] or "",
+        "display_name": user["DisplayName"] or user["Username"]
+    })
+
+@app.route('/api/settings/display_name', methods=['POST'])
+@login_required
+def api_settings_display_name():
+    data = request.json or {}
+    name = str(data.get('display_name') or '').strip()
+    if len(name) < 2:
+        return jsonify({"status": "error", "message": "Il nome deve avere almeno 2 caratteri"}), 400
+    if len(name) > 40:
+        return jsonify({"status": "error", "message": "Il nome è troppo lungo (max 40)"}), 400
+    database.update_display_name(session["user_id"], name)
+    session["display_name"] = name
+    return jsonify({"status": "success", "display_name": name})
+
+@app.route('/api/settings/password', methods=['POST'])
+@login_required
+def api_settings_password():
+    data = request.json or {}
+    old = str(data.get('old_password') or '')
+    new = str(data.get('new_password') or '')
+    user = database.get_user_by_id(session["user_id"])
+    if not user or not check_password_hash(user["PasswordHash"], old):
+        return jsonify({"status": "error", "message": "Password attuale errata"}), 400
+    if len(new) < 8:
+        return jsonify({"status": "error", "message": "La nuova password deve avere almeno 8 caratteri"}), 400
+    if not re.search(r"[A-Z]", new):
+        return jsonify({"status": "error", "message": "Serve almeno una lettera maiuscola"}), 400
+    if not re.search(r"[a-z]", new):
+        return jsonify({"status": "error", "message": "Serve almeno una lettera minuscola"}), 400
+    if not re.search(r"[0-9]", new):
+        return jsonify({"status": "error", "message": "Serve almeno un numero"}), 400
+    if not re.search(r"[^A-Za-z0-9]", new):
+        return jsonify({"status": "error", "message": "Serve almeno un carattere speciale"}), 400
+    database.update_password(session["user_id"], generate_password_hash(new))
+    return jsonify({"status": "success"})
+
 
 
 if __name__ == '__main__':

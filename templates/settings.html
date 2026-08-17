@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <link rel="icon" href="/static/wallpaper/favicon.ico">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#05020d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Monarch Hoard">
+    <link rel="apple-touch-icon" href="/static/wallpaper/icon-180.png">
+    <title>Impostazioni - Monarch Hoard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="app-shell">
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="/static/wallpaper/logo_monarchhoard.png" alt="Monarch Hoard Logo">
+            <img class="sidebar-wordmark" src="/static/wallpaper/Scritta_MonarchHoard.png" alt="Monarch Hoard">
+        </div>
+        <nav class="sidebar-nav">
+            <button class="side-nav-btn" onclick="goToView('DASHBOARD')">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_dashboard.png"><span>Dashboard</span>
+            </button>
+            <button class="side-nav-btn" onclick="goToView('COLLEZIONE')">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_collection.png"><span>Collezione</span>
+            </button>
+            <button class="side-nav-btn" onclick="goToView('WISHLIST')">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_wishlist.png"><span>Wishlist</span>
+            </button>
+            <button class="side-nav-btn" onclick="location.href='/showcase'">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_vetrina.png"><span>Vetrina</span>
+            </button>
+            <button class="side-nav-btn" onclick="location.href='/games/memory'">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_games.png"><span>Giochi</span>
+            </button>
+            <button class="side-nav-btn active">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_settings.png"><span>Impostazioni</span>
+            </button>
+        </nav>
+        <div class="sidebar-player">
+            <div class="player-avatar"></div>
+            <div>
+                <div class="player-name">Hunter</div>
+                <div class="player-rank">Impostazioni</div>
+            </div>
+        </div>
+    </aside>
+    <div class="main-content">
+        <div class="top-bar">
+            <div class="top-bar-left">
+                <img src="/static/wallpaper/Solo_Leveling_Title.png" class="top-bar-img" alt="Solo Leveling Title">
+            </div>
+            <div class="top-bar-right">
+                <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+            </div>
+        </div>
+        <main class="main-area">
+            <div class="settings-wrap">
+
+                <!-- PROFILO -->
+                <section class="settings-card">
+                    <div class="settings-card-title">Profilo</div>
+                    <div class="settings-field">
+                        <label>Nome visualizzato</label>
+                        <div class="settings-inline">
+                            <input type="text" id="set-display-name" class="settings-input" maxlength="40" placeholder="Il tuo nome">
+                            <button class="overlay-action-btn" onclick="saveDisplayName()">Salva</button>
+                        </div>
+                    </div>
+                    <div class="settings-field">
+                        <label>Email</label>
+                        <input type="text" id="set-email" class="settings-input" disabled>
+                        <div class="settings-hint">L'email non è modificabile.</div>
+                    </div>
+                </section>
+
+                <!-- SICUREZZA -->
+                <section class="settings-card">
+                    <div class="settings-card-title">Sicurezza</div>
+                    <div class="settings-field">
+                        <label>Password attuale</label>
+                        <input type="password" id="set-old-pwd" class="settings-input" autocomplete="current-password">
+                    </div>
+                    <div class="settings-field">
+                        <label>Nuova password</label>
+                        <input type="password" id="set-new-pwd" class="settings-input" autocomplete="new-password" oninput="setCheckPwd()">
+                        <div id="set-pwd-bar" style="height:6px;border-radius:99px;background:rgba(255,255,255,0.08);overflow:hidden;margin-top:8px;">
+                            <div id="set-pwd-fill" style="height:100%;width:0%;transition:width .3s ease,background .3s ease;"></div>
+                        </div>
+                        <div id="set-pwd-msg" class="settings-hint"></div>
+                    </div>
+                    <div class="settings-field">
+                        <label>Ripeti nuova password</label>
+                        <input type="password" id="set-new-pwd2" class="settings-input" autocomplete="new-password">
+                    </div>
+                    <button class="overlay-action-btn" onclick="savePassword()">Aggiorna password</button>
+                </section>
+
+                <!-- PREFERENZE -->
+                <section class="settings-card">
+                    <div class="settings-card-title">Preferenze</div>
+                    <div class="settings-field">
+                        <label>Vista iniziale all'apertura</label>
+                        <div class="settings-choices" id="set-default-view">
+                            <button class="settings-choice" data-view="DASHBOARD" onclick="setDefaultView('DASHBOARD')">Dashboard</button>
+                            <button class="settings-choice" data-view="COLLEZIONE" onclick="setDefaultView('COLLEZIONE')">Collezione</button>
+                            <button class="settings-choice" data-view="WISHLIST" onclick="setDefaultView('WISHLIST')">Wishlist</button>
+                        </div>
+                        <div class="settings-hint">Sceglie quale sezione aprire quando entri nell'app.</div>
+                    </div>
+                </section>
+
+                <!-- DATI / BACKUP -->
+                <section class="settings-card">
+                    <div class="settings-card-title">Dati e Backup</div>
+
+                    <div class="settings-field">
+                        <label>Esporta collezione</label>
+                        <div class="settings-hint" style="margin-top:0;margin-bottom:10px;">
+                            Scarica un file CSV con carte, quantità, wishlist e numerazioni.
+                        </div>
+                        <button class="overlay-action-btn" onclick="exportBackupCsv()">Scarica CSV</button>
+                    </div>
+
+                    <div class="settings-divider"></div>
+
+                    <div class="settings-field">
+                        <label>Importa collezione</label>
+                        <div class="settings-hint" style="margin-top:0;margin-bottom:10px;">
+                            Scarica il modello vuoto, compila la colonna <b>Quantity</b> con Excel
+                            e reimportalo. Non modificare mai la colonna <b>CardCode</b>.
+                        </div>
+                        <button class="settings-example-btn" onclick="downloadBackupTemplate()">Scarica modello vuoto</button>
+
+                        <div id="set-csv-dropzone" class="csv-dropzone" onclick="triggerBackupPicker()" style="margin-top:14px;">
+                            <div class="csv-dropzone-icon">&#8681;</div>
+                            <div class="csv-dropzone-text">Trascina qui il file oppure clicca per sceglierlo</div>
+                            <div id="set-csv-file-name" class="csv-file-name">Nessun file selezionato</div>
+                        </div>
+                        <input type="file" id="set-csv-input" accept=".csv,text/csv" style="display:none;">
+                        <button id="set-csv-import-btn" class="overlay-action-btn" onclick="importBackupCsv()" disabled style="margin-top:14px;">
+                            Importa
+                        </button>
+                        <div id="set-csv-report" class="csv-report"></div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+</div>
+<div id="toast-container"></div>
+<script src="/static/js/settings.js"></script>
+</body>
+</html>

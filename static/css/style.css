@@ -1,25 +1,25 @@
 /* =========================================================
-   MONARCH HOARD - CLEAN STYLE.CSS
-   Dark fantasy / purple dashboard layout
-   ========================================================= */
+     MONARCH HOARD - CLEAN STYLE.CSS
+     Dark fantasy / purple dashboard layout
+     ========================================================= */
 
 /* ---------------------------------------------------------
-   01. VARIABILI GLOBALI
-   --------------------------------------------------------- */
+     01. VARIABILI GLOBALI
+     --------------------------------------------------------- */
 
 :root {
-  --bg-color: #05020d;
-  --panel-bg: rgba(13, 10, 28, 0.72);
-  --panel-bg-strong: rgba(18, 13, 39, 0.88);
-  --accent-color: #9b4dff;
-  --text-color: #e4d8ff;
-  --text-muted: #9a8ab8;
-  --danger-red: #ff4d6d;
+    --bg-color: #05020d;
+    --panel-bg: rgba(13, 10, 28, 0.72);
+    --panel-bg-strong: rgba(18, 13, 39, 0.88);
+    --accent-color: #9b4dff;
+    --text-color: #e4d8ff;
+    --text-muted: #9a8ab8;
+    --danger-red: #ff4d6d;
 }
 
 /* ---------------------------------------------------------
-   02. BASE
-   --------------------------------------------------------- */
+     02. BASE
+     --------------------------------------------------------- */
 
 * {
     box-sizing: border-box;
@@ -30,14 +30,13 @@ body {
     padding: 0;
     min-height: 100vh;
     color: var(--text-color);
-    font-family: 'Orbitron', sans-serif;
-    background:
-        linear-gradient(
+    font-family: "Orbitron", sans-serif;
+    background: linear-gradient(
             rgba(5, 2, 13, 0.42),
             rgba(5, 2, 13, 0.92) 420px,
             rgba(5, 2, 13, 0.98) 100%
         ),
-        url('/static/wallpaper/mh_header_bg.jpg');
+        url("/static/wallpaper/mh_header_bg.jpg");
     background-size: cover;
     background-position: top center;
     background-repeat: no-repeat;
@@ -45,14 +44,12 @@ body {
     overflow-x: hidden;
 }
 
-
 body::before {
     content: "";
     position: fixed;
     inset: 0;
     pointer-events: none;
-    background:
-        linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    background: linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
     background-size: 44px 44px;
     opacity: 0.35;
@@ -65,14 +62,13 @@ h3 {
     color: #ffffff;
     text-transform: uppercase;
     letter-spacing: 3px;
-    text-shadow:
-        0 0 4px #ffffff,
+    text-shadow: 0 0 4px #ffffff,
         0 0 8px var(--accent-color);
 }
 
 /* ---------------------------------------------------------
-   03. LAYOUT PRINCIPALE
-   --------------------------------------------------------- */
+     03. LAYOUT PRINCIPALE
+     --------------------------------------------------------- */
 
 .app-shell {
     display: grid;
@@ -89,21 +85,19 @@ h3 {
 }
 
 /* ---------------------------------------------------------
-   04. SIDEBAR
-   --------------------------------------------------------- */
+     04. SIDEBAR
+     --------------------------------------------------------- */
 
 .sidebar {
     position: sticky;
     top: 0;
     height: 100vh;
-	min-width: 270px;
+    min-width: 270px;
     padding: 26px 18px;
     border-right: 1px solid rgba(155, 77, 255, 0.22);
-    background:
-        linear-gradient(to bottom, rgba(9, 5, 23, 0.96), rgba(5, 3, 13, 0.94)),
+    background: linear-gradient(to bottom, rgba(9, 5, 23, 0.96), rgba(5, 3, 13, 0.94)),
         radial-gradient(circle at bottom, rgba(155, 77, 255, 0.32), transparent 42%);
-    box-shadow:
-        inset -1px 0 0 rgba(255,255,255,0.04),
+    box-shadow: inset -1px 0 0 rgba(255,255,255,0.04),
         12px 0 40px rgba(0,0,0,0.45);
     display: flex;
     flex-direction: column;
@@ -118,9 +112,8 @@ h3 {
     width: 100%;
     height: 360px;
     pointer-events: none;
-    background:
-        linear-gradient(to top, rgba(5,3,13,0.95), transparent 45%, rgba(5,3,13,0.75)),
-        url('/static/wallpaper/mh_sidebar_bottom.png');
+    background: linear-gradient(to top, rgba(5,3,13,0.95), transparent 45%, rgba(5,3,13,0.75)),
+        url("/static/wallpaper/mh_sidebar_bottom.png");
     background-size: cover;
     background-position: bottom center;
     opacity: 0.55;
@@ -184,22 +177,18 @@ h3 {
     min-width: 40px;
     max-width: 40px;
     max-height: 40px;
-
     object-fit: contain;
     display: block;
     flex-shrink: 0;
-
     filter: drop-shadow(0 0 8px rgba(155,77,255,0.65));
     opacity: 0.9;
-
     transition: 0.22s ease;
 }
 
 .side-nav-btn:hover .side-nav-icon,
 .side-nav-btn.active .side-nav-icon {
     opacity: 1;
-    filter:
-        drop-shadow(0 0 8px rgba(155,77,255,0.85))
+    filter: drop-shadow(0 0 8px rgba(155,77,255,0.85))
         drop-shadow(0 0 14px rgba(155,77,255,0.45));
 }
 
@@ -208,8 +197,7 @@ h3 {
     color: #ffffff;
     border-color: rgba(155,77,255,0.8);
     background: linear-gradient(90deg, rgba(126,52,255,0.34), rgba(126,52,255,0.08));
-    box-shadow:
-        inset 0 0 22px rgba(155,77,255,0.12),
+    box-shadow: inset 0 0 22px rgba(155,77,255,0.12),
         0 0 18px rgba(155,77,255,0.25);
 }
 
@@ -225,8 +213,8 @@ h3 {
 }
 
 /* ---------------------------------------------------------
-   05. PLAYER BOX SIDEBAR
-   --------------------------------------------------------- */
+     05. PLAYER BOX SIDEBAR
+     --------------------------------------------------------- */
 
 .sidebar-player {
     margin-top: auto;
@@ -245,8 +233,7 @@ h3 {
     width: 48px;
     height: 48px;
     border-radius: 50%;
-    background:
-        radial-gradient(circle, rgba(155,77,255,0.95), rgba(30,12,72,0.8));
+    background: radial-gradient(circle, rgba(155,77,255,0.95), rgba(30,12,72,0.8));
     box-shadow: 0 0 18px rgba(155,77,255,0.55);
 }
 
@@ -281,16 +268,16 @@ h3 {
 }
 
 .xp-fill {
-	width: 0%;
-	transition: width 0.5s ease;
+    width: 0%;
+    transition: width 0.5s ease;
     height: 100%;
     background: linear-gradient(90deg, #6f35ff, #c46bff);
     box-shadow: 0 0 12px rgba(155,77,255,0.8);
 }
 
 /* ---------------------------------------------------------
-   06. HEADER / HERO
-   --------------------------------------------------------- */
+     06. HEADER / HERO
+     --------------------------------------------------------- */
 
 .hero-panel {
     position: relative;
@@ -314,8 +301,7 @@ h3 {
     border-radius: 6px;
     background: rgba(5, 4, 14, 0.76);
     border: 1px solid rgba(155, 77, 255, 0.20);
-    box-shadow:
-        inset 0 0 20px rgba(155, 77, 255, 0.06),
+    box-shadow: inset 0 0 20px rgba(155, 77, 255, 0.06),
         0 12px 34px rgba(0, 0, 0, 0.42);
     backdrop-filter: blur(8px);
     overflow: hidden;
@@ -338,11 +324,9 @@ h3 {
 .hero-stat-icon {
     width: 46px;
     height: 46px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     background: transparent;
     border: none;
     box-shadow: none;
@@ -372,17 +356,17 @@ h3 {
 }
 
 /* ---------------------------------------------------------
-   08. FILTRI / SEARCH BAR
-   --------------------------------------------------------- */
+     08. FILTRI / SEARCH BAR
+     --------------------------------------------------------- */
 
 .search-bar {
     position: relative;
     z-index: 1000;
     overflow: visible;
     display: flex;
-    flex-direction: column;   /* NUOVO: dispone in verticale */
-    align-items: stretch;     /* NUOVO: occupa tutta la larghezza */
-    gap: 14px;                /* spazio tra le 2 righe */
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
     min-height: 96px;
     margin: 12px 0 28px 0;
     padding: 22px 24px;
@@ -392,8 +376,7 @@ h3 {
     border-left: none;
     border-right: none;
     background: rgba(5, 4, 14, 0.72);
-    box-shadow:
-        inset 0 0 18px rgba(155,77,255,0.06),
+    box-shadow: inset 0 0 18px rgba(155,77,255,0.06),
         0 10px 30px rgba(0,0,0,0.38);
 }
 
@@ -436,8 +419,7 @@ h3 {
 .search-input:focus {
     outline: none;
     border-color: rgba(176, 120, 255, 0.52);
-    box-shadow:
-        inset 0 0 20px rgba(0, 0, 0, 0.35),
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.35),
         0 0 16px rgba(155, 77, 255, 0.18);
 }
 
@@ -449,7 +431,6 @@ h3 {
     gap: 10px;
     flex-wrap: wrap;
 }
-
 
 .dropdown-filter {
     position: relative;
@@ -476,8 +457,7 @@ h3 {
     color: #ffffff;
     border-color: rgba(176, 120, 255, 0.50);
     background: rgba(15, 10, 35, 0.82);
-    box-shadow:
-        inset 0 0 18px rgba(155, 77, 255, 0.05),
+    box-shadow: inset 0 0 18px rgba(155, 77, 255, 0.05),
         0 0 14px rgba(155, 77, 255, 0.16);
 }
 
@@ -512,8 +492,7 @@ h3 {
     border-radius: 10px;
     background: rgba(12, 8, 29, 0.98);
     border: 1px solid rgba(155,77,255,0.35);
-    box-shadow:
-        0 14px 30px rgba(0,0,0,0.55),
+    box-shadow: 0 14px 30px rgba(0,0,0,0.55),
         0 0 18px rgba(155,77,255,0.16);
 }
 
@@ -569,11 +548,9 @@ h3 {
 .action-filter-btn {
     height: 48px;
     padding: 0 16px;
-
     border-radius: 8px;
     border: 1px solid rgba(155,77,255,0.24);
     background: rgba(5,4,14,0.82);
-
     color: #ffffff;
     cursor: pointer;
     font-family: inherit;
@@ -607,14 +584,13 @@ h3 {
     color: #ffffff;
     background: rgba(15, 10, 35, 0.82);
     border-color: rgba(176, 120, 255, 0.50);
-    box-shadow:
-        inset 0 0 18px rgba(155, 77, 255, 0.05),
+    box-shadow: inset 0 0 18px rgba(155, 77, 255, 0.05),
         0 0 14px rgba(155, 77, 255, 0.16);
 }
 
 /* ---------------------------------------------------------
-   09. SET / GRIGLIA CARTE
-   --------------------------------------------------------- */
+     09. SET / GRIGLIA CARTE
+     --------------------------------------------------------- */
 
 .set-section {
     position: relative;
@@ -623,8 +599,7 @@ h3 {
     border: 1px solid rgba(155,77,255,0.20);
     background-color: rgba(9,7,22,0.72);
     background-blend-mode: overlay;
-    box-shadow:
-        inset 0 0 24px rgba(155,77,255,0.06),
+    box-shadow: inset 0 0 24px rgba(155,77,255,0.06),
         0 16px 40px rgba(0,0,0,0.45);
     overflow: hidden;
 }
@@ -657,8 +632,7 @@ h3 {
     max-height: none;
     overflow: visible;
     opacity: 1;
-    transition:
-        padding 0.4s ease-in-out,
+    transition: padding 0.4s ease-in-out,
         opacity 0.3s ease-in-out,
         gap 0.4s ease-in-out;
 }
@@ -684,33 +658,23 @@ h3 {
 }
 
 /* ---------------------------------------------------------
-   10. CARD COLLEZIONE
-   --------------------------------------------------------- */
+     10. CARD COLLEZIONE
+     --------------------------------------------------------- */
 
 .card {
-
     position: relative;
     padding: 38px 12px 14px 12px;
     min-height: 375px;
-
     text-align: center;
     cursor: pointer;
-
     border-radius: 12px;
     border: 1px solid rgba(155, 77, 255, 0.20);
-
-    background:
-        linear-gradient(180deg, rgba(20, 12, 45, 0.86), rgba(5, 4, 14, 0.96)),
+    background: linear-gradient(180deg, rgba(20, 12, 45, 0.86), rgba(5, 4, 14, 0.96)),
         radial-gradient(circle at 50% 18%, rgba(155, 77, 255, 0.18), transparent 42%);
-
-    box-shadow:
-        inset 0 0 18px rgba(155, 77, 255, 0.045),
+    box-shadow: inset 0 0 18px rgba(155, 77, 255, 0.045),
         0 10px 24px rgba(0, 0, 0, 0.38);
-
     overflow: hidden;
-
-    transition:
-        transform 0.22s ease,
+    transition: transform 0.22s ease,
         border-color 0.22s ease,
         box-shadow 0.22s ease,
         background 0.22s ease;
@@ -721,28 +685,21 @@ h3 {
     top: 10px;
     left: 10px;
     z-index: 6;
-
     min-width: 34px;
     height: 26px;
     padding: 0 8px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     border-radius: 999px;
     border: 1px solid rgba(255, 77, 109, 0.85);
-
     background: linear-gradient(135deg, rgba(70, 12, 35, 0.98), rgba(150, 28, 65, 0.95));
     color: #ffffff;
-
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-
-    box-shadow:
-        0 0 12px rgba(255, 77, 109, 0.42),
+    box-shadow: 0 0 12px rgba(255, 77, 109, 0.42),
         inset 0 0 8px rgba(255, 255, 255, 0.12);
 }
 
@@ -762,9 +719,7 @@ h3 {
 .card:hover {
     transform: translateY(-4px);
     border-color: rgba(190, 145, 255, 0.78);
-
-    box-shadow:
-        inset 0 0 22px rgba(155, 77, 255, 0.08),
+    box-shadow: inset 0 0 22px rgba(155, 77, 255, 0.08),
         0 0 22px rgba(155, 77, 255, 0.26),
         0 16px 34px rgba(0, 0, 0, 0.52);
 }
@@ -772,13 +727,11 @@ h3 {
 .card.not-owned {
     opacity: 1;
     border-color: rgba(120, 105, 150, 0.14);
-    background:
-        linear-gradient(180deg, rgba(14, 11, 28, 0.72), rgba(4, 4, 10, 0.94));
+    background: linear-gradient(180deg, rgba(14, 11, 28, 0.72), rgba(4, 4, 10, 0.94));
 }
 
 .card.not-owned .card-img {
-    filter:
-        grayscale(92%)
+    filter: grayscale(92%)
         brightness(0.62)
         drop-shadow(0 8px 14px rgba(0, 0, 0, 0.5));
     opacity: 0.58;
@@ -789,32 +742,23 @@ h3 {
     width: 100%;
     height: 225px;
     margin: 8px 0 12px 0;
-
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-
     border-radius: 9px;
     border: 1px solid rgba(155, 77, 255, 0.16);
-
-    background:
-        radial-gradient(circle at center, rgba(155, 77, 255, 0.16), transparent 48%),
+    background: radial-gradient(circle at center, rgba(155, 77, 255, 0.16), transparent 48%),
         linear-gradient(180deg, rgba(255,255,255,0.025), rgba(0,0,0,0.22));
-
-    box-shadow:
-        inset 0 0 22px rgba(0, 0, 0, 0.26);
+    box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.26);
 }
 
 .card-img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-
-    filter:
-        drop-shadow(0 8px 14px rgba(0, 0, 0, 0.55))
+    filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.55))
         drop-shadow(0 0 8px rgba(155, 77, 255, 0.16));
-
     transition: transform 0.22s ease, filter 0.22s ease;
 }
 
@@ -831,31 +775,24 @@ h3 {
     font-size: 0.78rem;
     line-height: 1.25;
     letter-spacing: 0.25px;
-
     margin: 7px 0 8px 0;
-
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-
     text-shadow: 0 0 10px rgba(155, 77, 255, 0.20);
 }
 
 .card-rarity {
     display: inline-block;
-
     padding: 4px 8px;
-
     border-radius: 999px;
     border: 1px solid rgba(155, 77, 255, 0.24);
     background: rgba(155, 77, 255, 0.13);
-
     color: rgba(238, 228, 255, 0.92);
     font-size: 0.62rem;
     letter-spacing: 0.7px;
     text-transform: uppercase;
 }
-
 
 .card-rarity-row {
     display: flex;
@@ -867,8 +804,8 @@ h3 {
 }
 
 /* ---------------------------------------------------------
-   11. QUANTITÀ / WISHLIST
-   --------------------------------------------------------- */
+     11. QUANTITÀ / WISHLIST
+     --------------------------------------------------------- */
 
 .quantity-control {
     display: flex;
@@ -881,21 +818,15 @@ h3 {
 .btn-qty {
     width: 30px;
     height: 30px;
-
     border-radius: 7px;
     border: 1px solid rgba(155, 77, 255, 0.22);
     background: rgba(7, 6, 18, 0.72);
-
     color: rgba(239, 231, 255, 0.86);
     font-size: 0.92rem;
     font-weight: bold;
     font-family: inherit;
-
     cursor: pointer;
-
-    box-shadow:
-        inset 0 0 12px rgba(0, 0, 0, 0.28);
-
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.28);
     transition: 0.18s ease;
 }
 
@@ -919,18 +850,13 @@ h3 {
     width: 46px;
     height: 30px;
     text-align: center;
-
     border-radius: 7px;
     border: 1px solid rgba(155, 77, 255, 0.20);
     background: rgba(5, 4, 14, 0.74);
-
     color: #ffffff;
     font-family: inherit;
     font-size: 0.78rem;
-
-    box-shadow:
-        inset 0 0 12px rgba(0, 0, 0, 0.28);
-
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.28);
     -moz-appearance: textfield;
 }
 
@@ -950,15 +876,12 @@ h3 {
     border: none;
     cursor: pointer;
     padding: 0;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     color: rgba(255,255,255,0.4);
     font-size: 1.05rem;
     opacity: 0.85;
-
     transition: transform 0.2s ease, color 0.2s ease;
     z-index: 5;
 }
@@ -975,8 +898,8 @@ h3 {
 }
 
 /* ---------------------------------------------------------
-   12. DASHBOARD CENTRALE
-   --------------------------------------------------------- */
+     12. DASHBOARD CENTRALE
+     --------------------------------------------------------- */
 
 #dashboard-container {
     display: grid;
@@ -986,8 +909,7 @@ h3 {
 .mh-dashboard-grid {
     display: grid;
     grid-template-columns: minmax(0, 1.35fr) minmax(360px, 0.85fr);
-    grid-template-areas:
-        "progress sets"
+    grid-template-areas: "progress sets"
         "latest wishlist";
     gap: 22px;
 }
@@ -996,11 +918,9 @@ h3 {
     position: relative;
     border: 1px solid rgba(155,77,255,0.22);
     border-radius: 14px;
-    background:
-        linear-gradient(145deg, rgba(13,9,31,0.90), rgba(5,4,14,0.88)),
+    background: linear-gradient(145deg, rgba(13,9,31,0.90), rgba(5,4,14,0.88)),
         radial-gradient(circle at 70% 20%, rgba(155,77,255,0.18), transparent 34%);
-    box-shadow:
-        inset 0 0 28px rgba(155,77,255,0.06),
+    box-shadow: inset 0 0 28px rgba(155,77,255,0.06),
         0 18px 45px rgba(0,0,0,0.42),
         0 0 18px rgba(155,77,255,0.08);
     overflow: hidden;
@@ -1058,10 +978,9 @@ h3 {
     text-shadow: 0 0 12px rgba(155,77,255,0.9);
 }
 
-
 /* ---------------------------------------------------------
-   13. DASHBOARD - PROGRESS CIRCLE
-   --------------------------------------------------------- */
+     13. DASHBOARD - PROGRESS CIRCLE
+     --------------------------------------------------------- */
 
 .mh-progress-content {
     display: grid;
@@ -1084,14 +1003,13 @@ h3 {
     box-shadow: none;
 }
 
-
 /* Overlay che si illumina con la percentuale */
+
 .mh-progress-ring::after {
     content: "";
     position: absolute;
     inset: -20px;
-    background: url('/static/wallpaper/progress_ring_deco.png') center/contain no-repeat;
-
+    background: url("/static/wallpaper/progress_ring_deco.png") center/contain no-repeat;
     -webkit-mask: conic-gradient(
         from 0deg,
         black 0deg,
@@ -1099,27 +1017,25 @@ h3 {
         transparent calc(var(--progress) * 3.6deg),
         transparent 360deg
     );
-            mask: conic-gradient(
+    mask: conic-gradient(
         from 0deg,
         black 0deg,
         black calc(var(--progress) * 3.6deg),
         transparent calc(var(--progress) * 3.6deg),
         transparent 360deg
     );
-
     filter: drop-shadow(0 0 6px rgba(155, 77, 255, 0.7))
             drop-shadow(0 0 12px rgba(155, 77, 255, 0.4));
     pointer-events: none;
     z-index: 3;
-    display: block;   /* sovrascrive il display:none precedente */
+    display: block;
 }
 
 .mh-progress-inner {
     width: 180px;
     height: 180px;
     border-radius: 50%;
-    background:
-        radial-gradient(circle, rgba(18,13,39,0.98), rgba(5,4,14,0.98));
+    background: radial-gradient(circle, rgba(18,13,39,0.98), rgba(5,4,14,0.98));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -1152,16 +1068,15 @@ h3 {
 .mh-progress-creature {
     height: 210px;
     border-radius: 14px;
-    background:
-        radial-gradient(circle at center, rgba(155,77,255,0.42), transparent 28%),
+    background: radial-gradient(circle at center, rgba(155,77,255,0.42), transparent 28%),
         radial-gradient(circle at center, rgba(20,8,50,0.95), transparent 58%);
     position: relative;
     overflow: hidden;
 }
 
 /* ---------------------------------------------------------
-   14. DASHBOARD - MINI STATS
-   --------------------------------------------------------- */
+     14. DASHBOARD - MINI STATS
+     --------------------------------------------------------- */
 
 .mh-mini-stats {
     display: grid;
@@ -1186,7 +1101,6 @@ h3 {
 .mh-mini-icon {
     width: 52px;
     height: 52px;
-
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1212,8 +1126,8 @@ h3 {
 }
 
 /* ---------------------------------------------------------
-   15. DASHBOARD - SET PROGRESS
-   --------------------------------------------------------- */
+     15. DASHBOARD - SET PROGRESS
+     --------------------------------------------------------- */
 
 .mh-set-list {
     display: flex;
@@ -1237,8 +1151,7 @@ h3 {
     width: 58px;
     height: 58px;
     border-radius: 8px;
-    background:
-        radial-gradient(circle, rgba(155,77,255,0.32), rgba(0,0,0,0.35));
+    background: radial-gradient(circle, rgba(155,77,255,0.32), rgba(0,0,0,0.35));
     border: 1px solid rgba(155,77,255,0.18);
     overflow: hidden;
 }
@@ -1289,8 +1202,8 @@ h3 {
 }
 
 /* ---------------------------------------------------------
-   16. DASHBOARD - CARD PICCOLE
-   --------------------------------------------------------- */
+     16. DASHBOARD - CARD PICCOLE
+     --------------------------------------------------------- */
 
 .mh-card-row {
     display: grid;
@@ -1308,8 +1221,7 @@ h3 {
     border: 1px solid rgba(155,77,255,0.25);
     border-radius: 10px;
     padding: 8px;
-    background:
-        linear-gradient(180deg, rgba(20,12,45,0.9), rgba(5,4,14,0.94));
+    background: linear-gradient(180deg, rgba(20,12,45,0.9), rgba(5,4,14,0.94));
     cursor: pointer;
     overflow: hidden;
     transition: 0.2s ease;
@@ -1335,28 +1247,21 @@ h3 {
     top: 8px;
     left: 8px;
     z-index: 6;
-
     min-width: 34px;
     height: 26px;
     padding: 0 8px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     border-radius: 999px;
     border: 1px solid rgba(255, 77, 109, 0.85);
-
     background: linear-gradient(135deg, rgba(70, 12, 35, 0.98), rgba(150, 28, 65, 0.95));
     color: #ffffff;
-
     font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.5px;
     text-transform: uppercase;
-
-    box-shadow:
-        0 0 12px rgba(255, 77, 109, 0.42),
+    box-shadow: 0 0 12px rgba(255, 77, 109, 0.42),
         inset 0 0 8px rgba(255, 255, 255, 0.12);
 }
 
@@ -1402,30 +1307,29 @@ h3 {
 }
 
 /* ---------------------------------------------------------
-   17. MODAL CARTA
-   --------------------------------------------------------- */
+     17. MODAL CARTA
+     --------------------------------------------------------- */
 
 .modal {
-display: none;
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-align-items: center;
-justify-content: center;
-background: rgba(0, 0, 0, 0.78);
-z-index: 99999;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.78);
+    z-index: 99999;
 }
 
 .modal.open {
-display: flex;
+    display: flex;
 }
 
 .modal-content {
-    display: flex;              /* NUOVO */
-    flex-direction: column;     /* NUOVO */
-
+    display: flex;
+    flex-direction: column;
     background: rgba(12,8,29,0.96);
     border: 1px solid rgba(184,130,255,0.75);
     padding: 10px;
@@ -1434,7 +1338,6 @@ display: flex;
     width: 90%;
     text-align: center;
     box-shadow: 0 0 38px rgba(155,77,255,0.36);
-
     max-height: 92vh;
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -1443,21 +1346,26 @@ display: flex;
 }
 
 /* Solo l'immagine può rimpicciolirsi: testi e controlli restano interi */
+
 .modal-content > * {
     flex-shrink: 0;
 }
 
 /* Scrollbar in tema (Chrome / Edge) */
+
 .modal-content::-webkit-scrollbar {
     width: 8px;
 }
+
 .modal-content::-webkit-scrollbar-track {
     background: transparent;
 }
+
 .modal-content::-webkit-scrollbar-thumb {
     background: rgba(155,77,255,0.45);
     border-radius: 99px;
 }
+
 .modal-content::-webkit-scrollbar-thumb:hover {
     background: rgba(190,145,255,0.75);
 }
@@ -1465,11 +1373,9 @@ display: flex;
 .modal-img-container {
     position: relative;
     width: 100%;
-
-    height: 620px;        /* dimensione di DEFAULT (più grande di prima) */
-    min-height: 220px;    /* non scende mai sotto questa */
-    flex: 0 1 auto;       /* si rimpicciolisce SOLO se serve spazio */
-
+    height: 620px;
+    min-height: 220px;
+    flex: 0 1 auto;
     margin-bottom: 15px;
     display: flex;
     justify-content: center;
@@ -1492,7 +1398,7 @@ display: flex;
 .modal-content p {
     color: #ffffff;
     font-size: 1.2rem;
-    font-family: 'Orbitron', sans-serif;
+    font-family: "Orbitron", sans-serif;
     margin: 10px 0;
 }
 
@@ -1524,11 +1430,11 @@ display: flex;
 }
 
 .modal-content .close-btn {
-	position: static;
+    position: static;
     margin-top: 0;
-    width: auto;              /* larghezza in base al testo */
-    align-self: center;       /* lo centra nella colonna flex */
-    padding: 10px 40px;       /* <-- regola qui la larghezza */
+    width: auto;
+    align-self: center;
+    padding: 10px 40px;
     background: rgba(12,8,29,0.96);
     backdrop-filter: blur(4px);
     z-index: 20;
@@ -1548,8 +1454,8 @@ display: flex;
 }
 
 /* ---------------------------------------------------------
-   18. UTILITY
-   --------------------------------------------------------- */
+     18. UTILITY
+     --------------------------------------------------------- */
 
 .search-highlight {
     background: var(--accent-color);
@@ -1560,47 +1466,48 @@ display: flex;
 }
 
 .hidden {
-display: none !important;
+    display: none !important;
 }
 
 /* ---------------------------------------------------------
-   19. RESPONSIVE CONTROLLATO
-   Mantiene sempre la struttura sidebar + contenuto
-   --------------------------------------------------------- */
+     19. RESPONSIVE CONTROLLATO
+     Mantiene sempre la struttura sidebar + contenuto
+     --------------------------------------------------------- */
 
 /* L'app non deve diventare mobile sotto una certa larghezza */
+
 html,
 body {
     min-width: 1180px;
 }
 
 /* La dashboard può adattarsi un po', ma senza distruggere la struttura */
+
 @media (max-width: 1350px) {
     .mh-dashboard-grid {
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-areas:
-            "progress"
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "progress"
             "sets"
             "latest"
             "wishlist";
     }
 
     .mh-progress-content {
-        grid-template-columns: 280px 1fr;
+    grid-template-columns: 280px 1fr;
     }
 
     .mh-card-row,
     .mh-card-row.compact {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     }
 }
 
 /* ---------------------------------------------------------
-   20. EFFETTI PREMIUM CARD
-   --------------------------------------------------------- */
-
+     20. EFFETTI PREMIUM CARD
+     --------------------------------------------------------- */
 
 /* Linea luminosa superiore */
+
 .card::before {
     content: "";
     position: absolute;
@@ -1608,39 +1515,34 @@ body {
     left: 18px;
     right: 18px;
     height: 1px;
-
     background: linear-gradient(
         90deg,
         transparent,
         rgba(190, 145, 255, 0.75),
         transparent
     );
-
     opacity: 0.55;
 }
 
 /* Piccolo glow interno */
+
 .card::after {
     content: "";
     position: absolute;
     inset: 0;
     pointer-events: none;
-
-    background:
-        radial-gradient(circle at 50% 18%, rgba(155, 77, 255, 0.16), transparent 36%),
+    background: radial-gradient(circle at 50% 18%, rgba(155, 77, 255, 0.16), transparent 36%),
         linear-gradient(135deg, rgba(255,255,255,0.035), transparent 34%);
-
     opacity: 0;
     transition: opacity 0.22s ease;
 }
-
-
 
 .card:hover::after {
     opacity: 1;
 }
 
 /* Mini cornice dentro area immagine */
+
 .card-image-container::before {
     content: "";
     position: absolute;
@@ -1652,14 +1554,12 @@ body {
 
 .card:hover .card-img {
     transform: scale(1.035);
-    filter:
-        drop-shadow(0 10px 18px rgba(0, 0, 0, 0.65))
+    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.65))
         drop-shadow(0 0 13px rgba(155, 77, 255, 0.26));
 }
 
 .card.not-owned .card-image-container {
-    background:
-        radial-gradient(circle at center, rgba(120, 105, 150, 0.10), transparent 48%),
+    background: radial-gradient(circle at center, rgba(120, 105, 150, 0.10), transparent 48%),
         linear-gradient(180deg, rgba(255,255,255,0.018), rgba(0,0,0,0.28));
 }
 
@@ -1670,6 +1570,7 @@ body {
 }
 
 /* Hover anche sulle mancanti, ma più sobrio */
+
 .card.not-owned:hover {
     border-color: rgba(155, 77, 255, 0.34);
 }
@@ -1680,35 +1581,28 @@ body {
 }
 
 /* ---------------------------------------------------------
-   21. BADGE DOPPIONI
-   --------------------------------------------------------- */
+     21. BADGE DOPPIONI
+     --------------------------------------------------------- */
 
 .duplicate-badge {
     position: absolute;
     top: 10px;
     right: 10px;
     z-index: 6;
-
     min-width: 34px;
     height: 26px;
     padding: 0 8px;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     border-radius: 999px;
     border: 1px solid rgba(155, 77, 255, 0.85);
-
     background: linear-gradient(135deg, rgba(42, 18, 86, 0.98), rgba(92, 35, 170, 0.95));
     color: #ffffff;
-
     font-size: 0.72rem;
     font-weight: 700;
     letter-spacing: 0.5px;
-
-    box-shadow:
-        0 0 12px rgba(155, 77, 255, 0.45),
+    box-shadow: 0 0 12px rgba(155, 77, 255, 0.45),
         inset 0 0 8px rgba(255, 255, 255, 0.12);
 }
 
@@ -1721,9 +1615,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background:
-        linear-gradient(rgba(5, 2, 13, 0.60), rgba(5, 2, 13, 0.96)),
-        url('/static/wallpaper/mh_background.jpg');
+    background: linear-gradient(rgba(5, 2, 13, 0.60), rgba(5, 2, 13, 0.96)),
+        url("/static/wallpaper/mh_background.jpg");
     background-size: cover;
     background-position: center;
 }
@@ -1736,10 +1629,8 @@ body {
     padding: 34px;
     border: 1px solid rgba(155,77,255,0.35);
     border-radius: 16px;
-    background:
-        linear-gradient(145deg, rgba(13,9,31,0.94), rgba(5,4,14,0.94));
-    box-shadow:
-        inset 0 0 28px rgba(155,77,255,0.08),
+    background: linear-gradient(145deg, rgba(13,9,31,0.94), rgba(5,4,14,0.94));
+    box-shadow: inset 0 0 28px rgba(155,77,255,0.08),
         0 24px 60px rgba(0,0,0,0.58),
         0 0 28px rgba(155,77,255,0.18);
     text-align: center;
@@ -1757,38 +1648,38 @@ body {
 }
 
 .login-panel h1 {
-font-size: 1.45rem;
-margin: 18px 0 8px 0;
+    font-size: 1.45rem;
+    margin: 18px 0 8px 0;
 }
 
 .login-subtitle {
-color: #9a8ab8;
-font-size: 0.78rem;
-text-transform: uppercase;
-letter-spacing: 2px;
-margin-bottom: 24px;
+    color: #9a8ab8;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
 }
 
 .login-form {
-display: flex;
-flex-direction: column;
-gap: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 
 .login-form input {
-height: 46px;
-padding: 0 14px;
-border-radius: 8px;
-border: 1px solid rgba(155,77,255,0.26);
-background: rgba(5,4,14,0.82);
-color: #ffffff;
-font-family: inherit;
+    height: 46px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(155,77,255,0.26);
+    background: rgba(5,4,14,0.82);
+    color: #ffffff;
+    font-family: inherit;
 }
 
 .login-form input:focus {
-outline: none;
-border-color: rgba(176,120,255,0.62);
-box-shadow: 0 0 16px rgba(155,77,255,0.20);
+    outline: none;
+    border-color: rgba(176,120,255,0.62);
+    box-shadow: 0 0 16px rgba(155,77,255,0.20);
 }
 
 .login-form button {
@@ -1807,38 +1698,38 @@ box-shadow: 0 0 16px rgba(155,77,255,0.20);
 }
 
 .login-form button:hover {
-background: rgba(155,77,255,0.32);
-box-shadow: 0 0 18px rgba(155,77,255,0.28);
+    background: rgba(155,77,255,0.32);
+    box-shadow: 0 0 18px rgba(155,77,255,0.28);
 }
 
 .login-error {
-margin-bottom: 16px;
-padding: 10px;
-border-radius: 8px;
-background: rgba(255, 77, 109, 0.12);
-border: 1px solid rgba(255, 77, 109, 0.35);
-color: #ff8fa3;
-font-size: 0.78rem;
+    margin-bottom: 16px;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255, 77, 109, 0.12);
+    border: 1px solid rgba(255, 77, 109, 0.35);
+    color: #ff8fa3;
+    font-size: 0.78rem;
 }
 
 .login-hint {
-margin-top: 18px;
-color: #75668f;
-font-size: 0.68rem;
+    margin-top: 18px;
+    color: #75668f;
+    font-size: 0.68rem;
 }
 
 .login-panel h1 img {
-    max-width: 250px; /* Scegli la larghezza massima adatta al tuo design */
-    height: auto;     /* Mantiene le proporzioni corrette */
+    max-width: 250px;
+    height: auto;
 }
 
 /* ---------------------------------------------------------
-   BARRA SUPERIORE (TOP BAR) & LOGOUT
-   --------------------------------------------------------- */
+     BARRA SUPERIORE (TOP BAR) & LOGOUT
+     --------------------------------------------------------- */
 
 .top-bar {
     display: flex;
-    justify-content: space-between; /* Questo spinge i blocchi ai due estremi */
+    justify-content: space-between;
     align-items: center;
     padding: 15px 30px;
     background: var(--panel-bg);
@@ -1851,26 +1742,25 @@ font-size: 0.68rem;
     justify-content: flex-end;
 }
 
-
 .top-bar-left {
     display: flex;
     align-items: center;
     gap: 15px;
 }
 
-
 .top-bar-img {
-    height: 45px; /* Ho alzato il valore da 40px a 75px. Aumentalo o diminuiscilo a piacimento! */
+    height: 45px;
     width: auto;
     object-fit: contain;
     display: block;
 }
 
 /* Stile del Bottone Logout */
+
 .logout-btn {
     display: inline-flex;
     align-items: center;
-    background: rgba(255, 77, 109, 0.1); /* Sfondo rosso molto sfumato */
+    background: rgba(255, 77, 109, 0.1);
     color: var(--danger-red);
     border: 1px solid rgba(255, 77, 109, 0.3);
     padding: 8px 16px;
@@ -1886,6 +1776,7 @@ font-size: 0.68rem;
 }
 
 /* Effetto al passaggio del mouse */
+
 .logout-btn:hover {
     background: var(--danger-red);
     color: #ffffff;
@@ -1906,9 +1797,13 @@ font-size: 0.68rem;
 }
 
 /* ---------------------------------------------------------
-   MODAL - overlay rarità / copie / wishlist sull'immagine
+     MODAL - overlay rarità / copie / wishlist sull'immagine
 --------------------------------------------------------- */
-.modal-img-container { position: relative; }
+
+.modal-img-container {
+    position: relative;
+}
+
 /* Cuore wishlist inline sopra il quantity-control */
 
 #modal-wishlist-btn.modal-wishlist-btn {
@@ -1920,22 +1815,17 @@ font-size: 0.68rem;
     height: 44px;
     padding: 0;
     margin: 0;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     font-size: 1.6rem;
     line-height: 1;
-
     background: rgba(5, 4, 14, 0.75);
     border: 1px solid rgba(155, 77, 255, 0.55);
     border-radius: 50%;
-
     color: #ffffff;
     opacity: 1;
     cursor: pointer;
-
     box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
     transition: transform 0.2s ease, border-color 0.2s ease;
 }
@@ -1952,19 +1842,20 @@ font-size: 0.68rem;
     border-color: rgba(190, 145, 255, 0.9);
 }
 
-
-
 /* Controlli quantità +/- nella modale */
+
 .modal-quantity-control {
     justify-content: center;
     margin: 15px 0;
     gap: 12px;
 }
+
 .modal-quantity-control .btn-qty {
     width: 42px;
     height: 42px;
     font-size: 1.3rem;
 }
+
 .modal-quantity-control .qty-input {
     width: 64px;
     height: 42px;
@@ -1972,49 +1863,54 @@ font-size: 0.68rem;
 }
 
 /* Badge doppioni nella modale - forza centraggio come nelle carte piccole */
+
 #modal-duplicate-badge.duplicate-badge {
     top: 12px;
     right: 12px;
-
     min-width: 34px;
     height: 26px;
     padding: 0 8px;
-
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
     font-size: 0.72rem;
     line-height: 26px;
     text-align: center;
-
     box-sizing: border-box;
 }
 
 /* Badge rarità nella modale - forza centraggio come nelle carte piccole */
+
 #modal-card-rarity.collection-card-rarity {
     top: 4px;
     left: 4px;
-
     min-width: 34px;
     height: 26px;
     padding: 0 8px;
-
     display: inline-flex;
     align-items: center;
     justify-content: center;
-
     font-size: 0.72rem;
     line-height: 26px;
     text-align: center;
-
     box-sizing: border-box;
 }
 
 @keyframes badge-pop {
-    0%   { transform: scale(0);   opacity: 0; }
-    70%  { transform: scale(1.2); opacity: 1; }
-    100% { transform: scale(1);   opacity: 1; }
+    0% {
+    transform: scale(0);
+    opacity: 0;
+    }
+
+    70% {
+    transform: scale(1.2);
+    opacity: 1;
+    }
+
+    100% {
+    transform: scale(1);
+    opacity: 1;
+    }
 }
 
 .duplicate-badge {
@@ -2023,12 +1919,13 @@ font-size: 0.68rem;
 
 @keyframes wishlist-pulse {
     0%, 100% {
-        transform: scale(1);
-        text-shadow: 0 0 12px rgba(255, 77, 109, 0.65);
+    transform: scale(1);
+    text-shadow: 0 0 12px rgba(255, 77, 109, 0.65);
     }
+
     50% {
-        transform: scale(1.15);
-        text-shadow: 0 0 20px rgba(255, 77, 109, 1),
+    transform: scale(1.15);
+    text-shadow: 0 0 20px rgba(255, 77, 109, 1),
                      0 0 30px rgba(255, 77, 109, 0.6);
     }
 }
@@ -2038,6 +1935,7 @@ font-size: 0.68rem;
 }
 
 /* Shine effect sul badge rarità (solo carte possedute rare) */
+
 .collection-card-rarity.shine {
     position: absolute;
     overflow: hidden;
@@ -2059,12 +1957,17 @@ font-size: 0.68rem;
 }
 
 @keyframes rarity-shine {
-    0%, 55%  { left: -60%; }
-    100%     { left: 130%; }
+    0%, 55% {
+    left: -60%;
+    }
+
+    100% {
+    left: 130%;
+    }
 }
 
 /* ---------------------------------------------------------
-   23. TOAST NOTIFICATIONS
+     23. TOAST NOTIFICATIONS
 --------------------------------------------------------- */
 
 #toast-container {
@@ -2086,10 +1989,9 @@ font-size: 0.68rem;
     background: rgba(12, 8, 29, 0.96);
     border: 1px solid rgba(155, 77, 255, 0.55);
     color: #ffffff;
-    font-family: 'Orbitron', sans-serif;
+    font-family: "Orbitron", sans-serif;
     font-size: 0.82rem;
-    box-shadow:
-        0 8px 24px rgba(0, 0, 0, 0.55),
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55),
         0 0 18px rgba(155, 77, 255, 0.35);
     pointer-events: auto;
     animation: toast-in 0.3s ease-out;
@@ -2110,17 +2012,31 @@ font-size: 0.68rem;
 }
 
 @keyframes toast-in {
-    from { transform: translateX(120%); opacity: 0; }
-    to   { transform: translateX(0);    opacity: 1; }
+    from {
+    transform: translateX(120%);
+    opacity: 0;
+    }
+
+    to {
+    transform: translateX(0);
+    opacity: 1;
+    }
 }
 
 @keyframes toast-out {
-    from { transform: translateX(0);    opacity: 1; }
-    to   { transform: translateX(120%); opacity: 0; }
+    from {
+    transform: translateX(0);
+    opacity: 1;
+    }
+
+    to {
+    transform: translateX(120%);
+    opacity: 0;
+    }
 }
 
 /* ---------------------------------------------------------
-   24. LOADING SKELETON
+     24. LOADING SKELETON
 --------------------------------------------------------- */
 
 .skeleton-card {
@@ -2138,8 +2054,13 @@ font-size: 0.68rem;
 }
 
 @keyframes skeleton-pulse {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+    background-position: 200% 0;
+    }
+
+    100% {
+    background-position: -200% 0;
+    }
 }
 
 .skeleton-grid {
@@ -2150,12 +2071,12 @@ font-size: 0.68rem;
 }
 
 /* ---------------------------------------------------------
-   25. FLOATING FEEDBACK (+1 / -1)
+     25. FLOATING FEEDBACK (+1 / -1)
 --------------------------------------------------------- */
 
 .float-feedback {
     position: fixed;
-    font-family: 'Orbitron', sans-serif;
+    font-family: "Orbitron", sans-serif;
     font-size: 1.1rem;
     font-weight: 700;
     pointer-events: none;
@@ -2166,35 +2087,35 @@ font-size: 0.68rem;
 
 .float-feedback.positive {
     color: #4dff9b;
-    text-shadow:
-        0 0 10px rgba(77, 255, 155, 0.9),
+    text-shadow: 0 0 10px rgba(77, 255, 155, 0.9),
         0 0 4px rgba(0, 0, 0, 0.9);
 }
 
 .float-feedback.negative {
     color: #ff4d6d;
-    text-shadow:
-        0 0 10px rgba(255, 77, 109, 0.9),
+    text-shadow: 0 0 10px rgba(255, 77, 109, 0.9),
         0 0 4px rgba(0, 0, 0, 0.9);
 }
 
 @keyframes float-up {
     0% {
-        transform: translate(-50%, 0) scale(0.8);
-        opacity: 0;
+    transform: translate(-50%, 0) scale(0.8);
+    opacity: 0;
     }
+
     20% {
-        transform: translate(-50%, -8px) scale(1.2);
-        opacity: 1;
+    transform: translate(-50%, -8px) scale(1.2);
+    opacity: 1;
     }
+
     100% {
-        transform: translate(-50%, -45px) scale(1);
-        opacity: 0;
+    transform: translate(-50%, -45px) scale(1);
+    opacity: 0;
     }
 }
 
 /* ---------------------------------------------------------
-   26. MODAL NAVIGATION ARROWS (chunky style)
+     26. MODAL NAVIGATION ARROWS (chunky style)
 --------------------------------------------------------- */
 
 .modal-nav-btn {
@@ -2202,32 +2123,23 @@ font-size: 0.68rem;
     top: 50%;
     transform: translateY(-50%);
     z-index: 30;
-
     width: 40px;
     height: 40px;
     border-radius: 50%;
-
-    /* Cerchio pieno viola con leggero gradiente */
-    background:
-        radial-gradient(circle at 35% 30%, #b078ff, #7a35ff 65%, #5a1fd6 100%);
+    background: radial-gradient(circle at 35% 30%, #b078ff, #7a35ff 65%, #5a1fd6 100%);
     border: 2px solid rgba(255, 255, 255, 0.35);
-
     cursor: pointer;
     padding: 0;
-
-    box-shadow:
-        0 6px 14px rgba(0, 0, 0, 0.55),
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.55),
         0 0 20px rgba(155, 77, 255, 0.55),
         inset 0 2px 6px rgba(255, 255, 255, 0.25);
-
     transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
 .modal-nav-btn:hover {
     transform: translateY(-50%) scale(1.10);
     filter: brightness(1.15);
-    box-shadow:
-        0 8px 20px rgba(0, 0, 0, 0.6),
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6),
         0 0 28px rgba(190, 145, 255, 0.85),
         inset 0 2px 6px rgba(255, 255, 255, 0.35);
 }
@@ -2237,6 +2149,7 @@ font-size: 0.68rem;
 }
 
 /* Freccia bianca disegnata con ::before (corpo) e ::after (punta triangolare) */
+
 .modal-nav-btn::before {
     content: "";
     position: absolute;
@@ -2261,40 +2174,46 @@ font-size: 0.68rem;
 }
 
 /* Freccia SINISTRA */
+
 .modal-nav-prev {
     left: calc(50% - 380px);
     right: auto;
 }
+
 .modal-nav-prev::before {
     transform: translate(-40%, -50%);
 }
+
 .modal-nav-prev::after {
     border-right: 14px solid #ffffff;
     transform: translate(-100%, -50%);
 }
 
 /* Freccia DESTRA */
+
 .modal-nav-next {
     right: calc(50% - 380px);
     left: auto;
 }
+
 .modal-nav-next::before {
     transform: translate(-60%, -50%);
 }
+
 .modal-nav-next::after {
     border-left: 14px solid #ffffff;
     transform: translate(0%, -50%);
 }
 
 /* ---------------------------------------------------------
-   27. RESULTS COUNTER
+     27. RESULTS COUNTER
 --------------------------------------------------------- */
 
 .results-counter {
     padding: 8px 20px;
     margin: 0 0 16px 0;
     color: #b98cff;
-    font-family: 'Orbitron', sans-serif;
+    font-family: "Orbitron", sans-serif;
     font-size: 0.78rem;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -2317,7 +2236,7 @@ font-size: 0.68rem;
 }
 
 /* ---------------------------------------------------------
-   28. NUMERAZIONE CARTE SG
+     28. NUMERAZIONE CARTE SG
 --------------------------------------------------------- */
 
 .serial-block {
@@ -2392,6 +2311,7 @@ font-size: 0.68rem;
 }
 
 /* Feedback salvataggio automatico numerazione SG */
+
 .serial-input.saved-ok {
     border-color: rgba(77, 255, 155, 0.85);
     box-shadow: 0 0 14px rgba(77, 255, 155, 0.55);
@@ -2405,91 +2325,112 @@ font-size: 0.68rem;
 }
 
 @keyframes serial-shake {
-    0%, 100% { transform: translateX(0); }
-    25%      { transform: translateX(-4px); }
-    75%      { transform: translateX(4px); }
+    0%, 100% {
+    transform: translateX(0);
+    }
+
+    25% {
+    transform: translateX(-4px);
+    }
+
+    75% {
+    transform: translateX(4px);
+    }
 }
 
 /* Badge numerazione sulla carta in griglia */
+
 .serial-tag {
     position: absolute;
-    bottom: 10px;
-    left: 10px;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 6;
     padding: 3px 8px;
     border-radius: 6px;
     background: rgba(5, 4, 14, 0.88);
     border: 1px solid rgba(255, 209, 102, 0.55);
     color: #ffd166;
-    font-family: 'Orbitron', sans-serif;
+    font-family: "Orbitron", sans-serif;
     font-size: 0.62rem;
     letter-spacing: 0.5px;
     text-shadow: 0 0 8px rgba(255, 209, 102, 0.55);
     pointer-events: none;
+    white-space: nowrap;
 }
 
 /* ---------------------------------------------------------
-   29. MODALE ADATTIVA SU SCHERMI BASSI
+     29. MODALE ADATTIVA SU SCHERMI BASSI
 --------------------------------------------------------- */
 
 @media (max-height: 900px) {
     #modal-card-name {
-        font-size: 1.5rem;
-        margin: 0 0 6px 0;
+    font-size: 1.5rem;
+    margin: 0 0 6px 0;
     }
+
     .modal-quantity-control {
-        margin: 10px 0;
+    margin: 10px 0;
     }
+
     .serial-block {
-        margin: 10px 0 4px 0;
-        padding: 10px;
+    margin: 10px 0 4px 0;
+    padding: 10px;
     }
+
     .serial-inputs {
-        max-height: 130px;
+    max-height: 130px;
     }
+
     .modal-title-row {
-        margin: 8px 0 4px 0;
+    margin: 8px 0 4px 0;
     }
 }
 
 @media (max-height: 740px) {
     #modal-card-name {
-        font-size: 1.2rem;
-        margin: 0 0 4px 0;
+    font-size: 1.2rem;
+    margin: 0 0 4px 0;
     }
+
     .modal-content p {
-        font-size: 1rem;
-        margin: 6px 0;
+    font-size: 1rem;
+    margin: 6px 0;
     }
+
     .modal-quantity-control .btn-qty {
-        width: 36px;
-        height: 36px;
-        font-size: 1.1rem;
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
     }
+
     .modal-quantity-control .qty-input {
-        width: 56px;
-        height: 36px;
+    width: 56px;
+    height: 36px;
     }
+
     .serial-inputs {
-        max-height: 100px;
-        grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+    max-height: 100px;
+    grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
     }
+
     .serial-title {
-        margin-bottom: 8px;
+    margin-bottom: 8px;
     }
-	.modal-title-texts #modal-card-code {
-		margin: 0;
-	}
+
+    .modal-title-texts #modal-card-code {
+    margin: 0;
+    }
 }
 
 /* ---------------------------------------------------------
-   30. RIGA TITOLO MODALE (nome + codice + cuore a destra)
+     30. RIGA TITOLO MODALE (nome + codice + cuore a destra)
 --------------------------------------------------------- */
 
 .modal-title-row {
     position: relative;
     width: 100%;
-    padding: 0 66px;          /* spazio simmetrico: il testo resta centrato */
+    padding: 0 66px;
     margin: 12px 0 6px 0;
     box-sizing: border-box;
 }
@@ -2507,14 +2448,16 @@ font-size: 0.68rem;
 }
 
 /* Pulsazione cuore nella modale: conserva il centraggio verticale */
+
 @keyframes wishlist-pulse-modal {
     0%, 100% {
-        transform: translateY(-50%) scale(1.08);
-        text-shadow: 0 0 12px rgba(255, 77, 109, 0.65);
+    transform: translateY(-50%) scale(1.08);
+    text-shadow: 0 0 12px rgba(255, 77, 109, 0.65);
     }
+
     50% {
-        transform: translateY(-50%) scale(1.25);
-        text-shadow: 0 0 20px rgba(255, 77, 109, 1),
+    transform: translateY(-50%) scale(1.25);
+    text-shadow: 0 0 20px rgba(255, 77, 109, 1),
                      0 0 30px rgba(255, 77, 109, 0.6);
     }
 }
@@ -2524,7 +2467,7 @@ font-size: 0.68rem;
 }
 
 /* ---------------------------------------------------------
-   31. MEMORY GAME
+     31. MEMORY GAME
 --------------------------------------------------------- */
 
 .memory-hud {
@@ -2560,16 +2503,16 @@ font-size: 0.68rem;
     text-shadow: 0 0 10px rgba(155, 77, 255, 0.6);
 }
 
-.memory-board { 
-	display: grid;
-	justify-content: center;
-	align-content: center;
-	gap: 14px;
-	padding: 20px;
-	border-radius: 14px;
-	border: 1px solid rgba(155, 77, 255, 0.20);
-	background: rgba(9, 7, 22, 0.72);
-	box-shadow: inset 0 0 24px rgba(155, 77, 255, 0.06), 0 16px 40px rgba(0, 0, 0, 0.45);
+.memory-board {
+    display: grid;
+    justify-content: center;
+    align-content: center;
+    gap: 14px;
+    padding: 20px;
+    border-radius: 14px;
+    border: 1px solid rgba(155, 77, 255, 0.20);
+    background: rgba(9, 7, 22, 0.72);
+    box-shadow: inset 0 0 24px rgba(155, 77, 255, 0.06), 0 16px 40px rgba(0, 0, 0, 0.45);
 }
 
 .memory-tile {
@@ -2605,8 +2548,7 @@ font-size: 0.68rem;
 }
 
 .memory-back {
-    background:
-        linear-gradient(160deg, rgba(30, 14, 70, 0.95), rgba(5, 4, 14, 0.98)),
+    background: linear-gradient(160deg, rgba(30, 14, 70, 0.95), rgba(5, 4, 14, 0.98)),
         radial-gradient(circle at 50% 40%, rgba(155, 77, 255, 0.30), transparent 60%);
     box-shadow: inset 0 0 22px rgba(155, 77, 255, 0.15);
 }
@@ -2632,8 +2574,7 @@ font-size: 0.68rem;
 
 .memory-tile:hover .memory-back {
     border-color: rgba(190, 145, 255, 0.75);
-    box-shadow:
-        inset 0 0 22px rgba(155, 77, 255, 0.25),
+    box-shadow: inset 0 0 22px rgba(155, 77, 255, 0.25),
         0 0 18px rgba(155, 77, 255, 0.35);
 }
 
@@ -2644,15 +2585,22 @@ font-size: 0.68rem;
 
 .memory-tile.matched .memory-front {
     border-color: rgba(77, 255, 155, 0.75);
-    box-shadow:
-        0 0 20px rgba(77, 255, 155, 0.45),
+    box-shadow: 0 0 20px rgba(77, 255, 155, 0.45),
         inset 0 0 18px rgba(77, 255, 155, 0.12);
 }
 
 @keyframes memory-match {
-    0%   { transform: scale(1); }
-    45%  { transform: scale(1.08); }
-    100% { transform: scale(1); }
+    0% {
+    transform: scale(1);
+    }
+
+    45% {
+    transform: scale(1.08);
+    }
+
+    100% {
+    transform: scale(1);
+    }
 }
 
 .memory-tile.shake .memory-front {
@@ -2667,8 +2615,7 @@ font-size: 0.68rem;
     border: 1px solid rgba(155, 77, 255, 0.45);
     border-radius: 16px;
     background: linear-gradient(145deg, rgba(13, 9, 31, 0.97), rgba(5, 4, 14, 0.97));
-    box-shadow:
-        inset 0 0 28px rgba(155, 77, 255, 0.10),
+    box-shadow: inset 0 0 28px rgba(155, 77, 255, 0.10),
         0 24px 60px rgba(0, 0, 0, 0.60),
         0 0 32px rgba(155, 77, 255, 0.25);
     text-align: center;
@@ -2714,11 +2661,11 @@ body:has(#memory-board) .search-bar {
 }
 
 /* =========================================================
-   SNIPPET DA AGGIUNGERE IN FONDO A style.css
-   ========================================================= */
+     SNIPPET DA AGGIUNGERE IN FONDO A style.css
+     ========================================================= */
 
 /* ---------------------------------------------------------
-   32. QUIZ - INDOVINA LA CARTA
+     32. QUIZ - INDOVINA LA CARTA
 --------------------------------------------------------- */
 
 .quiz-stage {
@@ -2733,8 +2680,7 @@ body:has(#memory-board) .search-bar {
     border-radius: 14px;
     border: 1px solid rgba(155, 77, 255, 0.20);
     background: rgba(9, 7, 22, 0.72);
-    box-shadow:
-        inset 0 0 24px rgba(155, 77, 255, 0.06),
+    box-shadow: inset 0 0 24px rgba(155, 77, 255, 0.06),
         0 16px 40px rgba(0, 0, 0, 0.45);
     display: flex;
     flex-direction: column;
@@ -2768,8 +2714,7 @@ body:has(#memory-board) .search-bar {
     align-items: center;
     justify-content: center;
     border-radius: 12px;
-    background:
-        radial-gradient(circle at 50% 40%, rgba(155, 77, 255, 0.16), transparent 62%),
+    background: radial-gradient(circle at 50% 40%, rgba(155, 77, 255, 0.16), transparent 62%),
         linear-gradient(180deg, rgba(20, 12, 45, 0.55), rgba(5, 4, 14, 0.85));
     overflow: hidden;
 }
@@ -2780,14 +2725,23 @@ body:has(#memory-board) .search-bar {
     object-fit: contain;
 }
 
-.quiz-card-img.mask-1 { filter: blur(5px) saturate(0.85); }
-.quiz-card-img.mask-2 { filter: blur(17px) saturate(0.7); }
-.quiz-card-img.mask-3 { filter: saturate(0.55) contrast(1.15) blur(5px); transform: scale(4.6); }
+.quiz-card-img.mask-1 {
+    filter: blur(5px) saturate(0.85);
+}
+
+.quiz-card-img.mask-2 {
+    filter: blur(17px) saturate(0.7);
+}
+
+.quiz-card-img.mask-3 {
+    filter: saturate(0.55) contrast(1.15) blur(5px);
+    transform: scale(4.6);
+}
 
 .quiz-card-img.revealed {
-	filter: none;
-	transform: scale(1.03);
-	transform-origin: center center;
+    filter: none;
+    transform: scale(1.03);
+    transform-origin: center center;
 }
 
 .quiz-hint {
@@ -2805,8 +2759,7 @@ body:has(#memory-board) .search-bar {
     border-radius: 14px;
     border: 1px solid rgba(155, 77, 255, 0.20);
     background: rgba(9, 7, 22, 0.72);
-    box-shadow:
-        inset 0 0 24px rgba(155, 77, 255, 0.06),
+    box-shadow: inset 0 0 24px rgba(155, 77, 255, 0.06),
         0 16px 40px rgba(0, 0, 0, 0.45);
     display: flex;
     flex-direction: column;
@@ -2900,17 +2853,17 @@ body:has(#memory-board) .search-bar {
 
 @media (max-width: 1350px) {
     .quiz-stage {
-        grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     }
 }
 
 /* =========================================================
-   SNIPPET DA AGGIUNGERE IN FONDO A style.css
-   Controlli partita: overlay iniziale, pausa, ferma
-   ========================================================= */
+     SNIPPET DA AGGIUNGERE IN FONDO A style.css
+     Controlli partita: overlay iniziale, pausa, ferma
+     ========================================================= */
 
 /* ---------------------------------------------------------
-   33. CONTROLLI PARTITA (Pausa / Ferma) + OVERLAY
+     33. CONTROLLI PARTITA (Pausa / Ferma) + OVERLAY
 --------------------------------------------------------- */
 
 .game-ctrl-btn {
@@ -2934,8 +2887,7 @@ body:has(#memory-board) .search-bar {
     color: #ffffff;
     background: rgba(15, 10, 35, 0.88);
     border-color: rgba(176, 120, 255, 0.50);
-    box-shadow:
-        inset 0 0 18px rgba(155, 77, 255, 0.05),
+    box-shadow: inset 0 0 18px rgba(155, 77, 255, 0.05),
         0 0 14px rgba(155, 77, 255, 0.16);
 }
 
@@ -2967,16 +2919,16 @@ body:has(#memory-board) .search-bar {
 /* --- Contenitore area di gioco (serve per l'overlay) --- */
 
 .game-area {
-	position: relative;
-	min-height: calc(100vh - 260px);
-	display: flex;
-	flex-direction: column;
+    position: relative;
+    min-height: calc(100vh - 260px);
+    display: flex;
+    flex-direction: column;
 }
 
 .game-area > #memory-board,
 .game-area > #quiz-stage {
-	flex: 1;
-	min-height: 0;
+    flex: 1;
+    min-height: 0;
 }
 
 /* --- Sfocatura anti-imbroglio durante la pausa --- */
@@ -2999,8 +2951,7 @@ body:has(#memory-board) .search-bar {
     align-items: center;
     justify-content: center;
     border-radius: 14px;
-    background:
-        radial-gradient(circle at center, rgba(20, 10, 50, 0.55), rgba(5, 2, 13, 0.88));
+    background: radial-gradient(circle at center, rgba(20, 10, 50, 0.55), rgba(5, 2, 13, 0.88));
     backdrop-filter: blur(6px);
     animation: overlay-in 0.28s ease-out;
 }
@@ -3010,8 +2961,13 @@ body:has(#memory-board) .search-bar {
 }
 
 @keyframes overlay-in {
-    from { opacity: 0; }
-    to   { opacity: 1; }
+    from {
+    opacity: 0;
+    }
+
+    to {
+    opacity: 1;
+    }
 }
 
 .game-overlay-inner {
@@ -3022,8 +2978,7 @@ body:has(#memory-board) .search-bar {
     border-radius: 16px;
     border: 1px solid rgba(155, 77, 255, 0.42);
     background: linear-gradient(145deg, rgba(13, 9, 31, 0.96), rgba(5, 4, 14, 0.96));
-    box-shadow:
-        inset 0 0 30px rgba(155, 77, 255, 0.10),
+    box-shadow: inset 0 0 30px rgba(155, 77, 255, 0.10),
         0 24px 60px rgba(0, 0, 0, 0.60),
         0 0 34px rgba(155, 77, 255, 0.28);
 }
@@ -3033,15 +2988,21 @@ body:has(#memory-board) .search-bar {
     color: #b98cff;
     margin-bottom: 14px;
     letter-spacing: 6px;
-    text-shadow:
-        0 0 18px rgba(155, 77, 255, 0.95),
+    text-shadow: 0 0 18px rgba(155, 77, 255, 0.95),
         0 0 34px rgba(155, 77, 255, 0.55);
     animation: overlay-icon-pulse 2.4s ease-in-out infinite;
 }
 
 @keyframes overlay-icon-pulse {
-    0%, 100% { opacity: 0.75; transform: scale(1); }
-    50%      { opacity: 1;    transform: scale(1.08); }
+    0%, 100% {
+    opacity: 0.75;
+    transform: scale(1);
+    }
+
+    50% {
+    opacity: 1;
+    transform: scale(1.08);
+    }
 }
 
 .game-overlay-inner h2 {
@@ -3051,7 +3012,7 @@ body:has(#memory-board) .search-bar {
 
 .game-overlay-inner p {
     color: #9a8ab8;
-    font-family: 'Orbitron', sans-serif;
+    font-family: "Orbitron", sans-serif;
     font-size: 0.78rem;
     line-height: 1.6;
     letter-spacing: 0.5px;
@@ -3081,9 +3042,9 @@ body:has(#memory-board) .search-bar {
 }
 
 /* =========================================================
-   SNIPPET DA AGGIUNGERE IN FONDO A style.css
-   34. CLASSIFICHE
-   ========================================================= */
+     SNIPPET DA AGGIUNGERE IN FONDO A style.css
+     34. CLASSIFICHE
+     ========================================================= */
 
 /* --- Tab Memory / Quiz --- */
 
@@ -3119,8 +3080,7 @@ body:has(#memory-board) .search-bar {
     color: #ffffff;
     border-color: rgba(190, 145, 255, 0.85);
     background: linear-gradient(90deg, rgba(126, 52, 255, 0.34), rgba(126, 52, 255, 0.08));
-    box-shadow:
-        inset 0 0 22px rgba(155, 77, 255, 0.12),
+    box-shadow: inset 0 0 22px rgba(155, 77, 255, 0.12),
         0 0 18px rgba(155, 77, 255, 0.25);
 }
 
@@ -3138,10 +3098,8 @@ body:has(#memory-board) .search-bar {
     padding: 20px 16px;
     border-radius: 14px;
     border: 1px solid rgba(155, 77, 255, 0.28);
-    background:
-        linear-gradient(180deg, rgba(20, 12, 45, 0.92), rgba(5, 4, 14, 0.94));
-    box-shadow:
-        inset 0 0 24px rgba(155, 77, 255, 0.08),
+    background: linear-gradient(180deg, rgba(20, 12, 45, 0.92), rgba(5, 4, 14, 0.94));
+    box-shadow: inset 0 0 24px rgba(155, 77, 255, 0.08),
         0 16px 40px rgba(0, 0, 0, 0.45);
     text-align: center;
 }
@@ -3150,8 +3108,7 @@ body:has(#memory-board) .search-bar {
     padding-top: 30px;
     padding-bottom: 30px;
     border-color: rgba(255, 209, 102, 0.65);
-    box-shadow:
-        inset 0 0 26px rgba(255, 209, 102, 0.10),
+    box-shadow: inset 0 0 26px rgba(255, 209, 102, 0.10),
         0 18px 44px rgba(0, 0, 0, 0.50),
         0 0 26px rgba(255, 209, 102, 0.28);
 }
@@ -3236,8 +3193,7 @@ body:has(#memory-board) .search-bar {
     border-radius: 14px;
     border: 1px solid rgba(155, 77, 255, 0.22);
     background: rgba(9, 7, 22, 0.72);
-    box-shadow:
-        inset 0 0 24px rgba(155, 77, 255, 0.06),
+    box-shadow: inset 0 0 24px rgba(155, 77, 255, 0.06),
         0 16px 40px rgba(0, 0, 0, 0.45);
     overflow: hidden;
 }
@@ -3326,6 +3282,7 @@ body:has(#memory-board) .search-bar {
 }
 
 /* Scrollbar in tema */
+
 .lb-rows::-webkit-scrollbar {
     width: 8px;
 }
@@ -3344,9 +3301,9 @@ body:has(#memory-board) .search-bar {
 }
 
 /* =========================================================
-   SNIPPET DA AGGIUNGERE IN FONDO A style.css
-   35. BACKUP CSV (export / import)
-   ========================================================= */
+     SNIPPET DA AGGIUNGERE IN FONDO A style.css
+     35. BACKUP CSV (export / import)
+     ========================================================= */
 
 .csv-open-btn {
     min-width: 130px;
@@ -3361,8 +3318,7 @@ body:has(#memory-board) .search-bar {
     border: 1px solid rgba(155, 77, 255, 0.45);
     border-radius: 16px;
     background: linear-gradient(145deg, rgba(13, 9, 31, 0.97), rgba(5, 4, 14, 0.97));
-    box-shadow:
-        inset 0 0 28px rgba(155, 77, 255, 0.10),
+    box-shadow: inset 0 0 28px rgba(155, 77, 255, 0.10),
         0 24px 60px rgba(0, 0, 0, 0.60),
         0 0 32px rgba(155, 77, 255, 0.25);
     text-align: center;
@@ -3583,7 +3539,7 @@ body:has(#memory-board) .search-bar {
 }
 
 .csv-example-btn::before {
-    content: "\2193";
+    content: "↓";
     margin-right: 9px;
     font-size: 0.95rem;
 }
@@ -3597,400 +3553,419 @@ body:has(#memory-board) .search-bar {
 }
 
 /* =========================================================
-   36. RESPONSIVE MOBILE / TABLET  ·  Monarch Hoard
-   ---------------------------------------------------------
-   ISTRUZIONI:
-   - Incolla TUTTO questo blocco in FONDO a style.css
+     36. RESPONSIVE MOBILE / TABLET  ·  Monarch Hoard
+     ---------------------------------------------------------
+     ISTRUZIONI:
+     - Incolla TUTTO questo blocco in FONDO a style.css
      (dopo la sezione 35 - Backup CSV).
-   - NON devi cancellare nulla: queste regole si attivano solo
+     - NON devi cancellare nulla: queste regole si attivano solo
      su schermi piccoli e sovrascrivono i "blocchi" desktop
      (min-width 1180px ecc.). Su PC il sito resta identico.
-   ========================================================= */
-
+     ========================================================= */
 
 /* =========================================================
-   TABLET E SMARTPHONE  ·  fino a 1024px
-   Da qui in giu' il layout si "impila" (sidebar in alto).
-   ========================================================= */
+     TABLET E SMARTPHONE  ·  fino a 1024px
+     Da qui in giu' il layout si "impila" (sidebar in alto).
+     ========================================================= */
+
 @media (max-width: 1024px) {
-
-    /* --- SBLOCCA i vincoli desktop --- */
     html, body {
-        min-width: 0 !important;
-        overflow-x: hidden;
-    }
-    .app-shell {
-        min-width: 0 !important;
-        display: flex !important;
-        flex-direction: column !important;
-    }
-    .main-area {
-        min-width: 0 !important;
-        max-width: 100% !important;
-        padding: 18px !important;
+    min-width: 0 !important;
+    overflow-x: hidden;
     }
 
-    /* --- SIDEBAR: da colonna laterale a barra orizzontale in alto --- */
-    .sidebar {
-        position: static !important;
-        height: auto !important;
-        min-width: 0 !important;
-        width: 100% !important;
-        flex-direction: row !important;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 16px !important;
-        border-right: none;
-        border-bottom: 1px solid rgba(155, 77, 255, 0.22);
+    .app-shell {
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
     }
-    /* nasconde la decorazione in basso della sidebar (non serve da orizzontale) */
-    .sidebar::after { display: none !important; }
+
+    .main-area {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    padding: 18px !important;
+    }
+
+    .sidebar {
+    position: static !important;
+    height: auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px !important;
+    border-right: none;
+    border-bottom: 1px solid rgba(155, 77, 255, 0.22);
+    }
+
+    .sidebar::after {
+    display: none !important;
+    }
 
     .sidebar-logo {
-        flex-direction: row;
-        gap: 10px;
-        margin: 0;
+    flex-direction: row;
+    gap: 10px;
+    margin: 0;
     }
-    .sidebar-logo img:first-child { width: 46px; }
-    .sidebar-wordmark { width: 150px; }
 
-    /* Menu: riga scorrevole in orizzontale */
+    .sidebar-logo img:first-child {
+    width: 46px;
+    }
+
+    .sidebar-wordmark {
+    width: 150px;
+    }
+
     .sidebar-nav {
-        flex-direction: row !important;
-        flex-wrap: nowrap;
-        width: 100%;
-        overflow-x: auto;
-        gap: 8px;
-        padding-bottom: 4px;
-        -webkit-overflow-scrolling: touch;
+    flex-direction: row !important;
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
     }
+
     .side-nav-btn {
-        width: auto !important;
-        flex: 0 0 auto;
-        height: auto;
-        flex-direction: column;
-        gap: 4px;
-        min-width: 74px;
-        padding: 8px 8px !important;
-        font-size: 0.62rem;
-        text-align: center;
+    width: auto !important;
+    flex: 0 0 auto;
+    height: auto;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 74px;
+    padding: 8px 8px !important;
+    font-size: 0.62rem;
+    text-align: center;
     }
+
     .side-nav-icon {
-        width: 26px !important;
-        height: 26px !important;
-        min-width: 26px;
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px;
     }
 
-    /* Box giocatore a tutta larghezza */
     .sidebar-player {
-        margin-top: 0;
-        width: 100%;
+    margin-top: 0;
+    width: 100%;
     }
 
-    /* --- TOP BAR --- */
     .top-bar {
-        flex-wrap: wrap;
-        gap: 10px;
-        padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 12px 16px;
     }
 
-    /* --- STATISTICHE: da 4 a 2 colonne --- */
     .hero-stats {
-        grid-template-columns: repeat(2, 1fr) !important;
-        max-width: 100% !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    max-width: 100% !important;
     }
-    /* toglie il bordo destro fisso (creava linee strane in griglia 2x2) */
-    .hero-stat-card { border-right: none; }
 
-    /* --- RICERCA: il campo non deve piu' essere largo 540px fisso --- */
+    .hero-stat-card {
+    border-right: none;
+    }
+
     .search-row {
-        width: 100% !important;
-        min-width: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
     }
 
-    /* I menu a tendina non escono dallo schermo */
     .dropdown-content {
-        width: min(280px, 92vw);
-        max-width: 92vw;
+    width: min(280px, 92vw);
+    max-width: 92vw;
     }
 
-    /* Reset filtri torna in linea (non spinto a destra) */
-    .action-filter-btn { margin-left: 0; }
+    .action-filter-btn {
+    margin-left: 0;
+    }
 }
 
-
 /* =========================================================
-   SMARTPHONE  ·  fino a 600px
-   ========================================================= */
+     SMARTPHONE  ·  fino a 600px
+     ========================================================= */
+
 @media (max-width: 600px) {
+    .hero-stat-value {
+    font-size: 1.2rem;
+    }
 
-    /* Statistiche a 2 colonne restano, ma valori piu' piccoli */
-    .hero-stat-value { font-size: 1.2rem; }
-    .hero-stat-icon img { width: 54px; height: 54px; }
+    .hero-stat-icon img {
+    width: 54px;
+    height: 54px;
+    }
 
-    /* Filtri: ogni pulsante occupa meta' riga */
-    .filters-row { gap: 8px; }
+    .filters-row {
+    gap: 8px;
+    }
+
     .dropdown-filter,
     .dropdown-button,
     .set-toggle-btn,
     .action-filter-btn,
     .lb-tab,
     .game-ctrl-btn {
-        flex: 1 1 46%;
-        min-width: 0;
-        font-size: 0.74rem;
+    flex: 1 1 46%;
+    min-width: 0;
+    font-size: 0.74rem;
     }
 
-    /* HUD giochi va a capo */
     .memory-hud {
-        margin-left: 0;
-        flex-wrap: wrap;
-        height: auto;
-        gap: 14px;
-        padding: 10px 14px;
-        width: 100%;
+    margin-left: 0;
+    flex-wrap: wrap;
+    height: auto;
+    gap: 14px;
+    padding: 10px 14px;
+    width: 100%;
     }
 
-    /* Campi input a 16px = niente zoom automatico su iPhone */
-    input, select, textarea { font-size: 16px; }
+    input, select, textarea {
+    font-size: 16px;
+    }
 
-    /* --- CLASSIFICHE: tabella semplificata ---
-       Nascondo "Dettaglio" e "Data" per dare spazio a #, Hunter, Punteggio */
     .lb-table-head,
     .lb-row {
-        grid-template-columns: 44px minmax(0, 1fr) 90px !important;
-        gap: 8px;
-        padding: 12px 14px;
+    grid-template-columns: 44px minmax(0, 1fr) 90px !important;
+    gap: 8px;
+    padding: 12px 14px;
     }
+
     #lb-head-detail,
     .lb-col-detail,
     .lb-col-date {
-        display: none !important;
+    display: none !important;
     }
 
-    /* Podio: incolonna i 3 slot */
     .lb-podium {
-        grid-template-columns: 1fr !important;
+    grid-template-columns: 1fr !important;
     }
 
-    /* --- MODALI a tutta larghezza --- */
     .modal-content,
     .csv-modal-content,
     .memory-win-content {
-        width: 94vw !important;
-        max-width: 94vw !important;
+    width: 94vw !important;
+    max-width: 94vw !important;
     }
-    .modal-title-row { padding: 0 44px; }
-    #modal-card-name { font-size: 1.4rem; }
 
-    /* --- LOGIN / REGISTRAZIONE: non piu' 420px fisso --- */
+    .modal-title-row {
+    padding: 0 44px;
+    }
+
+    #modal-card-name {
+    font-size: 1.4rem;
+    }
+
     .login-panel {
-        width: 92vw !important;
-        min-width: 0 !important;
+    width: 92vw !important;
+    min-width: 0 !important;
     }
 
-    /* Titoli generici piu' contenuti */
-    h1 { font-size: 1.4rem; }
-    h2 { font-size: 1.2rem; }
+    h1 {
+    font-size: 1.4rem;
+    }
+
+    h2 {
+    font-size: 1.2rem;
+    }
 }
 
-
 /* =========================================================
-   SMARTPHONE STRETTI  ·  fino a 430px
-   ========================================================= */
+     SMARTPHONE STRETTI  ·  fino a 430px
+     ========================================================= */
+
 @media (max-width: 430px) {
+    .hero-stats {
+    grid-template-columns: 1fr !important;
+    }
 
-    /* Statistiche in colonna singola */
-    .hero-stats { grid-template-columns: 1fr !important; }
-
-    /* Filtri a tutta larghezza (uno per riga) */
     .dropdown-filter,
     .dropdown-button,
     .set-toggle-btn,
     .action-filter-btn {
-        flex: 1 1 100%;
+    flex: 1 1 100%;
     }
 }
 
 /* =========================================================
-   37. FRECCE MODALE VISIBILI SU MOBILE + AREA SWIPE
-   ---------------------------------------------------------
-   Incolla questo blocco in FONDO a style.css
-   (dopo il blocco 36 responsive che hai gia' aggiunto).
-   Su PC non cambia nulla: agisce solo sotto i 600px.
-   ========================================================= */
+     37. FRECCE MODALE VISIBILI SU MOBILE + AREA SWIPE
+     ---------------------------------------------------------
+     (dopo il blocco 36 responsive che hai gia' aggiunto).
+     Su PC non cambia nulla: agisce solo sotto i 600px.
+     ========================================================= */
 
 @media (max-width: 600px) {
-
-    /* Le frecce non sono piu' "fixed" fuori schermo:
-       diventano due pulsanti tondi DENTRO l'immagine, ai lati. */
     .modal-nav-btn {
-        position: absolute !important;
-        top: 50% !important;
-        width: 46px;
-        height: 46px;
-        border-radius: 50%;
-        background: rgba(12, 8, 29, 0.72);
-        border: 1px solid rgba(155, 77, 255, 0.55);
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5),
+    position: absolute !important;
+    top: 50% !important;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(12, 8, 29, 0.72);
+    border: 1px solid rgba(155, 77, 255, 0.55);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5),
                     0 0 14px rgba(155, 77, 255, 0.35);
-        backdrop-filter: blur(2px);
-        cursor: pointer;
+    backdrop-filter: blur(2px);
+    cursor: pointer;
     }
 
-    /* Riposiziona ai bordi dell'immagine (non piu' a 380px dal centro) */
     .modal-nav-prev {
-        left: 10px !important;
-        right: auto !important;
-    }
-    .modal-nav-next {
-        right: 10px !important;
-        left: auto !important;
+    left: 10px !important;
+    right: auto !important;
     }
 
-    /* Suggerimento visivo: piccola scritta sotto l'immagine */
+    .modal-nav-next {
+    right: 10px !important;
+    left: auto !important;
+    }
+
     .modal-img-container::after {
-        content: "‹ scorri per cambiare carta ›";
-        position: absolute;
-        bottom: 6px;
-        left: 0;
-        right: 0;
-        text-align: center;
-        color: rgba(185, 140, 255, 0.75);
-        font-size: 0.62rem;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        pointer-events: none;
+    content: "‹ scorri per cambiare carta ›";
+    position: absolute;
+    bottom: 6px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: rgba(185, 140, 255, 0.75);
+    font-size: 0.62rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    pointer-events: none;
     }
 }
 
 /* =========================================================
-   38. BLOCCA LO SCROLL DELLO SFONDO QUANDO LA MODALE E' APERTA
-   ---------------------------------------------------------
-   Incolla in FONDO a style.css.
-   Quando una modale ha la classe .open, la pagina sotto
-   non scrolla piu'. Vale sia su PC che su mobile.
-   ========================================================= */
+     38. BLOCCA LO SCROLL DELLO SFONDO QUANDO LA MODALE E' APERTA
+     ---------------------------------------------------------
+     Quando una modale ha la classe .open, la pagina sotto
+     non scrolla piu'. Vale sia su PC che su mobile.
+     ========================================================= */
 
 body:has(.modal.open) {
     overflow: hidden;
-    touch-action: none;   /* niente scroll da touch sullo sfondo */
+    touch-action: none;
 }
 
 /* La modale invece resta fluida al suo interno */
+
 .modal.open {
     touch-action: pan-y;
-    overscroll-behavior: contain;   /* lo scroll non "sfonda" verso la pagina */
+    overscroll-behavior: contain;
 }
+
 /* =========================================================
-   39. GRIGLIA CARTE COMPATTA SU SMARTPHONE
-   ---------------------------------------------------------
-   ISTRUZIONI:
-   - Incolla TUTTO questo blocco in FONDO a static/css/style.css
+     39. GRIGLIA CARTE COMPATTA SU SMARTPHONE
+     ---------------------------------------------------------
+     ISTRUZIONI:
+     - Incolla TUTTO questo blocco in FONDO a static/css/style.css
      (dopo la sezione 38, quella che blocca lo scroll con la modale).
-   - Non cancellare nulla: queste regole si attivano SOLO su
+     - Non cancellare nulla: queste regole si attivano SOLO su
      telefoni (max-width 600px). Su PC e tablet grandi non cambia niente.
 
-   COSA FA:
-   - Mostra 3 carte per riga sugli smartphone (invece di 1).
-   - Rende le carte piu' piccole e compatte (immagine bassa,
+     COSA FA:
+     - Mostra 3 carte per riga sugli smartphone (invece di 1).
+     - Rende le carte piu' piccole e compatte (immagine bassa,
      testi e pulsanti ridotti). Per i dettagli si apre la modale.
-   ========================================================= */
+     ========================================================= */
 
 @media (max-width: 600px) {
-
-    /* --- 3 carte per riga --- */
     .set-grid {
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 8px !important;
-        padding: 10px !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    padding: 10px !important;
     }
 
-    /* --- Carta piu' bassa e compatta --- */
     .card {
-        min-height: 0 !important;
-        padding: 22px 4px 8px 4px !important;
-        border-radius: 8px;
+    min-height: 0 !important;
+    padding: 22px 4px 8px 4px !important;
+    border-radius: 8px;
     }
 
-    /* --- Immagine ridotta in altezza --- */
     .card-image-container {
-        height: 118px !important;
-        margin: 4px 0 6px 0 !important;
+    height: 118px !important;
+    margin: 4px 0 6px 0 !important;
     }
 
-    /* --- Badge rarita' / doppioni piu' piccoli --- */
     .collection-card-rarity,
     .duplicate-badge {
-        top: 5px;
-        min-width: 24px;
-        height: 20px;
-        padding: 0 5px;
-        font-size: 0.56rem;
+    top: 5px;
+    min-width: 24px;
+    height: 20px;
+    padding: 0 5px;
+    font-size: 0.56rem;
     }
-    .collection-card-rarity { left: 5px; }
-    .duplicate-badge { right: 5px; }
 
-    /* --- Testi piu' piccoli --- */
-    .card-code { font-size: 0.55rem; }
+    .collection-card-rarity {
+    left: 5px;
+    }
+
+    .duplicate-badge {
+    right: 5px;
+    }
+
+    .card-code {
+    font-size: 0.55rem;
+    }
+
     .card-name {
-        font-size: 0.62rem;
-        margin: 4px 0 5px 0;
+    font-size: 0.62rem;
+    margin: 4px 0 5px 0;
     }
 
-    /* --- Cuore wishlist ridotto --- */
     .card-wishlist-row {
-        min-height: 18px;
-        margin-top: 4px;
+    min-height: 18px;
+    margin-top: 4px;
     }
+
     .card-wishlist-row .wishlist-btn {
-        font-size: 0.95rem;
+    font-size: 0.95rem;
     }
 
-    /* --- Controlli quantita' compatti (+ / -) --- */
     .quantity-control {
-        gap: 4px;
-        margin-top: 6px;
+    gap: 4px;
+    margin-top: 6px;
     }
+
     .btn-qty {
-        width: 22px;
-        height: 22px;
-        font-size: 0.75rem;
+    width: 22px;
+    height: 22px;
+    font-size: 0.75rem;
     }
+
     .qty-input {
-        width: 30px;
-        height: 22px;
-        font-size: 0.65rem;
+    width: 30px;
+    height: 22px;
+    font-size: 0.65rem;
     }
 
-    /* --- Badge numerazione SG piu' piccolo --- */
     .serial-tag {
-        bottom: 5px;
-        left: 5px;
-        padding: 2px 5px;
-        font-size: 0.52rem;
+    top: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 5px;
+    font-size: 0.52rem;
     }
 
-    /* --- Skeleton di caricamento coerente con la nuova griglia --- */
     .skeleton-grid {
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 8px !important;
-        padding: 10px !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    padding: 10px !important;
     }
+
     .skeleton-card {
-        min-height: 190px !important;
+    min-height: 190px !important;
     }
 }
 
 /* =========================================================
-   40. VETRINA
-   ========================================================= */
+     40. VETRINA
+     ========================================================= */
+
 .showcase-title-block {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
+
 .showcase-title {
     color: #efe7ff;
     text-transform: uppercase;
@@ -3998,36 +3973,39 @@ body:has(.modal.open) {
     font-size: 1rem;
     text-shadow: 0 0 14px rgba(155,77,255,0.9);
 }
+
 .showcase-subtitle {
     color: #9a8ab8;
     font-size: 0.76rem;
     letter-spacing: 0.5px;
 }
+
 .showcase-frame {
     padding: 28px;
     border-radius: 16px;
     border: 1px solid rgba(155, 77, 255, 0.22);
-    background:
-        linear-gradient(145deg, rgba(13,9,31,0.90), rgba(5,4,14,0.94)),
+    background: linear-gradient(145deg, rgba(13,9,31,0.90), rgba(5,4,14,0.94)),
         radial-gradient(circle at 50% 0%, rgba(155,77,255,0.14), transparent 55%);
-    box-shadow:
-        inset 0 0 30px rgba(155, 77, 255, 0.07),
+    box-shadow: inset 0 0 30px rgba(155, 77, 255, 0.07),
         0 18px 45px rgba(0, 0, 0, 0.45);
 }
+
 .showcase-grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(215px, 378px));
     justify-content: center;
-    gap: 32px;
+    grid-template-columns: repeat(3, minmax(150px, 265px));
+    gap: 22px;
 }
+
 .showcase-slot {
     position: relative;
-    min-height: 602px;
-    padding: 28px 22px 25px 22px;
     border-radius: 14px;
     text-align: center;
     overflow: hidden;
+    min-height: 420px;
+    padding: 20px 16px 18px 16px;
 }
+
 .showcase-slot.empty {
     display: flex;
     align-items: center;
@@ -4035,120 +4013,61 @@ body:has(.modal.open) {
     border: 1px dashed rgba(155, 77, 255, 0.30);
     background: rgba(5, 4, 14, 0.35);
 }
+
 .showcase-empty-text {
     color: #6d5f8c;
     font-size: 0.74rem;
     text-transform: uppercase;
     letter-spacing: 1.5px;
 }
+
 .showcase-slot.filled {
     border: 1px solid rgba(155, 77, 255, 0.28);
-    background:
-        linear-gradient(180deg, rgba(20, 12, 45, 0.88), rgba(5, 4, 14, 0.96)),
+    background: linear-gradient(180deg, rgba(20, 12, 45, 0.88), rgba(5, 4, 14, 0.96)),
         radial-gradient(circle at 50% 15%, rgba(155, 77, 255, 0.20), transparent 45%);
-    box-shadow:
-        inset 0 0 20px rgba(155, 77, 255, 0.06),
+    box-shadow: inset 0 0 20px rgba(155, 77, 255, 0.06),
         0 10px 26px rgba(0, 0, 0, 0.40);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
 .showcase-slot.filled:hover {
     transform: translateY(-3px);
-    box-shadow:
-        inset 0 0 24px rgba(155, 77, 255, 0.10),
+    box-shadow: inset 0 0 24px rgba(155, 77, 255, 0.10),
         0 0 22px rgba(155, 77, 255, 0.28),
         0 16px 34px rgba(0, 0, 0, 0.5);
 }
+
 .showcase-image-container {
-    height: 420px;
-    margin: 14px 0 18px 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 294px;
+    margin: 10px 0 12px 0;
 }
+
 .showcase-card-img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-    filter:
-        drop-shadow(0 8px 14px rgba(0, 0, 0, 0.55))
+    filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.55))
         drop-shadow(0 0 8px rgba(155, 77, 255, 0.20));
 }
+
 .showcase-card-name {
     color: #ffffff;
-    font-size: 1.2rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    font-size: 0.9rem;
 }
+
 .showcase-card-code {
     color: rgba(185, 167, 216, 0.70);
-    font-size: 1rem;
     letter-spacing: 1px;
-    margin-top: 6px;
+    font-size: 0.78rem;
+    margin-top: 4px;
 }
-.showcase-remove-btn {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    z-index: 6;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 77, 109, 0.55);
-    background: rgba(12, 8, 29, 0.85);
-    color: #ff8fa3;
-    font-size: 0.95rem;
-    line-height: 1;
-    cursor: pointer;
-    opacity: 0;
-    transition: 0.18s ease;
-}
-.showcase-slot.filled:hover .showcase-remove-btn {
-    opacity: 1;
-}
-.showcase-remove-btn:hover {
-    background: rgba(255, 77, 109, 0.22);
-    border-color: rgba(255, 77, 109, 0.85);
-}
-.showcase-dpad {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-    pointer-events: none;
-}
-.showcase-dpad-btn {
-    pointer-events: auto;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    border: 1px solid rgba(155, 77, 255, 0.45);
-    background: rgba(12, 8, 29, 0.82);
-    color: #d8cdf5;
-    font-size: 0.7rem;
-    cursor: pointer;
-    opacity: 0;
-    transition: 0.18s ease;
-    align-self: center;
-    justify-self: center;
-}
-.showcase-slot.filled:hover .showcase-dpad-btn {
-    opacity: 1;
-}
-.showcase-dpad-btn:disabled {
-    opacity: 0 !important;
-    pointer-events: none;
-}
-.dpad-up    { grid-column: 2; grid-row: 1; align-self: start; margin-top: 6px; }
-.dpad-left  { grid-column: 1; grid-row: 2; justify-self: start; margin-left: 6px; }
-.dpad-right { grid-column: 3; grid-row: 2; justify-self: end; margin-right: 6px; }
-.dpad-down  { grid-column: 2; grid-row: 3; align-self: end; margin-bottom: 6px; }
-.showcase-dpad-btn:hover:not(:disabled) {
-    background: rgba(155, 77, 255, 0.30);
-    border-color: rgba(190, 145, 255, 0.85);
-    color: #ffffff;
-}
+
 .showcase-hint {
     margin-top: 16px;
     text-align: center;
@@ -4156,7 +4075,9 @@ body:has(.modal.open) {
     font-size: 0.74rem;
     letter-spacing: 0.5px;
 }
+
 /* --- Bottone "+ Vetrina" nel modal carta della Collezione --- */
+
 .showcase-toggle-btn {
     background: transparent;
     border: 1px solid rgba(155, 77, 255, 0.55);
@@ -4169,53 +4090,627 @@ body:has(.modal.open) {
     letter-spacing: 0.5px;
     transition: 0.18s ease;
 }
+
 .showcase-toggle-btn:hover:not(:disabled) {
     background: rgba(155, 77, 255, 0.18);
     color: #ffffff;
     box-shadow: 0 0 14px rgba(155, 77, 255, 0.30);
 }
+
 .showcase-toggle-btn.active {
     background: rgba(155, 77, 255, 0.28);
     border-color: rgba(190, 145, 255, 0.85);
     color: #ffffff;
     box-shadow: 0 0 16px rgba(155, 77, 255, 0.40);
 }
+
 .showcase-toggle-btn:disabled {
     opacity: 0.35;
     cursor: default;
 }
+
 /* =========================================================
-   41. VETRINA - CONTROLLI SEMPRE VISIBILI SU TOUCH
-   ---------------------------------------------------------
-   Su dispositivi touch (smartphone/tablet) non esiste un
-   vero ":hover", quindi frecce e bottone rimuovi devono
-   essere sempre visibili, non solo al passaggio del mouse.
-   ========================================================= */
-@media (hover: none) {
-    .showcase-remove-btn,
-    .showcase-dpad-btn {
-        opacity: 1;
+     41. VETRINA - CONTROLLI SEMPRE VISIBILI SU TOUCH
+     ---------------------------------------------------------
+     Su dispositivi touch (smartphone/tablet) non esiste un
+     vero ":hover", quindi frecce e bottone rimuovi devono
+     essere sempre visibili, non solo al passaggio del mouse.
+     ========================================================= */
+
+/* =========================================================
+     42. VETRINA MOBILE - OVERRIDE FINALE
+     ---------------------------------------------------------
+     Posizionato qui, alla fine assoluta del file, in modo che
+     vinca sempre sulle regole desktop della sezione 40 quando
+     lo schermo è stretto (nessun conflitto di ordine).
+     ========================================================= */
+
+@media (max-width: 600px) {
+    .showcase-frame {
+    padding: 10px;
+    }
+
+    .showcase-title-block {
+    flex: 1 1 100%;
+    }
+
+    .showcase-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 7px !important;
+    }
+
+    .showcase-slot {
+    min-height: 175px !important;
+    padding: 6px 5px !important;
+    border-radius: 8px !important;
+    }
+
+    .showcase-image-container {
+    height: 88px !important;
+    margin: 4px 0 5px 0 !important;
+    }
+
+    .showcase-card-name {
+    font-size: 0.58rem !important;
+    margin: 3px 0 1px 0 !important;
+    }
+
+    .showcase-card-code {
+    font-size: 0.5rem !important;
+    margin-top: 1px !important;
+    }
+
+    .showcase-empty-text {
+    font-size: 0.56rem !important;
     }
 }
+
 /* =========================================================
-   42. VETRINA MOBILE - OVERRIDE FINALE
-   ---------------------------------------------------------
-   Posizionato qui, alla fine assoluta del file, in modo che
-   vinca sempre sulle regole desktop della sezione 40 quando
-   lo schermo è stretto (nessun conflitto di ordine).
-   ========================================================= */
+     43. PICKER VETRINA (scelta carta) + bottoni slot
+     ========================================================= */
+
+/* Bottone "+ Inserisci" negli slot vuoti */
+
+.showcase-insert-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 18px 24px;
+    border-radius: 12px;
+    border: 1px dashed rgba(155, 77, 255, 0.5);
+    background: rgba(155, 77, 255, 0.08);
+    color: #b98cff;
+    font-family: inherit;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.showcase-insert-btn:hover {
+    color: #ffffff;
+    background: rgba(155, 77, 255, 0.2);
+    border-color: rgba(190, 145, 255, 0.85);
+    box-shadow: 0 0 18px rgba(155, 77, 255, 0.35);
+}
+
+.showcase-insert-plus {
+    font-size: 1.9rem;
+    line-height: 1;
+}
+
+/* Bottone "Sostituisci" sugli slot pieni (compare all'hover, al centro) */
+
+/* Su touch (niente hover) resta sempre visibile */
+
+/* Finestra del picker */
+
+.picker-modal-content {
+    width: 1000px;
+    max-width: 94vw;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.picker-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.picker-controls .search-input {
+    width: 260px;
+    height: 44px;
+}
+
+.picker-count-box {
+    margin-left: auto;
+    color: #b98cff;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.picker-count-box span {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.picker-grid {
+    overflow-y: auto;
+    max-height: 62vh;
+    padding: 6px;
+}
+
+.picker-grid::-webkit-scrollbar {
+    width: 8px;
+}
+
+.picker-grid::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.picker-grid::-webkit-scrollbar-thumb {
+    background: rgba(155, 77, 255, 0.45);
+    border-radius: 99px;
+}
+
+.picker-grid::-webkit-scrollbar-thumb:hover {
+    background: rgba(190, 145, 255, 0.75);
+}
+
+/* Adattamento smartphone: griglia picker piu' compatta */
+
 @media (max-width: 600px) {
-    .showcase-frame { padding: 10px; }
-    .showcase-title-block { flex: 1 1 100%; }
-    .showcase-grid {
-        grid-template-columns: repeat(3, 1fr) !important;
-        gap: 7px !important;
+    .picker-controls .search-input {
+    width: 100%;
     }
-    .showcase-slot { min-height: 175px !important; padding: 6px 5px !important; border-radius: 8px !important; }
-    .showcase-image-container { height: 88px !important; margin: 4px 0 5px 0 !important; }
-    .showcase-card-name { font-size: 0.58rem !important; margin: 3px 0 1px 0 !important; }
-    .showcase-card-code { font-size: 0.5rem !important; margin-top: 1px !important; }
-    .showcase-empty-text { font-size: 0.56rem !important; }
-    .showcase-remove-btn { width: 18px !important; height: 18px !important; font-size: 0.68rem !important; top: 3px !important; right: 3px !important; }
-    .showcase-dpad-btn { width: 20px !important; height: 20px !important; font-size: 0.52rem !important; }
+
+    .picker-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    }
+}
+
+/* =========================================================
+     44. VETRINA · barra azioni slot (Sostituisci + Rimuovi)
+     ========================================================= */
+
+/* Le due azioni condividono la base; annullo il posizionamento
+     assoluto che .showcase-replace-btn aveva da sola */
+
+/* =========================================================
+     45. SFONDI VETRINA (bottone + finestra scelta)
+     ========================================================= */
+
+/* Quando c'e' uno sfondo custom, rende il riquadro un po' piu' scuro
+     ai bordi per far risaltare le carte (il gradiente e' gia' nel JS) */
+
+.showcase-frame.has-custom-bg {
+    background-repeat: no-repeat;
+    background-attachment: local;
+}
+
+/* Bottone "Cambia sfondo" nella barra */
+
+.showcase-bg-btn {
+    white-space: nowrap;
+}
+
+/* --- Finestra scelta sfondo --- */
+
+.bg-modal-content {
+    width: 640px;
+    max-width: 94vw;
+    max-height: 88vh;
+    overflow-y: auto;
+    text-align: center;
+}
+
+.bg-modal-text {
+    color: #9a8ab8 !important;
+    font-size: 0.8rem !important;
+    margin: 0 0 22px 0 !important;
+}
+
+.bg-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.bg-option {
+    border-radius: 12px;
+    border: 1px solid rgba(155, 77, 255, 0.25);
+    background: rgba(5, 4, 14, 0.6);
+    padding: 8px;
+    cursor: pointer;
+    transition: 0.18s ease;
+}
+
+.bg-option:hover {
+    border-color: rgba(190, 145, 255, 0.85);
+    box-shadow: 0 0 16px rgba(155, 77, 255, 0.35);
+    transform: translateY(-2px);
+}
+
+.bg-option.active {
+    border-color: rgba(190, 145, 255, 1);
+    box-shadow: 0 0 20px rgba(155, 77, 255, 0.5);
+}
+
+.bg-option-preview {
+    width: 100%;
+    height: 110px;
+    border-radius: 8px;
+    border: 1px solid rgba(155, 77, 255, 0.2);
+}
+
+.bg-option-name {
+    margin-top: 10px;
+    color: #d8cdf5;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.bg-option.active .bg-option-name {
+    color: #ffffff;
+    text-shadow: 0 0 10px rgba(155, 77, 255, 0.7);
+}
+
+/* --- TABLET --- */
+
+@media (max-width: 1024px) {
+    .bg-grid {
+    grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* --- SMARTPHONE --- */
+
+@media (max-width: 600px) {
+    .showcase-bg-btn {
+    flex: 1 1 100%;
+    margin-top: 6px;
+    }
+
+    .bg-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    }
+
+    .bg-option-preview {
+    height: 80px;
+    }
+
+    .bg-option-name {
+    font-size: 0.66rem;
+    }
+}
+
+/* =========================================================
+     46. VETRINA · dimensioni carte ridotte (~ -30%)
+     ========================================================= */
+
+/* --- Smartphone: leggero ritocco coerente (facoltativo) --- */
+
+@media (max-width: 600px) {
+    .showcase-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+    }
+}
+
+/* =========================================================
+     51. VETRINA · azioni slot visibili solo al click
+     ========================================================= */
+
+/* Di default: frecce e bottoni NASCOSTI (niente piu' hover) */
+
+/* Quando lo slot e' "aperto" (cliccato): mostra tutto */
+
+/* I d-pad disabilitati (bordo griglia) restano invisibili anche da aperti */
+
+/* Annulla le vecchie regole hover / touch che mostravano sempre i bottoni */
+
+/* Piccolo segnale visivo: lo slot aperto si evidenzia un filo */
+
+/* =========================================================
+     52. VETRINA · popup azioni carta
+     ========================================================= */
+
+.slot-actions-content {
+    max-width: 92vw;
+    text-align: center;
+    width: 230px;
+    padding: 16px;
+}
+
+.slot-actions-code {
+    color: #9a8ab8 !important;
+    font-size: 0.68rem !important;
+    margin: 2px 0 12px 0 !important;
+}
+
+.slot-actions-move {
+    margin: 4px 0 12px 0;
+}
+
+.slot-actions-move-label {
+    display: block;
+    color: #b98cff;
+    text-transform: uppercase;
+    font-size: 0.6rem;
+    letter-spacing: 1.5px;
+    margin-bottom: 6px;
+}
+
+.slot-actions-dpad {
+    display: grid;
+    justify-content: center;
+    grid-template-columns: repeat(3, 30px);
+    grid-template-rows: repeat(3, 30px);
+    gap: 3px;
+}
+
+.sa-dpad {
+    border: 1px solid rgba(155, 77, 255, 0.4);
+    background: rgba(12, 8, 29, 0.85);
+    color: #d8cdf5;
+    cursor: pointer;
+    transition: 0.16s ease;
+    width: 30px;
+    height: 30px;
+    font-size: 0.72rem;
+    border-radius: 6px;
+}
+
+.sa-dpad:hover:not(:disabled) {
+    background: rgba(155, 77, 255, 0.3);
+    border-color: rgba(190, 145, 255, 0.9);
+    color: #ffffff;
+}
+
+.sa-dpad:disabled {
+    opacity: 0.25;
+    cursor: default;
+}
+
+.sa-up {
+    grid-column: 2;
+    grid-row: 1;
+}
+
+.sa-left {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.sa-right {
+    grid-column: 3;
+    grid-row: 2;
+}
+
+.sa-down {
+    grid-column: 2;
+    grid-row: 3;
+}
+
+.slot-actions-buttons {
+    display: flex;
+    flex-direction: column;
+    margin-top: 6px;
+    gap: 7px;
+}
+
+.slot-actions-delete {
+    border-radius: 8px;
+    border: 1px solid rgba(255, 77, 109, 0.6);
+    background: rgba(255, 77, 109, 0.1);
+    color: #ff8fa3;
+    font-family: inherit;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.18s ease;
+    height: 34px;
+    font-size: 0.7rem;
+}
+
+.slot-actions-delete:hover {
+    color: #ffffff;
+    background: rgba(255, 77, 109, 0.28);
+    border-color: rgba(255, 77, 109, 0.9);
+    box-shadow: 0 0 16px rgba(255, 77, 109, 0.4);
+}
+
+.slot-actions-content .modal-footer {
+    position: static;
+    margin-top: 18px;
+    background: transparent;
+}
+
+/* =========================================================
+     53. VETRINA · popup azioni compatto (~ -50%)
+     ========================================================= */
+
+.slot-actions-content h2 {
+    font-size: 1rem;
+    margin: 0 0 2px 0;
+}
+
+.slot-actions-buttons .overlay-action-btn {
+    height: 34px;
+    padding: 0 14px;
+    font-size: 0.72rem;
+}
+
+.slot-actions-content .modal-footer {
+    margin-top: 12px;
+}
+
+.slot-actions-content .close-btn {
+    padding: 7px 24px;
+    font-size: 0.75rem;
+}
+
+/* =========================================================
+   54. IMPOSTAZIONI
+   ========================================================= */
+.settings-wrap {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 22px;
+    max-width: 1100px;
+}
+.settings-card {
+    padding: 26px;
+    border-radius: 14px;
+    border: 1px solid rgba(155, 77, 255, 0.22);
+    background:
+        linear-gradient(145deg, rgba(13, 9, 31, 0.90), rgba(5, 4, 14, 0.88)),
+        radial-gradient(circle at 70% 20%, rgba(155, 77, 255, 0.14), transparent 40%);
+    box-shadow:
+        inset 0 0 28px rgba(155, 77, 255, 0.06),
+        0 18px 45px rgba(0, 0, 0, 0.42);
+}
+.settings-card-title {
+    color: #efe7ff;
+    text-transform: uppercase;
+    letter-spacing: 4px;
+    font-size: 0.9rem;
+    margin-bottom: 22px;
+    text-shadow: 0 0 14px rgba(155, 77, 255, 0.9);
+}
+.settings-field {
+    margin-bottom: 18px;
+}
+.settings-field label {
+    display: block;
+    color: #9a8ab8;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+.settings-input {
+    width: 100%;
+    height: 46px;
+    padding: 0 14px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    border: 1px solid rgba(155, 77, 255, 0.26);
+    background: rgba(5, 4, 14, 0.82);
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.86rem;
+}
+.settings-input:focus {
+    outline: none;
+    border-color: rgba(176, 120, 255, 0.62);
+    box-shadow: 0 0 16px rgba(155, 77, 255, 0.20);
+}
+.settings-input:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+.settings-inline {
+    display: flex;
+    gap: 10px;
+}
+.settings-inline .settings-input {
+    flex: 1;
+}
+.settings-inline .overlay-action-btn {
+    height: 46px;
+    padding: 0 22px;
+    white-space: nowrap;
+}
+.settings-hint {
+    margin-top: 8px;
+    color: #75668f;
+    font-size: 0.7rem;
+    letter-spacing: 0.4px;
+}
+.settings-choices {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.settings-choice {
+    height: 42px;
+    padding: 0 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(155, 77, 255, 0.26);
+    background: rgba(5, 4, 14, 0.82);
+    color: #d8cdf5;
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.18s ease;
+}
+.settings-choice:hover {
+    color: #ffffff;
+    border-color: rgba(176, 120, 255, 0.55);
+    background: rgba(15, 10, 35, 0.88);
+}
+.settings-choice.active {
+    color: #ffffff;
+    border-color: rgba(190, 145, 255, 0.85);
+    background: linear-gradient(90deg, rgba(126, 52, 255, 0.34), rgba(126, 52, 255, 0.08));
+    box-shadow: 0 0 16px rgba(155, 77, 255, 0.30);
+}
+.settings-card .overlay-action-btn {
+    margin-top: 4px;
+}
+
+/* --- Smartphone --- */
+@media (max-width: 600px) {
+    .settings-wrap { grid-template-columns: 1fr; }
+    .settings-inline { flex-direction: column; }
+    .settings-inline .overlay-action-btn { width: 100%; }
+}
+
+/* =========================================================
+   55. IMPOSTAZIONI · divisore + bottone modello nel Backup
+   ========================================================= */
+.settings-divider {
+    height: 1px;
+    margin: 22px 0;
+    background: linear-gradient(90deg, transparent, rgba(155, 77, 255, 0.35), transparent);
+}
+.settings-example-btn {
+    display: inline-flex;
+    align-items: center;
+    height: 38px;
+    padding: 0 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 209, 102, 0.45);
+    background: rgba(255, 209, 102, 0.08);
+    color: #ffd166;
+    font-family: inherit;
+    font-size: 0.72rem;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+.settings-example-btn::before {
+    content: "\2193";
+    margin-right: 9px;
+    font-size: 0.95rem;
+}
+.settings-example-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 209, 102, 0.20);
+    border-color: rgba(255, 209, 102, 0.85);
+    box-shadow: 0 0 14px rgba(255, 209, 102, 0.35);
+    transform: translateY(-1px);
 }

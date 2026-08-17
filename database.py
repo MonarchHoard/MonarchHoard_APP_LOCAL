@@ -217,6 +217,8 @@ def check_users_schema():
         cursor.execute("ALTER TABLE Users ADD COLUMN ShowcasePublic INTEGER DEFAULT 0")
     if "ShowcaseSlug" not in columns:
         cursor.execute("ALTER TABLE Users ADD COLUMN ShowcaseSlug TEXT")
+    if "ShowcaseBg" not in columns:
+        cursor.execute("ALTER TABLE Users ADD COLUMN ShowcaseBg TEXT DEFAULT 'none'")
     conn.commit()
     conn.close()
 
@@ -665,3 +667,73 @@ def move_showcase(user_id, card_code, direction):
     conn.commit()
     conn.close()
     return True, target_pos
+
+def set_showcase_slot(user_id, card_code, slot_position):
+    """Inserisce o sostituisce una carta in uno slot SPECIFICO."""
+    if slot_position < 1 or slot_position > MAX_SHOWCASE_SLOTS:
+        return False, "Posizione non valida"
+    conn = get_connection()
+    cursor = conn.cursor()
+    # La carta e' gia' in un ALTRO slot? -> niente doppioni
+    cursor.execute(
+        "SELECT SlotPosition FROM Showcase WHERE UserId = ? AND CardCode = ?",
+        (user_id, card_code)
+    )
+    existing = cursor.fetchone()
+    if existing and existing["SlotPosition"] != slot_position:
+        conn.close()
+        return False, "Carta gia' presente in un altro slot della vetrina"
+    # Svuota lo slot scelto (se aveva gia' una carta) e inserisce la nuova
+    cursor.execute(
+        "DELETE FROM Showcase WHERE UserId = ? AND SlotPosition = ?",
+        (user_id, slot_position)
+    )
+    cursor.execute(
+        "INSERT INTO Showcase (UserId, CardCode, SlotPosition) VALUES (?, ?, ?)",
+        (user_id, card_code, slot_position)
+    )
+    conn.commit()
+    conn.close()
+    return True, slot_position
+
+def get_showcase_bg(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT ShowcaseBg FROM Users WHERE Id = ?", (user_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if row and row["ShowcaseBg"]:
+        return row["ShowcaseBg"]
+    return "none"
+
+def set_showcase_bg(user_id, bg_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Users SET ShowcaseBg = ? WHERE Id = ?", (bg_id, user_id))
+    conn.commit()
+    conn.close()
+
+def get_user_by_id(user_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT Id, Username, PasswordHash, DisplayName, Email, IsVerified
+        FROM Users WHERE Id = ?
+    """, (user_id,))
+    user = cursor.fetchone()
+    conn.close()
+    return user
+
+def update_display_name(user_id, display_name):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Users SET DisplayName = ? WHERE Id = ?", (display_name, user_id))
+    conn.commit()
+    conn.close()
+
+def update_password(user_id, password_hash):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE Users SET PasswordHash = ? WHERE Id = ?", (password_hash, user_id))
+    conn.commit()
+    conn.close()

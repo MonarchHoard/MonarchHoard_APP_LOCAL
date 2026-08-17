@@ -734,15 +734,18 @@ function updateCardVisual(cardCode, newQty) {
 		cardEl.appendChild(badge);
 	}
 	
-	const rarityBadge = cardEl.querySelector('.collection-card-rarity');
-	const cardData = allCardsData.find(c => c.card_code === cardCode);
-	if (rarityBadge && cardData) {
-		if (newQty > 0 && (cardData.rarity_Order || 0) >= 35) {
-			rarityBadge.classList.add('shine');
-		} else {
-			rarityBadge.classList.remove('shine');
-		}
-	}
+    const rarityBadge = cardEl.querySelector('.collection-card-rarity');
+    const cardData = allCardsData.find(c => c.card_code === cardCode);
+    if (rarityBadge && cardData) {
+        if (newQty > 0 && (cardData.rarity_Order || 0) >= 35) {
+            rarityBadge.classList.add('shine');
+        } else {
+            rarityBadge.classList.remove('shine');
+        }
+    }
+
+    // Ricalcola il badge numerazione SG in base alla nuova quantita'
+    updateSerialTag(cardCode, cardEl);
 }
 
 function updateSetHeaderForCard(cardCode) {
@@ -1674,14 +1677,16 @@ function updateSerialTag(cardCode, element = null) {
     const cardEl = element || document.getElementById(`card-${cardCode}`);
     const card = allCardsData.find(c => c.card_code === cardCode);
     if (!cardEl || !card) return;
-
     const old = cardEl.querySelector('.serial-tag');
     if (old) old.remove();
     if (!isSGCard(card)) return;
-
-    const list = String(card.serials || '').split(',').map(s => s.trim()).filter(Boolean);
+    const qty = Math.max(0, parseInt(card.quantity) || 0);
+    const list = String(card.serials || '')
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean)
+        .slice(0, qty);   // considera solo le numerazioni fino alle copie possedute
     if (list.length === 0) return;
-
     const tag = document.createElement('div');
     tag.className = 'serial-tag';
     tag.innerText = list.length === 1 ? `#${list[0]}` : `#${list[0]} +${list.length - 1}`;

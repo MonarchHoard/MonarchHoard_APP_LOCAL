@@ -22,25 +22,37 @@
             <img class="sidebar-wordmark" src="/static/wallpaper/Scritta_MonarchHoard.png" alt="Monarch Hoard">
         </div>
         <nav class="sidebar-nav">
-            <button class="side-nav-btn" onclick="location.href='/'">
+            <button class="side-nav-btn" onclick="goToView('DASHBOARD')">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_dashboard.png">
+                <span>Dashboard</span>
+            </button>
+            <button class="side-nav-btn" onclick="goToView('COLLEZIONE')">
                 <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_collection.png">
                 <span>Collezione</span>
+            </button>
+            <button class="side-nav-btn" onclick="goToView('WISHLIST')">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_wishlist.png">
+                <span>Wishlist</span>
             </button>
             <button class="side-nav-btn active">
                 <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_vetrina.png">
                 <span>Vetrina</span>
             </button>
+            <button class="side-nav-btn disabled" disabled>
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_progressionset.png">
+                <span>Progressione Set</span>
+            </button>
+            <button class="side-nav-btn disabled" disabled>
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_exchanges.png">
+                <span>Scambi</span>
+            </button>
             <button class="side-nav-btn" onclick="location.href='/games/memory'">
-                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_memory.png">
-                <span>Memory</span>
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_games.png">
+                <span>Giochi</span>
             </button>
-            <button class="side-nav-btn" onclick="location.href='/games/quiz'">
-                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_cardquiz.png">
-                <span>Indovina la Carta</span>
-            </button>
-            <button class="side-nav-btn" onclick="location.href='/games/leaderboard'">
-                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_leaderboard.png">
-                <span>Classifiche</span>
+            <button class="side-nav-btn" onclick="location.href='/settings'">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_settings.png">
+                <span>Impostazioni</span>
             </button>
         </nav>
         <div class="sidebar-player">
@@ -67,6 +79,9 @@
                         <div class="showcase-title">La Tua Vetrina</div>
                         <div class="showcase-subtitle">Le carte migliori della tua collezione, in mostra.</div>
                     </div>
+                    <button class="set-toggle-btn showcase-bg-btn" onclick="openBgPicker()">
+                        &#127912; Cambia sfondo
+                    </button>
                     <div class="memory-hud">
                         <div class="memory-hud-item">
                             <span class="memory-hud-label">Slot occupati</span>
@@ -82,6 +97,86 @@
         </main>
     </div>
 </div>
+
+<!-- MODAL PICKER VETRINA -->
+<div id="picker-modal" class="modal">
+    <div class="modal-content picker-modal-content">
+        <h2 id="picker-title">Scegli una carta</h2>
+        <div class="picker-controls">
+            <input type="text" id="picker-search" class="search-input"
+                   placeholder="Cerca nome o codice..." oninput="renderPicker()">
+            <div class="dropdown-filter">
+                <button class="dropdown-button" onclick="pickerToggleDropdown('picker-rarity-dropdown')">Rarita' &#9660;</button>
+                <div id="picker-rarity-dropdown" class="dropdown-content">
+                    <div id="picker-rarity-filter"></div>
+                </div>
+            </div>
+            <div class="dropdown-filter">
+                <button class="dropdown-button" onclick="pickerToggleDropdown('picker-set-dropdown')">Set &#9660;</button>
+                <div id="picker-set-dropdown" class="dropdown-content">
+                    <div id="picker-set-filter"></div>
+                </div>
+            </div>
+            <div class="dropdown-filter">
+                <button id="picker-sort-button" class="dropdown-button" onclick="pickerToggleDropdown('picker-sort-dropdown')">Ordina: CardCode &#9660;</button>
+                <div id="picker-sort-dropdown" class="dropdown-content">
+                    <div id="picker-sort-filter">
+                        <div class="filter-chip active" onclick="setPickerSort('id','Ordina: CardCode', event)">CardCode</div>
+                        <div class="filter-chip" onclick="setPickerSort('name','Ordina: Nome (A-Z)', event)">Nome (A-Z)</div>
+                        <div class="filter-chip" onclick="setPickerSort('rarity-desc','Ordina: Rarita' Max-Min', event)">Rarita' Max-Min</div>
+                        <div class="filter-chip" onclick="setPickerSort('rarity-asc','Ordina: Rarita' Min-Max', event)">Rarita' Min-Max</div>
+                        <div class="filter-chip" onclick="setPickerSort('qty-desc','Ordina: Quantita' Max-Min', event)">Quantita' Max-Min</div>
+                    </div>
+                </div>
+            </div>
+            <div class="picker-count-box">Possedute: <span id="picker-count">0</span></div>
+        </div>
+        <div id="picker-grid" class="set-grid picker-grid"></div>
+        <div class="modal-footer">
+            <button class="close-btn" onclick="closePicker()">Chiudi</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL SCELTA SFONDO VETRINA -->
+<div id="bg-modal" class="modal">
+    <div class="modal-content bg-modal-content">
+        <h2>Sfondo della Vetrina</h2>
+        <p class="bg-modal-text">Scegli lo sfondo per la tua vetrina personale.</p>
+        <div id="bg-grid" class="bg-grid"></div>
+        <div class="modal-footer">
+            <button class="close-btn" onclick="closeBgPicker()">Chiudi</button>
+        </div>
+    </div>
+</div>
+
+<!-- POPUP AZIONI CARTA VETRINA -->
+<div id="slot-actions-modal" class="modal">
+    <div class="modal-content slot-actions-content">
+        <h2 id="slot-actions-title">Carta</h2>
+        <p id="slot-actions-code" class="slot-actions-code"></p>
+
+        <div class="slot-actions-move">
+            <span class="slot-actions-move-label">Sposta</span>
+            <div class="slot-actions-dpad">
+                <button class="sa-dpad sa-up"    onclick="slotActionMove(-3)">&#9650;</button>
+                <button class="sa-dpad sa-left"  onclick="slotActionMove(-1)">&#9664;</button>
+                <button class="sa-dpad sa-right" onclick="slotActionMove(1)">&#9654;</button>
+                <button class="sa-dpad sa-down"  onclick="slotActionMove(3)">&#9660;</button>
+            </div>
+        </div>
+
+        <div class="slot-actions-buttons">
+            <button class="overlay-action-btn" onclick="slotActionReplace()">&#8646; Sostituisci</button>
+            <button class="slot-actions-delete" onclick="slotActionRemove()">&#128465; Rimuovi</button>
+        </div>
+
+        <div class="modal-footer">
+            <button class="close-btn" onclick="closeSlotActions()">Chiudi</button>
+        </div>
+    </div>
+</div>
+
 <div id="toast-container"></div>
 <script src="/static/js/showcase.js"></script>
 </body>

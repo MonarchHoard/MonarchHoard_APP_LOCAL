@@ -554,3 +554,15 @@ document.addEventListener('DOMContentLoaded', async function () {
         );
     }
 });
+
+async function loadUserInfo() {
+    try {
+        const data = await fetchJSON('/api/me');
+        if (data && data.display_name) {
+            const el = document.querySelector('.player-name');
+            if (el) el.innerText = data.display_name;
+        }
+    } catch (e) {
+        console.error(e);
+    }
+}

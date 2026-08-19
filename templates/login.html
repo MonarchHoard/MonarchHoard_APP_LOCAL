@@ -26,7 +26,6 @@
         <h1>
             <img src="/static/wallpaper/Scritta_MonarchHoard.png" alt="Monarch Hoard">
         </h1>
-
         <p class="login-subtitle">Accesso Hunter</p>
 		{% if success %}
 			<div class="login-error" style="background:rgba(77,255,155,0.12); border-color:rgba(77,255,155,0.35); color:#9bffcb;">
@@ -36,7 +35,7 @@
 		{% if error %}
 			<div class="login-error">{{ error }}</div>
 		{% endif %}
-        <form method="POST" class="login-form">
+        <form method="POST" action="{{ url_for('login') }}" class="login-form">
             <input type="text" name="username" placeholder="Username" autocomplete="username" aria-label="Username" required>
             <input type="password" name="password" placeholder="Password" autocomplete="current-password" aria-label="Password" required>
             <button type="submit">Entra</button>

@@ -80,35 +80,33 @@
 		
 		</nav>
 
-        <div class="sidebar-player">
-            <div class="player-avatar"></div>
-            <div>
-                <div class="player-name">Hunter</div>
-                <div class="player-rank" id="player-rank">Rank E</div>
-            </div>
-            <div class="player-xp">
-                <div class="xp-row">
-                    <span id="player-level">Lv. 1</span>
-                    <span id="player-xp-text">0 / 1.000 XP</span>
-                </div>
-                <div class="xp-bar">
-                    <div class="xp-fill" id="xp-fill"></div>
-                </div>
-            </div>
-        </div>
-
     </aside>
 
 	<div class="main-content"> 
     <div class="top-bar">
-		<div class="top-bar-left">
-			<img src="/static/wallpaper/Solo_Leveling_Title.png" class="top-bar-img" alt="Solo Leveling Title">
-		</div>
-
-		<div class="top-bar-right">
-			<a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
-		</div>
-	</div>
+        <div class="top-bar-left">
+            <img src="/static/wallpaper/Solo_Leveling_Title.png" class="top-bar-img" alt="Solo Leveling Title">
+        </div>
+        <div class="top-bar-right">
+            <div class="topbar-player">
+                <div class="topbar-player-xp">
+                    <div class="xp-row">
+                        <span id="player-level">Lv. 1</span>
+                        <span id="player-xp-text">0 / 1.000 XP</span>
+                    </div>
+                    <div class="xp-bar">
+                        <div class="xp-fill" id="xp-fill"></div>
+                    </div>
+                </div>
+                <div class="topbar-player-info">
+                    <div class="player-name">Hunter</div>
+                    <div class="player-rank" id="player-rank">Rank E</div>
+                </div>
+                <div class="player-avatar"></div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+        </div>
+    </div>
 
     <!-- AREA CENTRALE -->
     <main class="main-area">
@@ -270,6 +268,10 @@
 					Vista: Per Set
 				</button>
 				
+				<button id="graded-toggle-btn" class="set-toggle-btn" onclick="toggleGradedFilter()">
+					Gradate: Tutte
+				</button>
+				
 				<button class="set-toggle-btn csv-open-btn" onclick="openCsvModal()">
 					Backup CSV
 				</button>
@@ -310,20 +312,54 @@
         </div>
 
         <div class="quantity-control modal-quantity-control">
-            <button class="btn-qty" id="modal-btn-minus" type="button">-</button>
-            <input class="qty-input" id="modal-qty-input" type="number" min="0" value="0">
-            <button class="btn-qty" id="modal-btn-plus" type="button">+</button>
+            <button class="btn-qty" id="modal-btn-minus" type="button" aria-label="Diminuisci quantita'">-</button>
+            <input class="qty-input" id="modal-qty-input" type="number" min="0" value="0" aria-label="Quantita' posseduta">
+            <button class="btn-qty" id="modal-btn-plus" type="button" aria-label="Aumenta quantita'">+</button>
         </div>
 
         <div id="modal-serial-block" class="serial-block" style="display:none;">
             <div class="serial-title">Numerazione SG · 001 – 300</div>
             <div id="modal-serial-inputs" class="serial-inputs"></div>
         </div>
+        <div id="modal-grading-block" class="grading-block">
+            <div class="grading-row">
+                <span class="grading-label">Gradata</span>
+                <div class="grading-toggle">
+                    <button id="grading-toggle-no" class="grading-toggle-btn active" type="button">No</button>
+                    <button id="grading-toggle-yes" class="grading-toggle-btn" type="button">Si'</button>
+                </div>
+            </div>
+            <div id="grading-details" class="grading-details" style="display:none;">
+                <div class="grading-field">
+                    <label>DA</label>
+                    <select id="grading-company" class="grading-select">
+                        <option value="">&mdash; Seleziona &mdash;</option>
+                        <option value="PSA">PSA</option>
+                        <option value="BGS">BGS (Beckett)</option>
+                        <option value="CGC">CGC</option>
+                        <option value="SGC">SGC</option>
+                        <option value="TAG">TAG</option>
+                        <option value="Altro">Altro...</option>
+                    </select>
+                    <input id="grading-company-other" class="grading-input" style="display:none;" placeholder="Nome azienda" maxlength="30">
+                </div>
+                <div class="grading-field">
+                    <label>Voto</label>
+                    <input id="grading-grade" class="grading-input grading-grade" placeholder="es. 10, 9.5" maxlength="10">
+                </div>
+            </div>
+        </div>
+        <div id="modal-notes-block" class="notes-block">
+            <div class="notes-title">Note personali</div>
+            <textarea id="modal-notes-input" class="notes-input" maxlength="500"
+                      placeholder="Aggiungi una nota: dove l'hai presa, condizione, se e' da scambiare..."></textarea>
+            <div id="modal-notes-hint" class="notes-hint"></div>
+        </div>
 
         <div class="modal-footer">
             <button class="close-btn" onclick="closeModal()">Chiudi</button>
-            <button id="modal-showcase-btn" class="showcase-toggle-btn" type="button" onclick="toggleShowcaseFromModal()">+ Vetrina</button>
-            <button id="modal-wishlist-btn" class="wishlist-btn modal-wishlist-btn" type="button" onclick="toggleWishlistFromModal()">🤍</button>
+            <button id="modal-showcase-btn" class="showcase-toggle-btn" type="button" aria-label="Aggiungi o togli dalla vetrina" onclick="toggleShowcaseFromModal()">+ Vetrina</button>
+            <button id="modal-wishlist-btn" class="wishlist-btn modal-wishlist-btn" type="button" aria-label="Aggiungi o togli dalla wishlist" onclick="toggleWishlistFromModal()">🤍</button>
         </div>
     </div>
 </div>

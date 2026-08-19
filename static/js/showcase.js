@@ -95,23 +95,6 @@ function buildSlotElement(card, position) {
 }
 
 // -------- Azioni --------
-async function moveShowcaseCard(cardCode, direction) {
-    try {
-        const data = await fetchJSON('/api/showcase/move', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ card_code: cardCode, direction: direction })
-        });
-        if (data.status === 'success') {
-            loadShowcase();
-        } else {
-            showToast(data.message || 'Impossibile spostare la carta.', 'error');
-        }
-    } catch (e) {
-        console.error(e);
-        showToast('Errore di connessione.', 'error');
-    }
-}
 
 async function removeShowcaseCard(cardCode) {
     try {
@@ -422,13 +405,6 @@ function goToView(view) {
     localStorage.setItem('lastView', view);
     location.href = '/';
 }
-
-// Clic fuori da uno slot -> chiude i bottoni azione
-document.addEventListener('click', function (e) {
-    if (e.target.closest('.showcase-slot')) return;
-    document.querySelectorAll('.showcase-slot.actions-open')
-        .forEach(function (s) { s.classList.remove('actions-open'); });
-});
 
 // =========================================================
 // POPUP AZIONI CARTA (vetrina)

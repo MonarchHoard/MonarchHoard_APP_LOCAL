@@ -10,6 +10,7 @@ let collapsedSets = new Set(savedCollapsedSets ? JSON.parse(savedCollapsedSets) 
 let collectionGroupMode = localStorage.getItem('groupMode') || 'bySet';
 let currentGroupMode = collectionGroupMode;
 let showcaseCodes = new Set(); // codici carta attualmente in vetrina
+let gradedFilterOn = false;    // filtro "solo gradate"
 
 async function fetchJSON(url, options = {}) {
     const response = await fetch(url, options);
@@ -295,7 +296,9 @@ function filterCards() {
 		const matchesView = (currentView === 'COLLEZIONE') || 
 							(currentView === 'WISHLIST' && card.is_wishlisted);
 		
-		return matchesSearch && matchesRarity && matchesSet && matchesOwned && matchesView;
+		const matchesGraded = !gradedFilterOn || !!card.graded;
+		
+		return matchesSearch && matchesRarity && matchesSet && matchesOwned && matchesView && matchesGraded;
 	});
 
 	renderCards(filtered);
@@ -452,18 +455,20 @@ function buildCardElement(card) {
         <div class="card-code">${highlightedCode}</div>
         <div class="card-name">${highlightedName}</div>
         <div class="card-wishlist-row">
-            <button class="wishlist-btn ${card.is_wishlisted ? 'active' : ''}" data-code="${card.card_code}" onclick="toggleWishlist('${card.card_code}', event)">
+            <button class="wishlist-btn ${card.is_wishlisted ? 'active' : ''}" data-code="${escapeHTML(card.card_code)}" onclick="toggleWishlist('${escapeAttr(card.card_code)}', event)">
                 ${card.is_wishlisted ? '❤️' : '🤍'}
             </button>
         </div>
         <div class="quantity-control">
-            <button class="btn-qty" data-code="${card.card_code}" data-change="-1">-</button>
-            <input class="qty-input" id="qty-${card.card_code}" type="number" min="0" value="${card.quantity}" onchange="setQty('${card.card_code}', this.value)">
-            <button class="btn-qty" data-code="${card.card_code}" data-change="1">+</button>
+            <button class="btn-qty" data-code="${escapeHTML(card.card_code)}" data-change="-1">-</button>
+            <input class="qty-input" id="qty-${escapeHTML(card.card_code)}" type="number" min="0" value="${card.quantity}" onchange="setQty('${escapeAttr(card.card_code)}', this.value)">
+            <button class="btn-qty" data-code="${escapeHTML(card.card_code)}" data-change="1">+</button>
         </div>
     `;
 
     updateSerialTag(card.card_code, cardEl);
+    updateNoteBadge(card.card_code, cardEl);
+    updateGradingBadge(card.card_code, cardEl);
     return cardEl;
 }
 
@@ -598,8 +603,25 @@ function renderCards(cardsToRender) {
             grid.appendChild(buildCardElement(card));
         });
 
+        // --- Barra in fondo per comprimere il set senza risalire ---
+        const footer = document.createElement('div');
+        footer.className = 'set-footer';
+        footer.innerHTML = `
+            <span class="set-footer-arrow">&#9650;</span>
+            <span>Comprimi il set</span>
+            <span class="set-footer-arrow">&#9650;</span>
+        `;
+        footer.onclick = () => {
+            setSection.classList.add('collapsed');
+            collapsedSets.add(setCode);
+            localStorage.setItem('collapsedSets', JSON.stringify([...collapsedSets]));
+            // Riporta la vista all'inizio di questo set
+            setSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+
         setSection.appendChild(header);
         setSection.appendChild(grid);
+        setSection.appendChild(footer);
         container.appendChild(setSection);
     });
 
@@ -897,10 +919,14 @@ function openModal(card) {
 	}
 
 	renderSerialInputs(fullCardData, currentQty);
+	renderGrading(fullCardData);
+	renderNotes(fullCardData);
 }
 
 function closeModal() {
     autoSaveSerials();   // salva eventuali modifiche pendenti (es. chiusura con ESC)
+    autoSaveGrading();
+    autoSaveNotes();
     document.getElementById('card-modal').classList.remove('open');
 }
 
@@ -1086,6 +1112,43 @@ function selectSortSet(event, value, labelText) {
     filterCards();
 }
 
+// -------- Completamento per rarita' (Dashboard) --------
+function buildRarityBreakdownHTML() {
+    if (!allCardsData || allCardsData.length === 0) return '';
+
+    // Raggruppa per rarita': conta totale e possedute
+    const map = new Map();
+    allCardsData.forEach(card => {
+        const r = card.rarity || '???';
+        if (!map.has(r)) {
+            map.set(r, { total: 0, owned: 0, order: card.rarity_Order ?? 999 });
+        }
+        const entry = map.get(r);
+        entry.total++;
+        if (card.quantity > 0) entry.owned++;
+    });
+
+    // Ordina dalla piu' rara alla piu' comune
+    const rows = [...map.entries()].sort((a, b) => b[1].order - a[1].order);
+
+    let html = '<div class="mh-rarity-title">Completamento per Rarita\'</div>';
+    html += '<div class="mh-rarity-list">';
+    rows.forEach(([rarity, data]) => {
+        const pct = data.total > 0 ? Math.round((data.owned / data.total) * 100) : 0;
+        const isHigh = (data.order || 0) >= 35;
+        html += `
+            <div class="mh-rarity-row ${isHigh ? 'high' : ''}">
+                <span class="mh-rarity-name">${escapeHTML(rarity)}</span>
+                <div class="mh-rarity-bar">
+                    <div class="mh-rarity-fill ${isHigh ? 'gold' : ''}" style="width:${pct}%;"></div>
+                </div>
+                <span class="mh-rarity-count">${data.owned}/${data.total}</span>
+            </div>`;
+    });
+    html += '</div>';
+    return html;
+}
+
 async function renderDashboard() {
     try {
         const stats = await fetchJSON('/api/stats');
@@ -1127,7 +1190,7 @@ async function renderDashboard() {
                             </div>
                         </div>
 
-                        <div class="mh-progress-creature"></div>
+                        <div class="mh-progress-creature mh-rarity-breakdown">${buildRarityBreakdownHTML()}</div>
                     </div>
 
                     <div class="mh-mini-stats">
@@ -1161,6 +1224,11 @@ async function renderDashboard() {
 						</div>
                             <div class="mh-mini-value">${missing}</div>
                             <div class="mh-mini-label">Mancanti</div>
+                        </div>
+                        <div class="mh-mini-stat">
+                            <div class="mh-mini-icon" style="font-size:1.8rem;">&#127894;</div>
+                            <div class="mh-mini-value">${allCardsData.filter(c => c.graded).length}</div>
+                            <div class="mh-mini-label">Gradate</div>
                         </div>
                     </div>
                 </section>
@@ -1222,11 +1290,11 @@ function renderDashboardSmallCard(card) {
     const safeName = escapeHTML(card.card_name);
     const safeCode = escapeHTML(card.card_code);
     const safeRarity = escapeHTML(card.rarity);
-
+    const notOwned = (card.quantity > 0) ? '' : 'not-owned';
     return `
-        <div class="mh-small-card" onclick="openModalByCode('${safeCode}')">
+        <div class="mh-small-card ${notOwned}" onclick="openModalByCode('${escapeAttr(card.card_code)}')">
             <div class="mh-small-rarity">${safeRarity}</div>
-            <img data-src="${card.image_url}" alt="${safeName}" decoding="async" onerror="this.src='/static/cards/TRANSPARENT/No_Image_Available.webp';">
+            <img src="${card.image_url}" alt="${safeName}" loading="eager" decoding="async" onerror="this.src='/static/cards/TRANSPARENT/No_Image_Available.webp';">
             <div class="mh-small-card-name">${safeName}</div>
             <div class="mh-small-card-code">${safeCode}</div>
         </div>
@@ -1300,6 +1368,18 @@ function escapeHTML(value) {
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
+}
+
+// Escape sicuro per valori dentro onclick="funzione('...')"
+// (prima interpretati come HTML, poi come stringa JavaScript)
+function escapeAttr(value) {
+    return String(value ?? '')
+        .replaceAll('\\', '\\\\')
+        .replaceAll("'", "\\'")
+        .replaceAll('&', '&amp;')
+        .replaceAll('"', '&quot;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;');
 }
 
 async function loadUserInfo() {
@@ -1673,6 +1753,63 @@ function flashSerialInput(input, type) {
     setTimeout(() => input.classList.remove('saved-ok', 'saved-error'), 900);
 }
 
+function renderNotes(card) {
+    const input = document.getElementById('modal-notes-input');
+    const hint = document.getElementById('modal-notes-hint');
+    if (!input) return;
+    input.value = (card && card.notes) ? card.notes : '';
+    if (hint) { hint.innerText = ''; hint.className = 'notes-hint'; }
+}
+
+let notesSaveInProgress = false;
+async function autoSaveNotes() {
+    const input = document.getElementById('modal-notes-input');
+    if (!input || !currentModalCardCode || notesSaveInProgress) return;
+    const cardCode = currentModalCardCode;
+    const card = allCardsData.find(c => c.card_code === cardCode);
+    const newVal = input.value.trim();
+    const oldVal = (card && card.notes) ? card.notes : '';
+    if (newVal === oldVal) return; // niente di nuovo da salvare
+    notesSaveInProgress = true;
+    const hint = document.getElementById('modal-notes-hint');
+    try {
+        const res = await fetch('/api/update_notes', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ card_code: cardCode, notes: newVal })
+        });
+        const data = await res.json();
+        if (!res.ok || data.status !== 'success') {
+            if (hint) { hint.innerText = data.message || 'Errore nel salvataggio.'; hint.className = 'notes-hint error'; }
+            return;
+        }
+        const idx = allCardsData.findIndex(c => c.card_code === cardCode);
+        if (idx !== -1) allCardsData[idx].notes = newVal;
+        if (hint) { hint.innerText = 'Nota salvata'; hint.className = 'notes-hint ok'; }
+        updateNoteBadge(cardCode);
+    } catch (e) {
+        console.error(e);
+        if (hint) { hint.innerText = 'Errore di connessione.'; hint.className = 'notes-hint error'; }
+    } finally {
+        notesSaveInProgress = false;
+    }
+}
+
+function updateNoteBadge(cardCode, element = null) {
+    const cardEl = element || document.getElementById(`card-${cardCode}`);
+    const card = allCardsData.find(c => c.card_code === cardCode);
+    if (!cardEl || !card) return;
+    const old = cardEl.querySelector('.note-badge');
+    if (old) old.remove();
+    if (card.notes && card.notes.trim() !== '') {
+        const badge = document.createElement('div');
+        badge.className = 'note-badge';
+        badge.innerText = '\uD83D\uDCDD'; // emoji nota
+        badge.title = card.notes;
+        cardEl.appendChild(badge);
+    }
+}
+
 function updateSerialTag(cardCode, element = null) {
     const cardEl = element || document.getElementById(`card-${cardCode}`);
     const card = allCardsData.find(c => c.card_code === cardCode);
@@ -1849,4 +1986,175 @@ async function toggleShowcaseFromModal() {
         console.error(e);
         showToast('Errore di connessione.', 'error');
     }
+}
+// -------- Note personali: salvataggio automatico all'uscita dal campo --------
+document.addEventListener('DOMContentLoaded', function () {
+    const notesInput = document.getElementById('modal-notes-input');
+    if (notesInput) {
+        notesInput.addEventListener('focusout', function () { autoSaveNotes(); });
+    }
+});
+// =========================================================
+//  GRADAZIONE CARTE
+// =========================================================
+const KNOWN_GRADERS = ['PSA', 'BGS', 'CGC', 'SGC', 'TAG'];
+
+function setGradingToggle(isYes) {
+    const yes = document.getElementById('grading-toggle-yes');
+    const no = document.getElementById('grading-toggle-no');
+    const details = document.getElementById('grading-details');
+    if (yes) yes.classList.toggle('active', isYes);
+    if (no) no.classList.toggle('active', !isYes);
+    if (details) details.style.display = isYes ? 'block' : 'none';
+}
+
+function renderGrading(card) {
+    const isYes = !!(card && card.graded);
+    const grader = (card && card.grader) ? card.grader : '';
+    const grade = (card && card.grade) ? card.grade : '';
+    setGradingToggle(isYes);
+    const select = document.getElementById('grading-company');
+    const other = document.getElementById('grading-company-other');
+    const gradeInput = document.getElementById('grading-grade');
+    if (select && other) {
+        if (grader && KNOWN_GRADERS.indexOf(grader) === -1) {
+            select.value = 'Altro';
+            other.style.display = 'block';
+            other.value = grader;
+        } else {
+            select.value = grader || '';
+            other.style.display = 'none';
+            other.value = '';
+        }
+    }
+    if (gradeInput) gradeInput.value = grade;
+}
+
+let gradingSaveInProgress = false;
+async function autoSaveGrading() {
+    if (!currentModalCardCode || gradingSaveInProgress) return;
+    const cardCode = currentModalCardCode;
+    const card = allCardsData.find(c => c.card_code === cardCode);
+    const isYes = document.getElementById('grading-toggle-yes').classList.contains('active');
+    let grader = '';
+    let grade = '';
+    if (isYes) {
+        const select = document.getElementById('grading-company');
+        if (select && select.value === 'Altro') {
+            grader = document.getElementById('grading-company-other').value.trim();
+        } else if (select) {
+            grader = select.value;
+        }
+        const gi = document.getElementById('grading-grade');
+        grade = gi ? gi.value.trim() : '';
+    }
+    const graded = isYes ? 1 : 0;
+    const oldGraded = (card && card.graded) ? 1 : 0;
+    const oldGrader = (card && card.grader) ? card.grader : '';
+    const oldGrade = (card && card.grade) ? card.grade : '';
+    if (graded === oldGraded && grader === oldGrader && grade === oldGrade) return;
+    gradingSaveInProgress = true;
+    try {
+        const res = await fetch('/api/update_grading', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ card_code: cardCode, graded: graded, grader: grader, grade: grade })
+        });
+        const data = await res.json();
+        if (res.ok && data.status === 'success') {
+            const idx = allCardsData.findIndex(c => c.card_code === cardCode);
+            if (idx !== -1) {
+                allCardsData[idx].graded = graded;
+                allCardsData[idx].grader = grader;
+                allCardsData[idx].grade = grade;
+            }
+            updateGradingBadge(cardCode);
+        } else {
+            showToast(data.message || 'Errore nel salvataggio della gradazione.', 'error');
+        }
+    } catch (e) {
+        console.error(e);
+        showToast('Errore di connessione.', 'error');
+    } finally {
+        gradingSaveInProgress = false;
+    }
+}
+
+function gradeTier(grade) {
+    const n = parseFloat(String(grade).replace(',', '.'));
+    if (isNaN(n)) return 'none';
+    if (n >= 10) return 'platinum';
+    if (n >= 9)  return 'gold';
+    if (n >= 7)  return 'silver';
+    return 'bronze';
+}
+
+function updateGradingBadge(cardCode, element = null) {
+    const cardEl = element || document.getElementById(`card-${cardCode}`);
+    const card = allCardsData.find(c => c.card_code === cardCode);
+    if (!cardEl || !card) return;
+    const old = cardEl.querySelector('.grading-badge');
+    if (old) old.remove();
+    const row = cardEl.querySelector('.card-wishlist-row');
+    if (card.graded && row) {
+        const badge = document.createElement('span');
+        badge.className = 'grading-badge tier-' + gradeTier(card.grade);
+        let txt = card.grader || 'GRD';
+        if (card.grade) txt += ' ' + card.grade;
+        badge.innerText = txt;
+        badge.title = 'Gradata' +
+            (card.grader ? ' da ' + card.grader : '') +
+            (card.grade ? ' - voto ' + card.grade : '');
+        row.insertBefore(badge, row.firstChild); // a sinistra del cuore
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const tYes = document.getElementById('grading-toggle-yes');
+    const tNo = document.getElementById('grading-toggle-no');
+    const sel = document.getElementById('grading-company');
+    const other = document.getElementById('grading-company-other');
+    const grade = document.getElementById('grading-grade');
+    if (tYes) tYes.addEventListener('click', function () { setGradingToggle(true); autoSaveGrading(); });
+    if (tNo) tNo.addEventListener('click', function () { setGradingToggle(false); autoSaveGrading(); });
+    if (sel) sel.addEventListener('change', function () {
+        document.getElementById('grading-company-other').style.display =
+            (sel.value === 'Altro') ? 'block' : 'none';
+        autoSaveGrading();
+    });
+    if (other) other.addEventListener('focusout', function () { autoSaveGrading(); });
+    if (grade) {
+        // Trasforma il campo voto in un menu a tendina di valori validi
+        buildGradeOptions();
+        grade.addEventListener('change', function () { autoSaveGrading(); });
+    }
+});
+// -------- Filtro "solo gradate" --------
+function toggleGradedFilter() {
+    gradedFilterOn = !gradedFilterOn;
+    const btn = document.getElementById('graded-toggle-btn');
+    if (btn) {
+        btn.innerText = gradedFilterOn ? 'Gradate: Solo si\'' : 'Gradate: Tutte';
+        btn.classList.toggle('active', gradedFilterOn);
+    }
+    filterCards();
+}
+// -------- Voto gradazione: opzioni valide (10 -> 1, mezzi punti) --------
+function buildGradeOptions() {
+    const sel = document.getElementById('grading-grade');
+    if (!sel || sel.tagName === 'SELECT') return; // gia' convertito
+
+    // Creo un <select> che sostituisce l'<input>
+    const newSel = document.createElement('select');
+    newSel.id = 'grading-grade';
+    newSel.className = 'grading-select grading-grade';
+
+    let html = '<option value="">&mdash;</option>';
+    for (let v = 10; v >= 1; v -= 0.5) {
+        const label = Number.isInteger(v) ? String(v) : v.toFixed(1);
+        html += '<option value="' + label + '">' + label + '</option>';
+    }
+    newSel.innerHTML = html;
+    sel.parentNode.replaceChild(newSel, sel);
+    newSel.addEventListener('change', function () { autoSaveGrading(); });
 }

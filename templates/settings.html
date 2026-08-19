@@ -23,31 +23,37 @@
         </div>
         <nav class="sidebar-nav">
             <button class="side-nav-btn" onclick="goToView('DASHBOARD')">
-                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_dashboard.png"><span>Dashboard</span>
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_dashboard.png">
+                <span>Dashboard</span>
             </button>
             <button class="side-nav-btn" onclick="goToView('COLLEZIONE')">
-                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_collection.png"><span>Collezione</span>
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_collection.png">
+                <span>Collezione</span>
             </button>
             <button class="side-nav-btn" onclick="goToView('WISHLIST')">
-                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_wishlist.png"><span>Wishlist</span>
-            </button>
-            <button class="side-nav-btn" onclick="location.href='/showcase'">
-                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_vetrina.png"><span>Vetrina</span>
-            </button>
-            <button class="side-nav-btn" onclick="location.href='/games/memory'">
-                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_games.png"><span>Giochi</span>
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_wishlist.png">
+                <span>Wishlist</span>
             </button>
             <button class="side-nav-btn active">
-                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_settings.png"><span>Impostazioni</span>
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_vetrina.png">
+                <span>Vetrina</span>
             </button>
+            <button class="side-nav-btn disabled" disabled>
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_progressionset.png">
+                <span>Progressione Set</span>
+            </button>
+            <button class="side-nav-btn disabled" disabled>
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_exchanges.png">
+                <span>Scambi</span>
+            </button>
+            <button class="side-nav-btn" onclick="location.href='/games/memory'">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_games.png">
+                <span>Giochi</span>
+            </button>
+            <button class="side-nav-btn" onclick="location.href='/settings'">
+                <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_settings.png">
+                <span>Impostazioni</span>
         </nav>
-        <div class="sidebar-player">
-            <div class="player-avatar"></div>
-            <div>
-                <div class="player-name">Hunter</div>
-                <div class="player-rank">Impostazioni</div>
-            </div>
-        </div>
     </aside>
     <div class="main-content">
         <div class="top-bar">
@@ -55,6 +61,13 @@
                 <img src="/static/wallpaper/Solo_Leveling_Title.png" class="top-bar-img" alt="Solo Leveling Title">
             </div>
             <div class="top-bar-right">
+                <div class="topbar-player">
+                    <div class="topbar-player-info">
+                        <div class="player-name">Hunter</div>
+                        <div class="player-rank">Impostazioni</div>
+                    </div>
+                    <div class="player-avatar"></div>
+                </div>
                 <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
             </div>
         </div>
@@ -149,8 +162,67 @@
                     </div>
                 </section>
 
+                <!-- ZONA PERICOLO -->
+                <section class="settings-card settings-danger">
+                    <div class="settings-card-title">Zona Pericolo</div>
+                    <div class="settings-field">
+                        <label>Elimina account</label>
+                        <div class="settings-hint" style="margin-top:0;margin-bottom:12px;">
+                            Elimina definitivamente il tuo account e tutti i dati della collezione
+                            (carte, vetrina, wishlist). Prima di procedere ti consigliamo di
+                            scaricare un backup. Questa azione &egrave; irreversibile.
+                        </div>
+                        <button class="settings-danger-btn" onclick="openDeleteModal()">
+                            Elimina il mio account
+                        </button>
+                    </div>
+                </section>
+
             </div>
         </main>
+    </div>
+</div>
+<!-- MODAL ELIMINAZIONE ACCOUNT -->
+<div id="delete-modal" class="modal">
+    <div class="modal-content delete-modal-content">
+
+        <!-- STEP 1: backup -->
+        <div id="delete-step-1">
+            <h2>Elimina Account</h2>
+            <p class="delete-warn-text">
+                Stai per eliminare il tuo account. Vuoi prima scaricare un
+                <b>backup CSV</b> della tua collezione? Una volta eliminato
+                non sar&agrave; pi&ugrave; recuperabile.
+            </p>
+            <button class="settings-example-btn" onclick="exportBackupCsv()">
+                Scarica backup CSV
+            </button>
+            <div class="modal-footer" style="gap:12px;">
+                <button class="close-btn" onclick="closeDeleteModal()">Annulla</button>
+                <button class="settings-danger-btn" onclick="deleteGoStep2()">
+                    Continua
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 2: conferma finale con password -->
+        <div id="delete-step-2" style="display:none;">
+            <h2>Confermi l'eliminazione?</h2>
+            <p class="delete-warn-text">
+                Verranno eliminati <b>collezione, vetrina e wishlist</b>.
+                Questa azione &egrave; <b>irreversibile</b>.
+                Inserisci la tua password per confermare.
+            </p>
+            <input type="password" id="delete-pwd" class="settings-input"
+                   placeholder="La tua password" autocomplete="current-password">
+            <div class="modal-footer" style="gap:12px;">
+                <button class="close-btn" onclick="closeDeleteModal()">Annulla</button>
+                <button class="settings-danger-btn" onclick="confirmDeleteAccount()">
+                    Elimina definitivamente
+                </button>
+            </div>
+        </div>
+
     </div>
 </div>
 <div id="toast-container"></div>

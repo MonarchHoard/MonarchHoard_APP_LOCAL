@@ -238,3 +238,51 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+// -------- Apertura / chiusura modale --------
+function openDeleteModal() {
+    document.getElementById('delete-step-1').style.display = 'block';
+    document.getElementById('delete-step-2').style.display = 'none';
+    document.getElementById('delete-pwd').value = '';
+    document.getElementById('delete-modal').classList.add('open');
+}
+
+function closeDeleteModal() {
+    document.getElementById('delete-modal').classList.remove('open');
+}
+
+// -------- Passaggio allo step 2 (conferma finale) --------
+function deleteGoStep2() {
+    document.getElementById('delete-step-1').style.display = 'none';
+    document.getElementById('delete-step-2').style.display = 'block';
+}
+
+// -------- Eliminazione definitiva --------
+async function confirmDeleteAccount() {
+    const pwd = document.getElementById('delete-pwd').value;
+    if (!pwd) {
+        showToast('Inserisci la password per confermare.', 'error');
+        return;
+    }
+    try {
+        await fetchJSON('/api/settings/delete_account', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: pwd })
+        });
+        showToast('Account eliminato. Arrivederci!', 'success');
+        setTimeout(function () { location.href = '/login'; }, 1500);
+    } catch (e) {
+        showToast(e.message || 'Impossibile eliminare l\'account.', 'error');
+    }
+}
+
+// -------- Chiusura cliccando fuori dalla modale --------
+document.addEventListener('DOMContentLoaded', function () {
+    const m = document.getElementById('delete-modal');
+    if (m) {
+        m.addEventListener('click', function (e) {
+            if (e.target.id === 'delete-modal') closeDeleteModal();
+        });
+    }
+});

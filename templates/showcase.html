@@ -55,13 +55,6 @@
                 <span>Impostazioni</span>
             </button>
         </nav>
-        <div class="sidebar-player">
-            <div class="player-avatar"></div>
-            <div>
-                <div class="player-name">Hunter</div>
-                <div class="player-rank">Vetrina Personale</div>
-            </div>
-        </div>
     </aside>
     <div class="main-content">
         <div class="top-bar">
@@ -69,6 +62,13 @@
                 <img src="/static/wallpaper/Solo_Leveling_Title.png" class="top-bar-img" alt="Solo Leveling Title">
             </div>
             <div class="top-bar-right">
+                <div class="topbar-player">
+                    <div class="topbar-player-info">
+                        <div class="player-name">Hunter</div>
+                        <div class="player-rank">Vetrina Personale</div>
+                    </div>
+                    <div class="player-avatar"></div>
+                </div>
                 <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
             </div>
         </div>

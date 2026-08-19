@@ -4110,14 +4110,6 @@ body:has(.modal.open) {
 }
 
 /* =========================================================
-     41. VETRINA - CONTROLLI SEMPRE VISIBILI SU TOUCH
-     ---------------------------------------------------------
-     Su dispositivi touch (smartphone/tablet) non esiste un
-     vero ":hover", quindi frecce e bottone rimuovi devono
-     essere sempre visibili, non solo al passaggio del mouse.
-     ========================================================= */
-
-/* =========================================================
      42. VETRINA MOBILE - OVERRIDE FINALE
      ---------------------------------------------------------
      Posizionato qui, alla fine assoluta del file, in modo che
@@ -4278,12 +4270,6 @@ body:has(.modal.open) {
     }
 }
 
-/* =========================================================
-     44. VETRINA · barra azioni slot (Sostituisci + Rimuovi)
-     ========================================================= */
-
-/* Le due azioni condividono la base; annullo il posizionamento
-     assoluto che .showcase-replace-btn aveva da sola */
 
 /* =========================================================
      45. SFONDI VETRINA (bottone + finestra scelta)
@@ -4407,20 +4393,6 @@ body:has(.modal.open) {
     gap: 7px;
     }
 }
-
-/* =========================================================
-     51. VETRINA · azioni slot visibili solo al click
-     ========================================================= */
-
-/* Di default: frecce e bottoni NASCOSTI (niente piu' hover) */
-
-/* Quando lo slot e' "aperto" (cliccato): mostra tutto */
-
-/* I d-pad disabilitati (bordo griglia) restano invisibili anche da aperti */
-
-/* Annulla le vecchie regole hover / touch che mostravano sempre i bottoni */
-
-/* Piccolo segnale visivo: lo slot aperto si evidenzia un filo */
 
 /* =========================================================
      52. VETRINA · popup azioni carta
@@ -4713,4 +4685,773 @@ body:has(.modal.open) {
     border-color: rgba(255, 209, 102, 0.85);
     box-shadow: 0 0 14px rgba(255, 209, 102, 0.35);
     transform: translateY(-1px);
+}
+/* =========================================================
+   56. IMPOSTAZIONI · ZONA PERICOLO (elimina account)
+   ========================================================= */
+
+.settings-danger {
+    border-color: rgba(255, 77, 109, 0.35);
+}
+
+.settings-danger .settings-card-title {
+    color: #ff8fa3;
+    text-shadow: 0 0 14px rgba(255, 77, 109, 0.6);
+}
+
+.settings-danger-btn {
+    height: 44px;
+    padding: 0 24px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 77, 109, 0.6);
+    background: rgba(255, 77, 109, 0.12);
+    color: #ff8fa3;
+    font-family: inherit;
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.settings-danger-btn:hover {
+    color: #ffffff;
+    background: rgba(255, 77, 109, 0.28);
+    border-color: rgba(255, 77, 109, 0.9);
+    box-shadow: 0 0 16px rgba(255, 77, 109, 0.4);
+}
+
+/* --- Modale eliminazione account --- */
+.delete-modal-content {
+    width: 460px;
+    max-width: 92vw;
+    text-align: center;
+    border-color: rgba(255, 77, 109, 0.45) !important;
+}
+
+.delete-modal-content h2 {
+    color: #ff8fa3;
+    text-shadow: 0 0 14px rgba(255, 77, 109, 0.6);
+}
+
+.delete-warn-text {
+    color: #9a8ab8 !important;
+    font-size: 0.82rem !important;
+    line-height: 1.6;
+    margin: 0 0 20px 0 !important;
+}
+
+.delete-modal-content .settings-input {
+    margin-bottom: 4px;
+}
+
+/* =========================================================
+   57. FOOTER "COMPRIMI SET" (barra in fondo a ogni set)
+   ---------------------------------------------------------
+   ISTRUZIONI:
+   - Incolla TUTTO questo blocco in FONDO a static/css/style.css
+     (dopo la sezione 56 - Zona Pericolo).
+   - Non cancellare nulla: aggiunge solo la barra in basso.
+
+   COSA FA:
+   - Mostra una piccola barra sotto le carte di ogni set, con
+     una freccia, per richiudere il set senza risalire in alto.
+   - La barra sparisce automaticamente quando il set e' gia' chiuso.
+   ========================================================= */
+
+.set-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 40px;
+    padding: 11px 22px;
+    cursor: pointer;
+    user-select: none;
+    color: #b98cff;
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, rgba(155,77,255,0.10), rgba(155,77,255,0.03));
+    border-top: 1px solid rgba(155,77,255,0.20);
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.set-footer:hover {
+    color: #ffffff;
+    background: linear-gradient(90deg, rgba(155,77,255,0.22), rgba(155,77,255,0.06));
+    text-shadow: 0 0 10px rgba(155,77,255,0.6);
+}
+
+.set-footer-arrow {
+    font-size: 0.85rem;
+    transform: translateY(1px);
+}
+
+/* Quando il set e' compreso, il footer non serve: lo nascondiamo */
+.set-section.collapsed .set-footer {
+    display: none;
+}
+
+/* Smartphone: barra un po' piu' compatta */
+@media (max-width: 600px) {
+    .set-footer {
+        min-height: 34px;
+        padding: 8px 12px;
+        font-size: 0.64rem;
+        letter-spacing: 1.2px;
+    }
+}
+/* =========================================================
+   58. DASHBOARD - COMPLETAMENTO PER RARITA'
+   ---------------------------------------------------------
+   ISTRUZIONI:
+   - Incolla TUTTO questo blocco in FONDO a static/css/style.css
+     (dopo la sezione 57 - Footer Comprimi Set).
+   - Non cancellare nulla.
+
+   COSA FA:
+   - Trasforma lo spazio vuoto accanto alla ruota della Dashboard
+     in una lista di barre: per ogni rarita' mostra quante carte
+     possiedi sul totale. Le rarita' piu' pregiate sono in oro.
+   ========================================================= */
+
+/* Riquadro contenitore (sostituisce lo sfondo decorativo vuoto) */
+.mh-progress-creature.mh-rarity-breakdown {
+    height: 210px;
+    padding: 16px 18px;
+    background: rgba(5, 4, 14, 0.55);
+    border: 1px solid rgba(155, 77, 255, 0.18);
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.mh-rarity-title {
+    color: #b98cff;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    text-shadow: 0 0 10px rgba(155, 77, 255, 0.5);
+    flex-shrink: 0;
+}
+
+.mh-rarity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+
+.mh-rarity-row {
+    display: grid;
+    grid-template-columns: 52px 1fr 54px;
+    align-items: center;
+    gap: 10px;
+}
+
+.mh-rarity-name {
+    color: #ffffff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mh-rarity-bar {
+    height: 7px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 100px;
+    overflow: hidden;
+}
+
+.mh-rarity-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #7a35ff, #c46bff);
+    box-shadow: 0 0 10px rgba(155, 77, 255, 0.7);
+    transition: width 0.6s ease;
+}
+
+.mh-rarity-count {
+    color: #9a8ab8;
+    font-size: 0.68rem;
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* Rarita' pregiate (order >= 35): tocco dorato coerente con lo shine */
+.mh-rarity-row.high .mh-rarity-name {
+    color: #ffd166;
+    text-shadow: 0 0 10px rgba(255, 209, 102, 0.5);
+}
+
+.mh-rarity-fill.gold {
+    background: linear-gradient(90deg, #b57e12, #ffd166);
+    box-shadow: 0 0 10px rgba(255, 209, 102, 0.7);
+}
+
+/* Scrollbar in tema */
+.mh-rarity-list::-webkit-scrollbar {
+    width: 6px;
+}
+.mh-rarity-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+.mh-rarity-list::-webkit-scrollbar-thumb {
+    background: rgba(155, 77, 255, 0.45);
+    border-radius: 99px;
+}
+.mh-rarity-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(190, 145, 255, 0.75);
+}
+
+/* Su schermi stretti la Dashboard impila: manteniamo la lista leggibile */
+@media (max-width: 1350px) {
+    .mh-progress-creature.mh-rarity-breakdown {
+        height: auto;
+        min-height: 180px;
+    }
+}
+/* =========================================================
+   59. DASHBOARD - MINI-CARTE NON POSSEDUTE (grigie)
+   ---------------------------------------------------------
+   ISTRUZIONI:
+   - Incolla in FONDO a static/css/style.css (dopo la sezione 58).
+   - Non cancellare nulla.
+
+   COSA FA:
+   - Le mini-carte della Dashboard che non possiedi (es. carte in
+     Wishlist non ancora ottenute) vengono mostrate in grigio,
+     come nella Collezione.
+   ========================================================= */
+
+.mh-small-card.not-owned {
+    border-color: rgba(120, 105, 150, 0.14);
+    background: linear-gradient(180deg, rgba(14, 11, 28, 0.72), rgba(4, 4, 10, 0.94));
+}
+
+.mh-small-card.not-owned img {
+    filter: grayscale(92%) brightness(0.62);
+    opacity: 0.58;
+}
+
+.mh-small-card.not-owned .mh-small-card-name,
+.mh-small-card.not-owned .mh-small-card-code {
+    opacity: 0.58;
+}
+
+/* Hover piu' sobrio sulle mancanti (coerente con la Collezione) */
+.mh-small-card.not-owned:hover {
+    border-color: rgba(155, 77, 255, 0.34);
+}
+
+.mh-small-card.not-owned:hover img {
+    opacity: 0.68;
+}
+/* =========================================================
+   60. FIX REPAINT MINI-CARTE (immagini che appaiono solo
+       al passaggio del mouse) - Dashboard
+   ---------------------------------------------------------
+   COSA FA:
+   - Forza il browser a disegnare subito le immagini delle
+     mini-carte, mettendole su un proprio "livello" grafico.
+     Cosi' non aspettano piu' il passaggio del mouse per comparire.
+   ========================================================= */
+
+.mh-small-card img {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+/* =========================================================
+   61. NOTE PERSONALI SULLE CARTE
+   ---------------------------------------------------------
+   ISTRUZIONI:
+   - Incolla in FONDO a static/css/style.css (dopo la sezione 60).
+   - Non cancellare nulla.
+   ========================================================= */
+
+/* --- Campo note nel modal --- */
+.notes-block {
+    margin: 14px 0 6px 0;
+    padding: 14px;
+    border: 1px solid rgba(155, 77, 255, 0.30);
+    border-radius: 10px;
+    background: rgba(155, 77, 255, 0.05);
+    text-align: left;
+}
+
+.notes-title {
+    color: #b98cff;
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(155, 77, 255, 0.45);
+}
+
+.notes-input {
+    width: 100%;
+    min-height: 70px;
+    max-height: 160px;
+    resize: vertical;
+    padding: 10px 12px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    border: 1px solid rgba(155, 77, 255, 0.30);
+    background: rgba(5, 4, 14, 0.85);
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.notes-input:focus {
+    outline: none;
+    border-color: rgba(176, 120, 255, 0.65);
+    box-shadow: 0 0 14px rgba(155, 77, 255, 0.25);
+}
+
+.notes-input::placeholder {
+    color: rgba(215, 202, 245, 0.4);
+}
+
+.notes-hint {
+    min-height: 16px;
+    margin-top: 8px;
+    font-size: 0.68rem;
+    letter-spacing: 0.5px;
+    color: #9a8ab8;
+    transition: color 0.2s ease;
+}
+
+.notes-hint.ok { color: #4dff9b; }
+.notes-hint.error { color: #ff8fa3; }
+
+/* --- Icona nota sulla carta in griglia --- */
+.note-badge {
+    position: absolute;
+    top: 42px;      /* subito sotto il badge della rarita' */
+    left: 10px;
+    z-index: 6;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 999px;
+    border: 1px solid rgba(155, 77, 255, 0.6);
+    background: rgba(12, 8, 29, 0.9);
+    font-size: 0.8rem;
+    cursor: help;
+    box-shadow: 0 0 10px rgba(155, 77, 255, 0.35);
+}
+
+/* --- Smartphone: carte compatte --- */
+@media (max-width: 600px) {
+    .note-badge {
+        top: 30px;
+        left: 5px;
+        width: 20px;
+        height: 20px;
+        font-size: 0.62rem;
+    }
+}
+
+/* --- Schermi bassi: campo note piu' compatto nel modal --- */
+@media (max-height: 740px) {
+    .notes-block {
+        margin: 10px 0 4px 0;
+        padding: 10px;
+    }
+    .notes-input {
+        min-height: 54px;
+    }
+}
+/* =========================================================
+   62. SIDEBAR SCROLLABILE + BOX UTENTE NELLA TOP BAR
+   ---------------------------------------------------------
+   ISTRUZIONI:
+   - Incolla in FONDO a static/css/style.css (dopo la sezione 61).
+   - Non cancellare nulla.
+   ========================================================= */
+
+/* --- Menu della sidebar scrollabile (logo resta fisso in alto) --- */
+.sidebar-nav {
+    flex: 1 1 auto;
+    min-height: 0;          /* indispensabile per far scrollare dentro un flex */
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 6px;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    width: 6px;
+}
+.sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+    background: rgba(155, 77, 255, 0.45);
+    border-radius: 99px;
+}
+.sidebar-nav::-webkit-scrollbar-thumb:hover {
+    background: rgba(190, 145, 255, 0.75);
+}
+
+/* --- Box utente nella TOP BAR (a destra) --- */
+.topbar-player {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.topbar-player-info {
+    text-align: right;
+    line-height: 1.2;
+}
+
+.topbar-player-info .player-name {
+    color: #ffffff;
+    font-size: 0.9rem;
+}
+
+.topbar-player-info .player-rank {
+    color: #b98cff;
+    font-size: 0.72rem;
+    margin-top: 3px;
+}
+
+.topbar-player-xp {
+    width: 170px;
+}
+
+/* L'avatar eredita gradiente e glow globali di .player-avatar, qui solo la misura */
+.topbar-player .player-avatar {
+    width: 44px;
+    height: 44px;
+}
+
+/* --- Tablet: la top bar puo' andare a capo (gia' previsto), niente da fare --- */
+
+/* --- Smartphone: niente barra XP nella top bar, restano nome + rank + avatar --- */
+@media (max-width: 600px) {
+    .topbar-player-xp {
+        display: none;
+    }
+    .topbar-player {
+        gap: 10px;
+    }
+    .topbar-player-info .player-name {
+        font-size: 0.8rem;
+    }
+}
+/* =========================================================
+   62-BIS. SPAZIO TRA BOX UTENTE E LOGOUT (top bar)
+   ---------------------------------------------------------
+   ISTRUZIONI:
+   - Incolla in FONDO a static/css/style.css (dopo la sezione 62).
+   - Non cancellare nulla.
+
+   COSA FA:
+   - Allinea box utente e bottone Logout sulla stessa riga, con un
+     po' di spazio tra loro.
+   ========================================================= */
+
+.top-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+/* =========================================================
+   63. GRADAZIONE CARTE
+   ---------------------------------------------------------
+   ISTRUZIONI:
+   - Incolla in FONDO a static/css/style.css (dopo la sezione 62).
+   - Non cancellare nulla.
+   ========================================================= */
+
+/* --- Blocco gradazione nel modal --- */
+.grading-block {
+    margin: 14px 0 6px 0;
+    padding: 14px;
+    border: 1px solid rgba(120, 200, 255, 0.30);
+    border-radius: 10px;
+    background: rgba(70, 160, 255, 0.05);
+    text-align: left;
+}
+
+.grading-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.grading-label {
+    color: #7fc8ff;
+    font-size: 0.72rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(120, 200, 255, 0.4);
+}
+
+/* Toggle No / Si' */
+.grading-toggle {
+    display: inline-flex;
+    border: 1px solid rgba(120, 200, 255, 0.35);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.grading-toggle-btn {
+    padding: 8px 18px;
+    border: none;
+    background: rgba(5, 4, 14, 0.6);
+    color: #9a8ab8;
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: 0.18s ease;
+}
+
+.grading-toggle-btn.active {
+    color: #ffffff;
+    background: rgba(70, 160, 255, 0.28);
+    text-shadow: 0 0 10px rgba(120, 200, 255, 0.6);
+}
+
+.grading-toggle-btn:hover:not(.active) {
+    color: #d8cdf5;
+    background: rgba(70, 160, 255, 0.12);
+}
+
+/* Dettagli (DA + Voto) */
+.grading-details {
+    display: flex;
+    gap: 12px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+}
+
+.grading-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 140px;
+}
+
+.grading-field label {
+    color: #9a8ab8;
+    font-size: 0.66rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.grading-select,
+.grading-input {
+    height: 42px;
+    padding: 0 12px;
+    box-sizing: border-box;
+    border-radius: 8px;
+    border: 1px solid rgba(120, 200, 255, 0.30);
+    background: rgba(5, 4, 14, 0.85);
+    color: #ffffff;
+    font-family: inherit;
+    font-size: 0.85rem;
+}
+
+.grading-select:focus,
+.grading-input:focus {
+    outline: none;
+    border-color: rgba(120, 200, 255, 0.7);
+    box-shadow: 0 0 14px rgba(120, 200, 255, 0.25);
+}
+
+.grading-company-other,
+#grading-company-other {
+    margin-top: 8px;
+    width: 100%;
+}
+
+.grading-grade {
+    max-width: 120px;
+}
+
+/* --- Badge in griglia (a sinistra del cuore) --- */
+.grading-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(120, 200, 255, 0.7);
+    background: linear-gradient(135deg, rgba(20, 60, 110, 0.95), rgba(40, 110, 190, 0.9));
+    color: #ffffff;
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    box-shadow: 0 0 10px rgba(120, 200, 255, 0.4),
+        inset 0 0 6px rgba(255, 255, 255, 0.12);
+    cursor: help;
+}
+
+/* Distanza dal cuore, che gli sta a destra */
+.card-wishlist-row .grading-badge {
+    margin-right: 10px;
+}
+
+/* --- Smartphone --- */
+@media (max-width: 600px) {
+    .grading-badge {
+        font-size: 0.54rem;
+        padding: 2px 6px;
+    }
+    .card-wishlist-row .grading-badge {
+        margin-right: 6px;
+    }
+    .grading-details {
+        gap: 8px;
+    }
+}
+
+/* --- Schermi bassi: blocco piu' compatto nel modal --- */
+@media (max-height: 740px) {
+    .grading-block {
+        margin: 10px 0 4px 0;
+        padding: 10px;
+    }
+    .grading-details {
+        margin-top: 10px;
+    }
+}
+/* =========================================================
+   64. FIX MODALE (immagine grande + scroll) + BADGE A MEDAGLIA
+   ---------------------------------------------------------
+   ISTRUZIONI:
+   - Incolla in FONDO a static/css/style.css (dopo la sezione 63).
+   - Non cancellare nulla: essendo piu' in basso, queste regole
+     vincono su quelle precedenti.
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   A) IMMAGINE CARTA: torna grande, il resto scorre
+   --------------------------------------------------------- */
+.modal-img-container {
+    flex: 0 0 auto;          /* non si restringe piu' */
+    height: 58vh;            /* grande, ma adattiva allo schermo */
+    min-height: 340px;
+    max-height: 620px;
+    margin-bottom: 15px;
+}
+
+/* La modale scrolla gia' (max-height:92vh + overflow-y:auto):
+   con l'immagine fissa, note e gradazione finiscono sotto e si
+   raggiungono scrollando. Rendiamo lo scroll piu' evidente. */
+.modal-content {
+    scroll-padding-bottom: 20px;
+}
+
+/* Su schermi molto bassi riduciamo un po' l'immagine per non
+   dover scrollare troppo (ma resta comunque grande) */
+@media (max-height: 740px) {
+    .modal-img-container {
+        height: 48vh;
+        min-height: 280px;
+    }
+}
+
+
+/* ---------------------------------------------------------
+   B) BADGE GRADAZIONE A MEDAGLIA (colore in base al voto)
+   Le classi tier-* le assegna il JS (vedi grad_5).
+   --------------------------------------------------------- */
+
+/* Bronzo (voto < 7) */
+.grading-badge.tier-bronze {
+    border-color: rgba(205, 127, 50, 0.85);
+    background: linear-gradient(135deg, rgba(120, 70, 25, 0.95), rgba(180, 110, 50, 0.92));
+    box-shadow: 0 0 10px rgba(205, 127, 50, 0.45),
+        inset 0 0 6px rgba(255, 255, 255, 0.15);
+    color: #fff3e6;
+}
+
+/* Argento (voto 7 - 8.5) */
+.grading-badge.tier-silver {
+    border-color: rgba(220, 220, 235, 0.9);
+    background: linear-gradient(135deg, rgba(120, 125, 140, 0.95), rgba(200, 205, 220, 0.9));
+    box-shadow: 0 0 10px rgba(220, 220, 240, 0.45),
+        inset 0 0 6px rgba(255, 255, 255, 0.25);
+    color: #1a1a24;
+    text-shadow: none;
+}
+
+/* Oro (voto 9 - 9.5) */
+.grading-badge.tier-gold {
+    border-color: rgba(255, 209, 102, 0.95);
+    background: linear-gradient(135deg, rgba(150, 100, 15, 0.97), rgba(255, 200, 70, 0.92));
+    box-shadow: 0 0 12px rgba(255, 209, 102, 0.55),
+        inset 0 0 6px rgba(255, 255, 255, 0.25);
+    color: #3a2600;
+    text-shadow: none;
+}
+
+/* Platino (voto 10) */
+.grading-badge.tier-platinum {
+    border-color: rgba(210, 245, 255, 1);
+    background: linear-gradient(135deg, rgba(150, 210, 235, 0.95), rgba(235, 250, 255, 0.95));
+    box-shadow: 0 0 16px rgba(190, 235, 255, 0.7),
+        inset 0 0 8px rgba(255, 255, 255, 0.5);
+    color: #0a2733;
+    text-shadow: none;
+}
+
+/* Gradata senza voto: resta il blu neutro di default (sezione 63) */
+/* =========================================================
+   65. RIFINITURE GRADAZIONE (filtro + mini-stat dashboard)
+   ---------------------------------------------------------
+   ISTRUZIONI:
+   - Incolla in FONDO a static/css/style.css (dopo la sezione 64).
+   - Non cancellare nulla.
+   ========================================================= */
+
+/* --- Bottone filtro "Gradate" attivo --- */
+#graded-toggle-btn.active {
+    color: #ffffff;
+    border-color: rgba(120, 200, 255, 0.7);
+    background: rgba(70, 160, 255, 0.20);
+    box-shadow: inset 0 0 18px rgba(120, 200, 255, 0.10),
+        0 0 14px rgba(120, 200, 255, 0.25);
+}
+
+/* --- Dashboard: mini-stat ora sono 5 --- */
+.mh-mini-stats {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+/* Icona emoji dentro il mini-stat (per "Gradate") ben centrata */
+.mh-mini-icon {
+    line-height: 1;
+}
+
+/* Ripiego su schermi medio-stretti: torna a griglia flessibile */
+@media (max-width: 1350px) {
+    .mh-mini-stats {
+        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .mh-mini-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }

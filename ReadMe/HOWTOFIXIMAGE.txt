@@ -9,3 +9,6 @@ per una sola carta:
 py ridimensiona_immagine.py --single "SOLO_LEVELING/SL1E/SL1E-
 per tutte:
 py ridimensiona_immagine.py --all
+
+https://imagecompressor.11zon.com/it/compress-webp
+bulk rename

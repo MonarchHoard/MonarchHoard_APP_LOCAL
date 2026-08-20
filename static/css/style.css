@@ -2431,7 +2431,7 @@ body {
     position: relative;
     width: 100%;
     padding: 0 66px;
-    margin: 12px 0 6px 0;
+    margin: 1px 0 6px 0;
     box-sizing: border-box;
 }
 
@@ -3819,7 +3819,6 @@ body:has(#memory-board) .search-bar {
     }
 
     .modal-img-container::after {
-    content: "‹ scorri per cambiare carta ›";
     position: absolute;
     bottom: 6px;
     left: 0;
@@ -5348,10 +5347,10 @@ body:has(.modal.open) {
    --------------------------------------------------------- */
 .modal-img-container {
     flex: 0 0 auto;          /* non si restringe piu' */
-    height: 58vh;            /* grande, ma adattiva allo schermo */
+    height: 64vh;            /* grande, ma adattiva allo schermo */
     min-height: 340px;
     max-height: 620px;
-    margin-bottom: 15px;
+    margin-bottom: 1px;
 }
 
 /* La modale scrolla gia' (max-height:92vh + overflow-y:auto):
@@ -5454,4 +5453,807 @@ body:has(.modal.open) {
     .mh-mini-stats {
         grid-template-columns: repeat(2, 1fr);
     }
+}
+/* ---------------------------------------------------------
+   66. FIX: sidebar-nav (icone in alto su mobile) non scorreva
+   ---------------------------------------------------------
+   La sezione 62 aveva messo overflow-x:hidden su .sidebar-nav
+   in modo permanente, bloccando lo scroll orizzontale che
+   serviva SOLO su mobile. Qui lo ripristiniamo per mobile.
+   ========================================================= */
+@media (max-width: 1024px) {
+    .sidebar-nav {
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+    }
+}
+
+/* ---------------------------------------------------------
+   67. FIX: Dashboard, riquadro "Completamento per Rarita'"
+   invisibile su smartphone (le 2 colonne non si adattavano)
+   ========================================================= */
+@media (max-width: 768px) {
+    .mh-progress-content {
+        grid-template-columns: 1fr !important;
+    }
+    .mh-progress-ring {
+        margin: 0 auto;
+    }
+    .mh-progress-creature.mh-rarity-breakdown {
+        height: auto;
+        min-height: 0;
+        margin-top: 16px;
+    }
+}
+@media (max-width: 1024px) {
+    .game-area {
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+    }
+    .memory-board {
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
+/* =========================================================
+   68. FIX: "Indovina la Carta" su smartphone
+   ---------------------------------------------------------
+   COSA FA:
+   1) VERTICALE (telefono dritto): riduce l'altezza dell'immagine
+      e delle risposte cosi' tutte e 4 le opzioni si vedono senza
+      dover scrollare.
+   2) ORIZZONTALE (telefono ruotato, poca altezza): invece di
+      impilare immagine sopra e risposte sotto (che non ci stanno),
+      le affianca una accanto all'altra, come su PC.
+   ========================================================= */
+
+/* --- 1) VERTICALE: schermi stretti (telefoni) --- */
+@media (max-width: 600px) {
+    .quiz-image-panel {
+        padding: 12px;
+        gap: 8px;
+    }
+    .quiz-image-frame {
+        min-height: 200px;
+        max-height: 34vh;
+    }
+    .quiz-card-img {
+        max-height: 32vh;
+    }
+    .quiz-hint {
+        font-size: 0.68rem;
+        min-height: 0;
+    }
+    .quiz-answer-panel {
+        padding: 14px;
+        gap: 10px;
+    }
+    .quiz-question {
+        font-size: 0.76rem;
+        letter-spacing: 2px;
+    }
+    .quiz-options {
+        gap: 8px;
+    }
+    .quiz-option {
+        min-height: 44px;
+        padding: 8px 14px;
+        font-size: 0.78rem;
+    }
+    .quiz-feedback {
+        min-height: 18px;
+        font-size: 0.76rem;
+    }
+}
+
+/* --- 2) ORIZZONTALE: telefono ruotato, poca altezza disponibile ---
+   Vince su tutte le regole precedenti perche' e' l'ultima del file. */
+@media (max-width: 900px) and (max-height: 500px) {
+    .quiz-stage {
+        grid-template-columns: minmax(200px, 0.9fr) minmax(220px, 1.1fr) !important;
+        gap: 14px;
+    }
+    .quiz-image-panel {
+        padding: 10px;
+        gap: 6px;
+    }
+    .quiz-image-frame {
+        min-height: 0;
+        max-height: none;
+        height: 100%;
+    }
+    .quiz-card-img {
+        max-height: 78vh;
+    }
+    .quiz-hint {
+        font-size: 0.62rem;
+    }
+    .quiz-answer-panel {
+        padding: 12px;
+        gap: 8px;
+        justify-content: flex-start;
+        overflow-y: auto;
+        max-height: 92vh;
+    }
+    .quiz-question {
+        font-size: 0.7rem;
+    }
+    .quiz-options {
+        gap: 6px;
+    }
+    .quiz-option {
+        min-height: 38px;
+        padding: 6px 12px;
+        font-size: 0.72rem;
+    }
+    .quiz-feedback {
+        min-height: 14px;
+        font-size: 0.68rem;
+    }
+}
+
+/* --- Rete di sicurezza: in ogni caso, l'area di gioco puo'
+       sempre scorrere se qualcosa non dovesse bastare --- */
+@media (max-width: 1024px) {
+    #quiz-stage.quiz-stage {
+        overflow-y: visible;
+    }
+}
+
+/* =========================================================
+   69. FIX: schermata iniziale/pausa del Quiz troppo "vuota"
+   in orizzontale su smartphone (prima di premere Nuova Partita)
+   ---------------------------------------------------------
+   COSA FA:
+   Il Memory aveva gia' una regola che compatta la barra dei
+   controlli quando lo schermo e' basso (orizzontale su telefono).
+   Al Quiz mancava la stessa regola: per questo la barra restava
+   a grandezza piena e la schermata "Scegli la difficolta'..."
+   restava enorme con tanto spazio vuoto sopra e sotto.
+   Qui aggiungiamo lo stesso comportamento anche al Quiz, e in piu'
+   rendiamo la schermata overlay stessa piu' compatta quando
+   l'altezza dello schermo e' ridotta.
+   ========================================================= */
+
+/* --- Barra controlli compatta anche nel Quiz (come gia' nel Memory) --- */
+body:has(#quiz-stage) {
+    overflow: hidden;
+}
+body:has(#quiz-stage) .main-area {
+    padding: 16px 24px;
+}
+body:has(#quiz-stage) .search-bar {
+    min-height: 0;
+    margin: 0 0 14px 0;
+    padding: 12px 18px;
+}
+
+/* --- Overlay (schermata iniziale/pausa) compatta su schermi bassi --- */
+@media (max-height: 500px) {
+    .game-area {
+        min-height: calc(100vh - 140px);
+    }
+    .game-overlay-inner {
+        width: 380px;
+        padding: 18px 26px;
+    }
+    .game-overlay-icon {
+        font-size: 1.6rem;
+        margin-bottom: 8px;
+    }
+    .game-overlay-inner h2 {
+        font-size: 1.05rem;
+        margin: 0 0 6px 0;
+    }
+    .game-overlay-inner p {
+        font-size: 0.7rem;
+        line-height: 1.4;
+        margin: 0 0 14px 0;
+    }
+    .overlay-action-btn {
+        height: 38px;
+        padding: 0 28px;
+        font-size: 0.76rem;
+    }
+}
+
+/* --- Su schermi molto bassi e stretti, anche i controlli si stringono --- */
+@media (max-width: 900px) and (max-height: 500px) {
+    .memory-hud,
+    .lb-tabs {
+        height: auto;
+        padding: 6px 12px;
+    }
+    .game-ctrl-btn,
+    .set-toggle-btn,
+    .dropdown-button {
+        height: 38px;
+        font-size: 0.72rem;
+        padding: 0 12px;
+    }
+}
+/* =========================================================
+   70. MENU HAMBURGER MOBILE + TOP BAR SEMPRE IN CIMA
+   ---------------------------------------------------------
+   COSA FA:
+   - Su schermi stretti (telefono/tablet), il vecchio menu
+     laterale (che si spostava in alto sopra la topbar) viene
+     nascosto del tutto.
+   - Al suo posto compare un quadratino "3 righe" a sinistra
+     della scritta "Solo Leveling": premendolo si apre un
+     cassetto laterale con le stesse voci di menu.
+   - Con il menu laterale nascosto, la topbar torna sempre
+     ad essere il primo elemento in alto nella pagina.
+   ========================================================= */
+
+/* --- Nasconde il vecchio menu laterale su schermi stretti --- */
+@media (max-width: 1024px) {
+    .sidebar {
+        display: none !important;
+    }
+}
+
+/* --- Bottone hamburger (nascosto su desktop, mostrato su mobile) --- */
+.mobile-menu-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border: 1px solid rgba(155, 77, 255, 0.35);
+    border-radius: 8px;
+    background: rgba(155, 77, 255, 0.12);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: 0.2s ease;
+}
+.mobile-menu-btn span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    border-radius: 2px;
+    background: #e4d8ff;
+}
+.mobile-menu-btn:hover {
+    border-color: rgba(190, 145, 255, 0.75);
+    background: rgba(155, 77, 255, 0.22);
+    box-shadow: 0 0 12px rgba(155, 77, 255, 0.3);
+}
+@media (max-width: 1024px) {
+    .mobile-menu-btn {
+        display: flex;
+    }
+}
+
+/* --- Sfondo scuro dietro al cassetto --- */
+.mobile-menu-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99990;
+    background: rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+.mobile-menu-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* --- Cassetto laterale (drawer) --- */
+.mobile-menu-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    max-width: 82vw;
+    z-index: 99991;
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    background: linear-gradient(to bottom, rgba(9, 5, 23, 0.98), rgba(5, 3, 13, 0.98));
+    border-right: 1px solid rgba(155, 77, 255, 0.30);
+    box-shadow: 12px 0 40px rgba(0, 0, 0, 0.55);
+    transform: translateX(-105%);
+    transition: transform 0.28s ease;
+    overflow-y: auto;
+}
+.mobile-menu-drawer.open {
+    transform: translateX(0);
+}
+.mobile-menu-close {
+    align-self: flex-end;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid rgba(155, 77, 255, 0.35);
+    background: rgba(155, 77, 255, 0.12);
+    color: #e4d8ff;
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.mobile-menu-close:hover {
+    background: rgba(155, 77, 255, 0.24);
+}
+
+/* Blocca lo scroll della pagina sotto mentre il cassetto e' aperto */
+body.mobile-menu-locked {
+    overflow: hidden;
+}
+
+/* --- Dentro il cassetto, il menu torna verticale (come su PC),
+       non piu' righe di sole icone --- */
+#mobile-menu-drawer .sidebar-nav {
+    flex: 0 0 auto !important;   /* la scatola si adatta al contenuto reale, non si restringe piu' */
+    height: auto !important;
+    flex-direction: column !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    width: 100%;
+}
+#mobile-menu-drawer .side-nav-btn {
+    width: 100% !important;
+    flex: none !important;
+    flex-direction: row !important;
+    height: 54px !important;
+    min-width: 0 !important;
+    font-size: 0.82rem !important;
+    padding: 0 16px !important;
+    gap: 14px !important;
+}
+#mobile-menu-drawer .side-nav-icon {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+}
+#mobile-menu-drawer .sidebar-logo {
+    flex-direction: row;
+    gap: 10px;
+}
+#mobile-menu-drawer .sidebar-player {
+    margin-top: auto;
+    width: 100%;
+}
+/* =========================================================
+   71. FIX: swipe nel menu hamburger scrollava la pagina sotto
+   ---------------------------------------------------------
+   COSA FA:
+   Su molti telefoni "overflow: hidden" sul body non basta a
+   bloccare lo swipe: il dito continua a far scorrere la pagina
+   sotto al cassetto. Qui blocchiamo il tocco in modo esplicito
+   sia sul body che sull'overlay scuro, mentre lasciamo libero
+   lo scroll SOLO dentro il cassetto (in verticale), nel caso
+   il menu sia piu' lungo dello schermo.
+   ========================================================= */
+body.mobile-menu-locked {
+    overflow: hidden;
+    touch-action: none;
+    overscroll-behavior: none;
+}
+
+/* L'overlay scuro non deve far passare il tocco alla pagina sotto */
+.mobile-menu-overlay {
+    touch-action: none;
+}
+
+/* Il cassetto invece puo' scrollare in verticale al suo interno,
+   ma non deve "rimbalzare" facendo scrollare la pagina dietro */
+.mobile-menu-drawer {
+    touch-action: pan-y;
+    overscroll-behavior: contain;
+}
+html {
+    overscroll-behavior-x: none;
+}
+.mobile-menu-drawer {
+    overscroll-behavior-x: none;
+}
+/* =========================================================
+   73. FIX: menu hamburger tagliato in basso quando lo
+   smartphone e' orizzontale (schermo basso)
+   ---------------------------------------------------------
+   COSA FA:
+   Il cassetto usava "height: 100vh". Su Safari, quando la barra
+   degli indirizzi/tab e' ancora visibile (specie in orizzontale
+   con piu' tab aperte), "100vh" viene calcolato come se quella
+   barra sparisse subito, tagliando la parte finale del menu
+   (Giochi, Impostazioni, box utente) fuori dallo schermo visibile.
+   "100dvh" e' l'unita' pensata apposta per questo: si adatta
+   sempre allo spazio DAVVERO visibile in quel momento.
+   In piu', quando lo schermo e' basso, rendiamo le voci del menu
+   piu' compatte cosi' ci stanno tutte senza quasi bisogno di
+   scrollare.
+   ========================================================= */
+
+/* --- Altezza corretta del cassetto su tutti i browser --- */
+.mobile-menu-drawer {
+    height: 100vh;              /* valore di riserva per browser vecchi */
+    height: 100dvh;             /* valore corretto: si adatta alla barra di Safari */
+    max-height: 100dvh;
+}
+
+/* --- Menu compatto quando lo schermo e' basso (telefono ruotato) --- */
+@media (max-height: 500px) {
+    .mobile-menu-drawer {
+        padding: 10px 14px;
+        gap: 8px;
+    }
+    #mobile-menu-drawer .sidebar-logo img:first-child {
+        width: 34px;
+    }
+    #mobile-menu-drawer .sidebar-wordmark {
+        width: 130px;
+    }
+    #mobile-menu-drawer .side-nav-btn {
+        height: 40px !important;
+        font-size: 0.72rem !important;
+        gap: 10px !important;
+        padding: 0 12px !important;
+    }
+    #mobile-menu-drawer .side-nav-icon {
+        width: 26px !important;
+        height: 26px !important;
+        min-width: 26px !important;
+    }
+    #mobile-menu-drawer .sidebar-nav {
+        gap: 6px !important;
+    }
+    .mobile-menu-close {
+        width: 28px;
+        height: 28px;
+        font-size: 1rem;
+    }
+    #mobile-menu-drawer .sidebar-player {
+        padding: 10px;
+    }
+}
+/* =========================================================
+   74. PROFILO E LOGOUT DENTRO AL MENU HAMBURGER
+   ---------------------------------------------------------
+   COSA FA:
+   Lo script mobile-menu.js sposta il VERO box profilo
+   (nome, rank, XP, avatar) e il VERO bottone Logout dentro
+   al cassetto, subito sotto al logo (profilo) e in fondo dopo
+   i bottoni (logout). Qui li rivestiamo con uno stile adatto
+   a una colonna stretta invece che alla barra orizzontale.
+   ========================================================= */
+
+/* --- Box profilo: da riga orizzontale a card verticale --- */
+.mobile-menu-profile .topbar-player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 18px 14px;
+    margin: 4px 0 14px 0;
+    border: 1px solid rgba(155, 77, 255, 0.25);
+    border-radius: 12px;
+    background: rgba(155, 77, 255, 0.07);
+    box-shadow: inset 0 0 18px rgba(155, 77, 255, 0.06);
+}
+.mobile-menu-profile .player-avatar {
+    order: 1;
+    width: 60px;
+    height: 60px;
+    margin: 0;
+}
+.mobile-menu-profile .topbar-player-info {
+    order: 2;
+    text-align: center;
+}
+.mobile-menu-profile .topbar-player-info .player-name {
+    font-size: 1rem;
+}
+.mobile-menu-profile .topbar-player-info .player-rank {
+    font-size: 0.76rem;
+    margin-top: 5px;
+}
+/* La barra XP, nascosta sugli smartphone nella topbar,
+   qui nel cassetto la mostriamo sempre */
+.mobile-menu-profile .topbar-player-xp {
+    order: 3;
+    width: 100%;
+    display: block !important;
+}
+
+/* --- Logout: staccato dall'ultimo bottone di circa
+       mezzo bottone di distanza, poi a tutta larghezza --- */
+.mobile-menu-logout {
+    margin-top: 27px;   /* ~ meta' altezza di un bottone (54px) */
+    padding-top: 14px;
+    border-top: 1px solid rgba(155, 77, 255, 0.18);
+}
+.mobile-menu-logout .logout-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 46px;
+}
+
+/* --- Schermo basso (telefono ruotato): tutto un filo piu' compatto --- */
+@media (max-height: 500px) {
+    .mobile-menu-profile .topbar-player {
+        padding: 10px;
+        gap: 6px;
+        margin: 2px 0 8px 0;
+    }
+    .mobile-menu-profile .player-avatar {
+        width: 40px;
+        height: 40px;
+    }
+    .mobile-menu-profile .topbar-player-info .player-name {
+        font-size: 0.82rem;
+    }
+    .mobile-menu-profile .topbar-player-info .player-rank {
+        font-size: 0.66rem;
+        margin-top: 2px;
+    }
+    .mobile-menu-logout {
+        margin-top: 20px;  /* ~ meta' altezza bottone compatto (40px) */
+        padding-top: 8px;
+    }
+    .mobile-menu-logout .logout-btn {
+        height: 36px;
+        font-size: 0.78rem;
+    }
+}
+/* =========================================================
+   75. FIX: frecce della modale (precedente/successiva)
+   ---------------------------------------------------------
+   COSA FA QUESTO FIX:
+   Ancora le frecce DENTRO al riquadro dell'immagine (che e' gia'
+   sempre nella posizione corretta, dentro la modale), invece che
+   al centro dello schermo. Riserva loro un piccolo spazio ai lati,
+   cosi' l'immagine si restringe leggermente solo quel poco che
+   serve per non essere mai coperta.
+   ========================================================= */
+
+/* --- Spazio riservato alle frecce ai lati dell'immagine --- */
+.modal-img-container {
+    padding: 0 46px !important;
+    box-sizing: border-box !important;
+}
+
+/* --- Frecce: da "fisse sullo schermo" a "dentro alla modale" --- */
+.modal-nav-btn {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 38px;
+    height: 38px;
+}
+.modal-nav-prev {
+    left: 2px !important;
+    right: auto !important;
+}
+.modal-nav-next {
+    right: 2px !important;
+    left: auto !important;
+}
+
+/* --- Schermi piccoli: stesso principio, spazio leggermente ridotto --- */
+@media (max-width: 600px) {
+    .modal-img-container {
+        padding: 0 38px !important;
+    }
+    .modal-nav-btn {
+        width: 34px !important;
+        height: 34px !important;
+    }
+    .modal-nav-prev {
+        left: 2px !important;
+        right: auto !important;
+    }
+    .modal-nav-next {
+        right: 2px !important;
+        left: auto !important;
+    }
+}
+
+/* =========================================================
+   76. SIDEBAR UNIFICATA: profilo + logout dentro al menu,
+   sempre visibile su desktop, con puntina per comprimere
+   ---------------------------------------------------------
+   Richiede anche le modifiche HTML (6 pagine) e la sostituzione
+   di mobile-menu.js, spiegate nei file che ti do insieme a questo.
+   ========================================================= */
+
+/* --- Riga in alto nella sidebar: logo + puntina --- */
+.sidebar-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* --- Puntina per fissare/comprimere il menu (solo desktop) --- */
+.sidebar-pin-btn {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border: 1px solid rgba(155, 77, 255, 0.30);
+    border-radius: 8px;
+    background: rgba(155, 77, 255, 0.10);
+    color: #efe7ff;
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s ease;
+}
+.sidebar-pin-btn:hover {
+    background: rgba(155, 77, 255, 0.22);
+    border-color: rgba(190, 145, 255, 0.65);
+    box-shadow: 0 0 12px rgba(155, 77, 255, 0.25);
+}
+.sidebar.collapsed .sidebar-pin-btn {
+    opacity: 0.55;
+}
+/* Nel cassetto mobile la puntina non serve: il cassetto e' sempre "espanso" */
+.mobile-menu-drawer .sidebar-pin-btn {
+    display: none;
+}
+
+/* --- Box profilo dentro alla sidebar (funziona sia su desktop
+       che dentro al cassetto mobile, perche' e' lo stesso markup) --- */
+.sidebar-profile {
+    margin: 2px 0 4px 0;
+}
+.sidebar-profile .topbar-player {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px 12px;
+    border: 1px solid rgba(155, 77, 255, 0.22);
+    border-radius: 12px;
+    background: rgba(155, 77, 255, 0.06);
+    box-shadow: inset 0 0 16px rgba(155, 77, 255, 0.05);
+}
+.sidebar-profile .player-avatar {
+    order: 1;
+    width: 52px;
+    height: 52px;
+    margin: 0;
+    flex-shrink: 0;
+}
+.sidebar-profile .topbar-player-info {
+    order: 2;
+    text-align: center;
+}
+.sidebar-profile .topbar-player-info .player-name {
+    font-size: 0.92rem;
+}
+.sidebar-profile .topbar-player-info .player-rank {
+    font-size: 0.72rem;
+    margin-top: 4px;
+}
+.sidebar-profile .topbar-player-xp {
+    order: 3;
+    width: 100%;
+}
+
+/* --- Bottone Logout dentro alla sidebar --- */
+.sidebar-logout-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 46px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 77, 109, 0.30);
+    background: rgba(255, 77, 109, 0.08);
+    color: var(--danger-red);
+    text-decoration: none;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: 0.2s ease;
+    flex-shrink: 0;
+}
+.sidebar-logout-link:hover {
+    background: var(--danger-red);
+    color: #ffffff;
+    box-shadow: 0 0 14px rgba(255, 77, 109, 0.35);
+}
+.sidebar-logout-icon {
+    font-size: 1.15rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+/* --- top-bar-right ora e' vuoto: non deve occupare spazio inutile --- */
+.top-bar-right:empty {
+    display: none;
+}
+
+/* =========================================================
+   SIDEBAR COMPRESSA (solo desktop, quando la puntina e' spenta)
+   ========================================================= */
+@media (min-width: 1025px) {
+    /* La colonna della sidebar nella griglia si restringe */
+    .app-shell:has(.sidebar.collapsed) {
+        grid-template-columns: 84px minmax(910px, 1fr);
+    }
+
+    .sidebar.collapsed {
+        min-width: 84px;
+        width: 84px;
+        padding: 26px 10px;
+    }
+
+    /* Logo: solo icona, la scritta sparisce */
+    .sidebar.collapsed .sidebar-top {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+    .sidebar.collapsed .sidebar-wordmark {
+        display: none;
+    }
+
+    /* Profilo: solo il cerchio avatar, nome/rank/XP nascosti */
+    .sidebar.collapsed .sidebar-profile .topbar-player {
+        padding: 10px 4px;
+    }
+    .sidebar.collapsed .topbar-player-info,
+    .sidebar.collapsed .topbar-player-xp {
+        display: none;
+    }
+
+    /* Voci di menu: solo icona centrata, testo nascosto */
+    .sidebar.collapsed .side-nav-btn {
+        justify-content: center;
+        padding: 0;
+        gap: 0;
+    }
+    .sidebar.collapsed .side-nav-btn span {
+        display: none;
+    }
+
+    /* Logout: solo l'icona rossa, testo nascosto */
+    .sidebar.collapsed .sidebar-logout-link {
+        justify-content: center;
+        padding: 0;
+    }
+    .sidebar.collapsed .sidebar-logout-text {
+        display: none;
+    }
+}
+/* =========================================================
+   77. FIX: bottone Logout sovrapposto quando una voce di menu
+   va a capo su due righe nel cassetto/menu compresso
+   ========================================================= */
+#mobile-menu-drawer .side-nav-btn,
+.sidebar.collapsed .side-nav-btn {
+    height: auto !important;
+    min-height: 54px;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
+#mobile-menu-drawer .side-nav-btn span,
+.sidebar .side-nav-btn span {
+    white-space: normal;
+    line-height: 1.25;
+}
+.sidebar-logout-link {
+    flex-shrink: 0;      /* non si schiaccia mai, resta sempre leggibile */
+    margin-top: 4px;
+}
+.sidebar-nav {
+    margin-bottom: 4px;  /* piccolo respiro extra prima del logout */
 }

@@ -330,6 +330,10 @@ function showQuestion() {
 	}
     img.src = q.card.image_url;
     img.alt = '';
+    img.onerror = function () {
+        this.onerror = null;
+        this.src = '/static/cards/TRANSPARENT/No_Image_Available.webp';
+    };
 
     // Indizio: rarita' e set sono gia' nei dati
     const hint = document.getElementById('quiz-hint');

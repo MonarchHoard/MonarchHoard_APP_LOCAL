@@ -312,6 +312,10 @@ function renderBoard() {
         const frontImg = document.createElement('img');
         frontImg.src = item.img;
         frontImg.alt = item.name || '';
+        frontImg.onerror = function () {
+            this.onerror = null;
+            this.src = '/static/cards/TRANSPARENT/No_Image_Available.webp';
+        };
         front.appendChild(frontImg);
 
         inner.appendChild(back);
@@ -361,6 +365,21 @@ function layoutBoard() {
 }
 
 window.addEventListener('resize', layoutBoard);
+
+// Rotazione schermo: le dimensioni reali arrivano con un ritardo
+// variabile a seconda del telefono, quindi ricalcoliamo piu' volte.
+window.addEventListener('orientationchange', function () {
+    setTimeout(layoutBoard, 50);
+    setTimeout(layoutBoard, 250);
+    setTimeout(layoutBoard, 600);
+});
+
+// Rete di sicurezza extra per iOS Safari, che a volte non aggiorna
+// window.innerHeight in tempo neanche dopo 'orientationchange'.
+if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', layoutBoard);
+}
+
 
 // -------- Gioco --------
 function flipTile(tile) {

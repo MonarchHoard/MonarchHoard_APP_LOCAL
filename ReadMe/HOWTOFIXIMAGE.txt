@@ -1,0 +1,11 @@
+Se si ha l'immagine con sfondo trasparente in png, salvarla nel percorso delle imamgini carte corretto
+
+eseguire convert_to_webp.py
+
+poi
+
+eseguire
+per una sola carta:
+py ridimensiona_immagine.py --single "SOLO_LEVELING/SL1E/SL1E-
+per tutte:
+py ridimensiona_immagine.py --all

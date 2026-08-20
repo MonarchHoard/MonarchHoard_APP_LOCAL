@@ -4,6 +4,7 @@ let searchTimeout;
 let currentModalCardCode = null; // Variabile per tracciare la carta aperta nella modale
 let currentSortCard = 'id';
 let currentSortSet = 'asc';
+let visibleCardsOrder = [];
 let savedCollapsedSets = localStorage.getItem('collapsedSets');
 let collapsedSets = new Set(savedCollapsedSets ? JSON.parse(savedCollapsedSets) : []);
 // Modalità di visualizzazione: 'bySet' (divisa per set) | 'flat' (tutte insieme)
@@ -510,6 +511,7 @@ function renderCards(cardsToRender) {
         sortedCards.forEach(card => grid.appendChild(buildCardElement(card)));
         container.appendChild(grid);
         observeImages();
+        visibleCardsOrder = sortedCards.map(c => c.card_code);
         return;
     }
 
@@ -529,7 +531,7 @@ function renderCards(cardsToRender) {
         }
         return orderA - orderB;
     });
-
+	const orderedCodes = [];
     sortedSetCodes.forEach(setCode => {
         const setSection = document.createElement('div');
         setSection.className = 'set-section';
@@ -601,6 +603,7 @@ function renderCards(cardsToRender) {
         grid.className = 'set-grid';
         groups[setCode].forEach(card => {
             grid.appendChild(buildCardElement(card));
+			orderedCodes.push(card.card_code);
         });
 
         // --- Barra in fondo per comprimere il set senza risalire ---
@@ -625,6 +628,7 @@ function renderCards(cardsToRender) {
         container.appendChild(setSection);
     });
 
+	visibleCardsOrder = orderedCodes;
     observeImages();
 }
 
@@ -1573,32 +1577,43 @@ function showFloatFeedback(anchorElement, change) {
 function navigateModal(direction) {
     if (!currentModalCardCode) return;
 
-    const currentCard = allCardsData.find(c => c.card_code === currentModalCardCode);
-    if (!currentCard) return;
+    // Caso normale: usa l'ordine ESATTO con cui le carte sono
+    // disegnate a schermo in questo momento (rispetta filtri,
+    // ricerca, ordinamento e vista Per Set / Tutte insieme).
+    let codeList = visibleCardsOrder;
+    let currentIndex = codeList.indexOf(currentModalCardCode);
 
-    // Prendi tutte le carte dello stesso set, ordinate come nella griglia
-    const setCards = allCardsData
-        .filter(c => (c.set_name || "Altri") === (currentCard.set_name || "Altri"))
-        .sort((a, b) => {
-            const sortBy = currentSortCard || 'id';
-            if (sortBy === 'name')        return (a.card_name || '').localeCompare(b.card_name || '');
-            if (sortBy === 'qty-desc')    return (b.quantity || 0) - (a.quantity || 0);
-            if (sortBy === 'qty-asc')     return (a.quantity || 0) - (b.quantity || 0);
-            if (sortBy === 'rarity-asc')  return (a.rarity_Order || 999) - (b.rarity_Order || 999);
-            if (sortBy === 'rarity-desc') return (b.rarity_Order || 999) - (a.rarity_Order || 999);
-            if (sortBy === 'db-id')       return (a.cards_id || 999999) - (b.cards_id || 999999);
-            return (a.cards_display_order || '').localeCompare(b.cards_display_order || '');
-        });
-
-    const currentIndex = setCards.findIndex(c => c.card_code === currentModalCardCode);
-    if (currentIndex === -1) return;
+    if (currentIndex === -1) {
+        // Riserva: la carta aperta non fa parte della vista
+        // filtrata corrente (es. aperta da un riquadro della
+        // Dashboard). Si comporta come prima: stesso set,
+        // ignorando i filtri.
+        const currentCard = allCardsData.find(c => c.card_code === currentModalCardCode);
+        if (!currentCard) return;
+        const fallbackCards = allCardsData
+            .filter(c => (c.set_name || "Altri") === (currentCard.set_name || "Altri"))
+            .sort((a, b) => {
+                const sortBy = currentSortCard || 'id';
+                if (sortBy === 'name')        return (a.card_name || '').localeCompare(b.card_name || '');
+                if (sortBy === 'qty-desc')    return (b.quantity || 0) - (a.quantity || 0);
+                if (sortBy === 'qty-asc')     return (a.quantity || 0) - (b.quantity || 0);
+                if (sortBy === 'rarity-asc')  return (a.rarity_Order || 999) - (b.rarity_Order || 999);
+                if (sortBy === 'rarity-desc') return (b.rarity_Order || 999) - (a.rarity_Order || 999);
+                if (sortBy === 'db-id')       return (a.cards_id || 999999) - (b.cards_id || 999999);
+                return (a.cards_display_order || '').localeCompare(b.cards_display_order || '');
+            });
+        codeList = fallbackCards.map(c => c.card_code);
+        currentIndex = codeList.indexOf(currentModalCardCode);
+        if (currentIndex === -1) return;
+    }
 
     // Calcola il nuovo indice (con wrap-around: dopo l'ultima → prima)
     let newIndex = currentIndex + direction;
-    if (newIndex < 0) newIndex = setCards.length - 1;
-    if (newIndex >= setCards.length) newIndex = 0;
+    if (newIndex < 0) newIndex = codeList.length - 1;
+    if (newIndex >= codeList.length) newIndex = 0;
 
-    openModal(setCards[newIndex]);
+    const nextCard = allCardsData.find(c => c.card_code === codeList[newIndex]);
+    if (nextCard) openModal(nextCard);
 }
 
 // -------- Contatore risultati filtrati --------
@@ -1885,46 +1900,42 @@ function observeImages() {
     document.querySelectorAll('img[data-src]').forEach(img => imgObserver.observe(img));
 }
 
-// =========================================================
-//  SWIPE MODALE CARTA (mobile) - VERSIONE AGGIORNATA
-//  Monarch Hoard
-//  ---------------------------------------------------------
-//  DOVE: SOSTITUISCI il blocco swipe che avevi incollato prima
-//        in fondo a static/js/main.js con QUESTO.
-//        (Se non l'avevi ancora messo, incolla direttamente questo.)
-//
-//  NOVITA': durante lo swipe dentro la modale, la pagina sotto
-//  NON scrolla piu' (ne' in verticale ne' in orizzontale).
-//  Lo swipe orizzontale cambia carta come prima.
-// =========================================================
 (function () {
     const modal = document.getElementById('card-modal');
     if (!modal) return;
-
-    let startX = 0, startY = 0, tracking = false;
+    let startX = 0, startY = 0, tracking = false, isHorizontal = null;
 
     modal.addEventListener('touchstart', function (e) {
         if (e.touches.length !== 1) return;      // ignora pinch/zoom
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
         tracking = true;
+        isHorizontal = null;                     // direzione non ancora decisa
     }, { passive: true });
 
-    // NON passive: cosi' possiamo bloccare lo scroll della pagina sotto
     modal.addEventListener('touchmove', function (e) {
         if (!tracking) return;
-        // impedisce alla pagina di scrollare mentre il dito e' sulla modale
-        e.preventDefault();
+        const dx = e.touches[0].clientX - startX;
+        const dy = e.touches[0].clientY - startY;
+
+        // Decide la direzione appena il dito si è mosso un po'
+        if (isHorizontal === null && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
+            isHorizontal = Math.abs(dx) > Math.abs(dy);
+        }
+
+        // Blocca lo scroll della pagina SOLO se il gesto è orizzontale
+        // (swipe per cambiare carta). Se è verticale, lascia scrollare.
+        if (isHorizontal) {
+            e.preventDefault();
+        }
     }, { passive: false });
 
     modal.addEventListener('touchend', function (e) {
         if (!tracking) return;
         tracking = false;
-
         const dx = e.changedTouches[0].clientX - startX;
         const dy = e.changedTouches[0].clientY - startY;
-
-        // swipe valido: > 50px e piu' orizzontale che verticale
+        // swipe valido: > 50px e più orizzontale che verticale
         if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
             if (dx < 0) {
                 navigateModal(1);    // dito verso sinistra -> successiva

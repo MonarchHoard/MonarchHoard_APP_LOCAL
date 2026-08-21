@@ -23,10 +23,12 @@ function showToast(message, type, duration) {
     duration = duration || 3000;
     const container = document.getElementById('toast-container');
     if (!container) return;
+
     const toast = document.createElement('div');
     toast.className = 'toast toast-' + type;
     toast.textContent = message;
     container.appendChild(toast);
+
     setTimeout(function () {
         toast.classList.add('toast-out');
         setTimeout(function () { toast.remove(); }, 300);
@@ -53,36 +55,42 @@ async function loadShowcase() {
         const data = await fetchJSON('/api/showcase');
         const slots = data.slots || [];
         let filledCount = 0;
+
         for (let i = 0; i < MAX_SHOWCASE_SLOTS; i++) {
             const card = slots[i];
             if (card) filledCount++;
             grid.appendChild(buildSlotElement(card, i + 1));
         }
+
         document.getElementById('showcase-count').innerText = filledCount + ' / ' + MAX_SHOWCASE_SLOTS;
     } catch (e) {
         console.error(e);
-        grid.innerHTML = '<div class="mh-empty-message">Errore nel caricamento della vetrina.</div>';
-        showToast('Impossibile caricare la vetrina.', 'error');
+        grid.innerHTML = `<div class="mh-empty-message">${t('showcase.load_error')}</div>`;
+        showToast(t('showcase.load_error'), 'error');
     }
 }
 
 function buildSlotElement(card, position) {
     const slot = document.createElement('div');
+
     if (!card) {
         slot.className = 'showcase-slot empty';
         slot.innerHTML = `
             <button class="showcase-insert-btn" onclick="openPicker(${position})">
                 <span class="showcase-insert-plus">+</span>
-                <span>Inserisci</span>
+                <span>${t('showcase.insert_btn')}</span>
             </button>`;
         return slot;
     }
+
     slot.className = 'showcase-slot filled';
     slot.style.cursor = 'pointer';
     slot.onclick = function () { openSlotActions(position, card); };
+
     const safeName = escapeHTML(card.card_name);
     const safeCode = escapeHTML(card.card_code);
     const safeRarity = escapeHTML(card.rarity);
+
     slot.innerHTML = `
         <div class="collection-card-rarity ${(card.rarity_order || 0) >= 35 ? 'shine' : ''}">${safeRarity}</div>
         <div class="showcase-image-container">
@@ -91,11 +99,11 @@ function buildSlotElement(card, position) {
         <div class="showcase-card-name">${safeName}</div>
         <div class="showcase-card-code">${safeCode}</div>
     `;
+
     return slot;
 }
 
 // -------- Azioni --------
-
 async function removeShowcaseCard(cardCode) {
     try {
         const data = await fetchJSON('/api/showcase/remove', {
@@ -104,14 +112,14 @@ async function removeShowcaseCard(cardCode) {
             body: JSON.stringify({ card_code: cardCode })
         });
         if (data.status === 'success') {
-            showToast('Carta rimossa dalla vetrina.', 'success');
+            showToast(t('showcase.removed'), 'success');
             loadShowcase();
         } else {
-            showToast(data.message || 'Impossibile rimuovere la carta.', 'error');
+            showToast(data.message || t('showcase.cannot_remove'), 'error');
         }
     } catch (e) {
         console.error(e);
-        showToast('Errore di connessione.', 'error');
+        showToast(t('common.connection_error'), 'error');
     }
 }
 
@@ -141,22 +149,26 @@ async function ensurePickerCards() {
 
 async function openPicker(position) {
     pickerSlot = position;
+
     try {
         await ensurePickerCards();
     } catch (e) {
         console.error(e);
-        showToast('Impossibile caricare le carte.', 'error');
+        showToast(t('toast.cards_load_error'), 'error');
         return;
     }
-    document.getElementById('picker-title').innerText = 'Slot ' + position + ' \u00B7 scegli una carta';
+
+    document.getElementById('picker-title').innerText = `${t('showcase.picker_slot_word')} ${position} \u00B7 ${t('showcase.picker_title').toLowerCase()}`;
     document.getElementById('picker-search').value = '';
     pickerSelectedRarities = [];
     pickerSelectedSets = [];
     pickerSort = 'id';
+
     document.querySelectorAll('#picker-modal .filter-chip').forEach(function (c) { c.classList.remove('active'); });
     const idChip = document.querySelector('#picker-sort-filter .filter-chip');
     if (idChip) idChip.classList.add('active');
-    document.getElementById('picker-sort-button').innerText = 'Ordina: CardCode \u25BC';
+    document.getElementById('picker-sort-button').innerText = `${t('showcase.picker_sort_code')} \u25BC`;
+
     renderPicker();
     document.getElementById('picker-modal').classList.add('open');
 }
@@ -169,10 +181,12 @@ function closePicker() {
 function buildPickerFilters() {
     const rarityMap = new Map();
     const setMap = new Map();
+
     pickerCards.forEach(function (c) {
         if (c.rarity && !rarityMap.has(c.rarity)) rarityMap.set(c.rarity, c.rarity_Order != null ? c.rarity_Order : 999);
         if (c.set_name && !setMap.has(c.set_name)) setMap.set(c.set_name, c.set_order != null ? c.set_order : 999);
     });
+
     const rc = document.getElementById('picker-rarity-filter');
     rc.innerHTML = '';
     Array.from(rarityMap.entries()).sort(function (a, b) { return Number(a[1]) - Number(b[1]); })
@@ -187,6 +201,7 @@ function buildPickerFilters() {
             };
             rc.appendChild(chip);
         });
+
     const sc = document.getElementById('picker-set-filter');
     sc.innerHTML = '';
     Array.from(setMap.entries()).sort(function (a, b) { return Number(a[1]) - Number(b[1]); })
@@ -215,6 +230,7 @@ function setPickerSort(value, label, ev) {
 function renderPicker() {
     const grid = document.getElementById('picker-grid');
     const search = document.getElementById('picker-search').value.toLowerCase();
+
     let list = pickerCards.filter(function (c) {
         const ms = (c.card_name || '').toLowerCase().indexOf(search) !== -1 ||
                    (c.card_code || '').toLowerCase().indexOf(search) !== -1 ||
@@ -224,6 +240,7 @@ function renderPicker() {
         const mt = pickerSelectedSets.length === 0 || pickerSelectedSets.indexOf(c.set_name) !== -1;
         return ms && mr && mt;
     });
+
     list.sort(function (a, b) {
         if (pickerSort === 'name') return (a.card_name || '').localeCompare(b.card_name || '');
         if (pickerSort === 'rarity-desc') return (b.rarity_Order || 0) - (a.rarity_Order || 0);
@@ -231,12 +248,15 @@ function renderPicker() {
         if (pickerSort === 'qty-desc') return (b.quantity || 0) - (a.quantity || 0);
         return (a.cards_display_order || '').localeCompare(b.cards_display_order || '');
     });
+
     grid.innerHTML = '';
     document.getElementById('picker-count').innerText = list.length;
+
     if (list.length === 0) {
-        grid.innerHTML = '<p style="grid-column:1/-1; text-align:center; color:#9a8ab8; padding:30px;">Nessuna carta posseduta corrisponde ai filtri.</p>';
+        grid.innerHTML = `<p style="grid-column:1/-1; text-align:center; color:#9a8ab8; padding:30px;">${t('showcase.picker_no_match')}</p>`;
         return;
     }
+
     list.forEach(function (c) { grid.appendChild(buildPickerCard(c)); });
 }
 
@@ -245,7 +265,9 @@ function buildPickerCard(card) {
     el.className = 'card';
     el.style.cursor = 'pointer';
     el.onclick = function () { selectPickerCard(card.card_code); };
+
     const dup = card.quantity > 1 ? '<div class="duplicate-badge">x' + card.quantity + '</div>' : '';
+
     el.innerHTML = `
         <div class="collection-card-rarity">${escapeHTML(card.rarity)}</div>
         ${dup}
@@ -255,11 +277,13 @@ function buildPickerCard(card) {
         <div class="card-code">${escapeHTML(card.card_code)}</div>
         <div class="card-name">${escapeHTML(card.card_name)}</div>
     `;
+
     return el;
 }
 
 async function selectPickerCard(cardCode) {
     if (!pickerSlot) return;
+
     try {
         const data = await fetchJSON('/api/showcase/set', {
             method: 'POST',
@@ -267,15 +291,15 @@ async function selectPickerCard(cardCode) {
             body: JSON.stringify({ card_code: cardCode, slot_position: pickerSlot })
         });
         if (data.status === 'success') {
-            showToast('Vetrina aggiornata!', 'success');
+            showToast(t('showcase.updated'), 'success');
             closePicker();
             loadShowcase();
         } else {
-            showToast(data.message || 'Impossibile aggiornare la vetrina.', 'error');
+            showToast(data.message || t('showcase.cannot_update'), 'error');
         }
     } catch (e) {
         console.error(e);
-        showToast('Errore di connessione.', 'error');
+        showToast(t('common.connection_error'), 'error');
     }
 }
 
@@ -293,6 +317,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (e.target.id === 'picker-modal') closePicker();
         });
     }
+
     document.addEventListener('click', function (e) {
         if (e.target.closest('.dropdown-filter')) return;
         document.querySelectorAll('#picker-modal .dropdown-content').forEach(function (m) { m.classList.remove('open'); });
@@ -304,10 +329,12 @@ document.addEventListener('DOMContentLoaded', function () {
 // =========================================================
 // Per aggiungere un nuovo sfondo: metti il file in /static/wallpaper/,
 // aggiungi una riga qui E aggiungi il suo id in VALID_SHOWCASE_BG (app.py).
-const SHOWCASE_BACKGROUNDS = [
-    { id: 'none',   name: 'Nessuno',      url: null },
-    { id: 'nebula', name: 'Nebula Viola', url: '/static/wallpaper/showcase_bg_nebula.jpg' }
-];
+function getShowcaseBackgrounds() {
+    return [
+        { id: 'none',   name: t('showcase.bg_none'),   url: null },
+        { id: 'nebula', name: t('showcase.bg_nebula'), url: '/static/wallpaper/showcase_bg_nebula.jpg' }
+    ];
+}
 
 let currentShowcaseBg = 'none';
 
@@ -326,7 +353,8 @@ async function loadShowcaseBg() {
 function applyShowcaseBg() {
     const frame = document.querySelector('.showcase-frame');
     if (!frame) return;
-    const chosen = SHOWCASE_BACKGROUNDS.find(function (b) { return b.id === currentShowcaseBg; });
+
+    const chosen = getShowcaseBackgrounds().find(function (b) { return b.id === currentShowcaseBg; });
     if (chosen && chosen.url) {
         frame.style.backgroundImage =
             "linear-gradient(rgba(5,4,14,0.55), rgba(5,4,14,0.75)), url('" + chosen.url + "')";
@@ -343,18 +371,23 @@ function openBgPicker() {
     const grid = document.getElementById('bg-grid');
     if (!grid) return;
     grid.innerHTML = '';
-    SHOWCASE_BACKGROUNDS.forEach(function (bg) {
+
+    getShowcaseBackgrounds().forEach(function (bg) {
         const item = document.createElement('div');
         item.className = 'bg-option' + (bg.id === currentShowcaseBg ? ' active' : '');
         item.onclick = function () { selectBg(bg.id); };
+
         const preview = bg.url
             ? "background-image:url('" + bg.url + "'); background-size:cover; background-position:center;"
             : "background:linear-gradient(145deg, rgba(13,9,31,0.95), rgba(5,4,14,0.98));";
+
         item.innerHTML =
             '<div class="bg-option-preview" style="' + preview + '"></div>' +
             '<div class="bg-option-name">' + escapeHTML(bg.name) + '</div>';
+
         grid.appendChild(item);
     });
+
     document.getElementById('bg-modal').classList.add('open');
 }
 
@@ -367,6 +400,7 @@ async function selectBg(id) {
     currentShowcaseBg = id;   // applica subito (ottimistico)
     applyShowcaseBg();
     closeBgPicker();
+
     try {
         const res = await fetch('/api/showcase/bg', {
             method: 'POST',
@@ -374,18 +408,20 @@ async function selectBg(id) {
             body: JSON.stringify({ bg: id })
         });
         const data = await res.json();
+
         if (!res.ok || data.status !== 'success') {
             currentShowcaseBg = previous;   // rollback in caso di errore
             applyShowcaseBg();
-            showToast(data.message || 'Impossibile salvare lo sfondo.', 'error');
+            showToast(data.message || t('showcase.bg_save_error'), 'error');
             return;
         }
-        showToast('Sfondo aggiornato!', 'success');
+
+        showToast(t('showcase.bg_updated'), 'success');
     } catch (e) {
         console.error(e);
         currentShowcaseBg = previous;
         applyShowcaseBg();
-        showToast('Errore di connessione.', 'error');
+        showToast(t('common.connection_error'), 'error');
     }
 }
 
@@ -415,15 +451,19 @@ let saCode = null;      // codice carta corrente
 function openSlotActions(position, card) {
     saSlot = position;
     saCode = card.card_code;
-    document.getElementById('slot-actions-title').innerText = card.card_name || 'Carta';
+
+    document.getElementById('slot-actions-title').innerText = card.card_name || t('common.card_generic');
     document.getElementById('slot-actions-code').innerText = card.card_code || '';
+
     // Abilita/disabilita le frecce in base alla posizione nella griglia 3x3
     const row = Math.floor((position - 1) / 3);
     const col = (position - 1) % 3;
+
     setDpad('sa-up',    row > 0);
     setDpad('sa-down',  row < 2);
     setDpad('sa-left',  col > 0);
     setDpad('sa-right', col < 2);
+
     document.getElementById('slot-actions-modal').classList.add('open');
 }
 
@@ -453,6 +493,7 @@ async function slotActionRemove() {
 
 async function slotActionMove(direction) {
     if (!saCode) return;
+
     try {
         const data = await fetchJSON('/api/showcase/move', {
             method: 'POST',
@@ -463,11 +504,11 @@ async function slotActionMove(direction) {
             closeSlotActions();
             loadShowcase();
         } else {
-            showToast(data.message || 'Impossibile spostare la carta.', 'error');
+            showToast(data.message || t('showcase.cannot_update'), 'error');
         }
     } catch (e) {
         console.error(e);
-        showToast('Errore di connessione.', 'error');
+        showToast(t('common.connection_error'), 'error');
     }
 }
 

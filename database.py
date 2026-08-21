@@ -250,6 +250,8 @@ def check_users_schema():
             cursor.execute("ALTER TABLE Users ADD COLUMN ShowcaseBg TEXT DEFAULT 'none'")
         if "IsDeleted" not in columns:
             cursor.execute("ALTER TABLE Users ADD COLUMN IsDeleted INTEGER DEFAULT 0")
+        if "PreferredLang" not in columns:
+            cursor.execute("ALTER TABLE Users ADD COLUMN PreferredLang TEXT")
 
 
 def get_user_by_username(username):
@@ -603,21 +605,17 @@ def get_showcase(user_id):
 
 
 def add_to_showcase(user_id, card_code):
-    """Aggiunge una carta nel primo slot libero. Ritorna (ok, risultato)."""
+    """Aggiunge una carta nel primo slot libero. Ritorna (ok, risultato).
+    In caso di errore, 'risultato' e' un CODICE breve (non testo tradotto):
+    e' app.py a tradurlo con translate('server.' + codice)."""
     with get_cursor(commit=True) as cursor:
         cursor.execute("SELECT 1 FROM Showcase WHERE UserId = ? AND CardCode = ?", (user_id, card_code))
         if cursor.fetchone():
-            return False, "Carta gia' presente in vetrina"
+            return False, "already_in_showcase"
         cursor.execute("SELECT SlotPosition FROM Showcase WHERE UserId = ?", (user_id,))
         occupied = {row["SlotPosition"] for row in cursor.fetchall()}
         if len(occupied) >= MAX_SHOWCASE_SLOTS:
-            return False, "Vetrina piena (massimo 9 carte)"
-        free_slot = next(i for i in range(1, MAX_SHOWCASE_SLOTS + 1) if i not in occupied)
-        cursor.execute("""
-            INSERT INTO Showcase (UserId, CardCode, SlotPosition)
-            VALUES (?, ?, ?)
-        """, (user_id, card_code, free_slot))
-        return True, free_slot
+            return False, "showcase_full"
 
 
 def remove_from_showcase(user_id, card_code):
@@ -631,18 +629,18 @@ def move_showcase(user_id, card_code, direction):
         cursor.execute("SELECT SlotPosition FROM Showcase WHERE UserId = ? AND CardCode = ?", (user_id, card_code))
         current = cursor.fetchone()
         if not current:
-            return False, "Carta non trovata in vetrina"
+            return False, "card_not_in_showcase"
         current_pos = current["SlotPosition"]
         row = (current_pos - 1) // 3
         col = (current_pos - 1) % 3
         if direction == -1 and col == 0:
-            return False, "Gia' al bordo sinistro"
+            return False, "at_left_edge"
         if direction == 1 and col == 2:
-            return False, "Gia' al bordo destro"
+            return False, "at_right_edge"
         if direction == -3 and row == 0:
-            return False, "Gia' in prima riga"
+            return False, "at_top_row"
         if direction == 3 and row == 2:
-            return False, "Gia' in ultima riga"
+            return False, "at_bottom_row"
         target_pos = current_pos + direction
         cursor.execute("SELECT CardCode FROM Showcase WHERE UserId = ? AND SlotPosition = ?", (user_id, target_pos))
         target = cursor.fetchone()
@@ -659,7 +657,7 @@ def move_showcase(user_id, card_code, direction):
 def set_showcase_slot(user_id, card_code, slot_position):
     """Inserisce o sostituisce una carta in uno slot SPECIFICO."""
     if slot_position < 1 or slot_position > MAX_SHOWCASE_SLOTS:
-        return False, "Posizione non valida"
+        return False, "invalid_position"
     with get_cursor(commit=True) as cursor:
         # La carta e' gia' in un ALTRO slot? -> niente doppioni
         cursor.execute(
@@ -668,7 +666,7 @@ def set_showcase_slot(user_id, card_code, slot_position):
         )
         existing = cursor.fetchone()
         if existing and existing["SlotPosition"] != slot_position:
-            return False, "Carta gia' presente in un altro slot della vetrina"
+            return False, "already_in_other_slot"
         # Svuota lo slot scelto (se aveva gia' una carta) e inserisce la nuova
         cursor.execute(
             "DELETE FROM Showcase WHERE UserId = ? AND SlotPosition = ?",
@@ -713,6 +711,21 @@ def update_password(user_id, password_hash):
     with get_cursor(commit=True) as cursor:
         cursor.execute("UPDATE Users SET PasswordHash = ? WHERE Id = ?", (password_hash, user_id))
 
+def get_user_language(user_id):
+    """Ritorna la lingua salvata sull'account (None se l'utente non ne
+    ha mai scelta una: in quel caso si usa il default del sito)."""
+    with get_cursor() as cursor:
+        cursor.execute("SELECT PreferredLang FROM Users WHERE Id = ?", (user_id,))
+        row = cursor.fetchone()
+        if row and row["PreferredLang"]:
+            return row["PreferredLang"]
+        return None
+
+def set_user_language(user_id, lang_code):
+    """Salva sull'account la lingua scelta, cosi' verra' riproposta
+    automaticamente ad ogni futuro accesso, anche da un altro dispositivo."""
+    with get_cursor(commit=True) as cursor:
+        cursor.execute("UPDATE Users SET PreferredLang = ? WHERE Id = ?", (lang_code, user_id))
 
 # =========================================================
 # ELIMINA ACCOUNT (GDPR)

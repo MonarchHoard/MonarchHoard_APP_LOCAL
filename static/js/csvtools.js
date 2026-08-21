@@ -2,7 +2,6 @@
 // BACKUP CSV - Monarch Hoard
 // Richiede main.js (usa showToast, loadStats, loadCards)
 // =========================================================
-
 let csvSelectedFile = null;
 
 // -------- Apertura / chiusura modale --------
@@ -33,7 +32,7 @@ function setCsvFileLabel(name) {
         el.innerText = name;
         el.classList.add('has-file');
     } else {
-        el.innerText = 'Nessun file selezionato';
+        el.innerText = t('csv.no_file_selected');
         el.classList.remove('has-file');
     }
 }
@@ -41,7 +40,7 @@ function setCsvFileLabel(name) {
 // -------- Export --------
 function exportCsv() {
     window.location.href = '/api/export/csv';
-    showToast('Download del backup avviato.', 'success');
+    showToast(t('csv.download_started'), 'success');
 }
 
 // -------- Selezione file --------
@@ -53,11 +52,13 @@ function handleCsvFileChange(event) {
         document.getElementById('csv-import-btn').disabled = true;
         return;
     }
+
     if (!/\.csv$/i.test(file.name)) {
-        showToast('Seleziona un file .csv', 'error');
+        showToast(t('csv.select_csv_only'), 'error');
         event.target.value = '';
         return;
     }
+
     csvSelectedFile = file;
     setCsvFileLabel(file.name);
     document.getElementById('csv-import-btn').disabled = false;
@@ -75,9 +76,9 @@ async function importCsv() {
     const report = document.getElementById('csv-report');
 
     btn.disabled = true;
-    btn.innerText = 'Importazione...';
+    btn.innerText = t('csv.importing');
     report.className = 'csv-report';
-    report.innerHTML = '<div class="csv-report-line">Elaborazione del file in corso...</div>';
+    report.innerHTML = `<div class="csv-report-line">${t('csv.processing')}</div>`;
 
     const formData = new FormData();
     formData.append('file', csvSelectedFile);
@@ -92,47 +93,46 @@ async function importCsv() {
         if (!response.ok || data.status !== 'success') {
             report.className = 'csv-report error';
             let html = '<div class="csv-report-line">' +
-                escapeHTML(data.message || 'Import non riuscito.') + '</div>';
+                escapeHTML(data.message || t('csv.import_failed')) + '</div>';
             if (data.errors && data.errors.length) {
                 html += renderCsvErrors(data.errors, data.error_count);
             }
             report.innerHTML = html;
-            showToast('Import non riuscito.', 'error');
+            showToast(t('csv.import_failed'), 'error');
             return;
         }
 
         report.className = 'csv-report ok';
         let html = '<div class="csv-report-line strong">' +
-            data.updated + ' carte aggiornate</div>';
+            t('csv.cards_updated', { n: data.updated }) + '</div>';
         if (data.unknown > 0) {
             html += '<div class="csv-report-line warn">' +
-                data.unknown + ' codici non presenti nel database, ignorati</div>';
+                t('csv.unknown_codes', { n: data.unknown }) + '</div>';
         }
         if (data.errors && data.errors.length) {
             html += renderCsvErrors(data.errors, data.error_count);
         }
         report.innerHTML = html;
 
-        showToast(data.updated + ' carte aggiornate.', 'success');
+        showToast(t('csv.cards_updated', { n: data.updated }), 'success');
 
         // Ricarica collezione e statistiche
         if (typeof loadCards === 'function') loadCards();
         if (typeof loadStats === 'function') loadStats();
-
     } catch (e) {
         console.error(e);
         report.className = 'csv-report error';
-        report.innerHTML = '<div class="csv-report-line">Errore di connessione.</div>';
-        showToast('Errore di connessione durante l\'import.', 'error');
+        report.innerHTML = `<div class="csv-report-line">${t('common.connection_error')}</div>`;
+        showToast(t('csv.import_connection_error'), 'error');
     } finally {
-        btn.innerText = 'Importa';
+        btn.innerText = t('csv.import_btn');
         btn.disabled = !csvSelectedFile;
     }
 }
 
 function renderCsvErrors(errors, total) {
-    let html = '<div class="csv-report-line warn">Righe scartate' +
-        (total && total > errors.length ? ' (' + total + ' totali, prime ' + errors.length + '):' : ':') +
+    let html = '<div class="csv-report-line warn">' + t('csv.rows_discarded') +
+        (total && total > errors.length ? ' ' + t('csv.rows_discarded_detail', { total: total, shown: errors.length }) : ':') +
         '</div><ul class="csv-error-list">';
     errors.forEach(function (err) {
         html += '<li>' + escapeHTML(err) + '</li>';
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const file = e.dataTransfer.files && e.dataTransfer.files[0];
             if (!file) return;
             if (!/\.csv$/i.test(file.name)) {
-                showToast('Seleziona un file .csv', 'error');
+                showToast(t('csv.select_csv_only'), 'error');
                 return;
             }
             csvSelectedFile = file;
@@ -182,8 +182,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-
 function downloadExampleCsv() {
     window.location.href = '/api/export/template';
-    showToast('Download del modello avviato.', 'success');
+    showToast(t('csv.template_download_started'), 'success');
 }

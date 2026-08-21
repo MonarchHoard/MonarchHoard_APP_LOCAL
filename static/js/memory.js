@@ -1,7 +1,6 @@
 // =========================================================
 // MEMORY - Monarch Hoard
 // =========================================================
-
 let memoryCards = [];
 let deck = [];
 let flipped = [];
@@ -78,7 +77,7 @@ function setDifficulty(event, pairs, label) {
         c.classList.remove('active');
     });
     event.currentTarget.classList.add('active');
-    document.getElementById('difficulty-button').innerText = 'Difficolta\': ' + label + ' \u25BC';
+    document.getElementById('difficulty-button').innerText = t('games.difficulty_label') + ': ' + label + ' \u25BC';
     document.getElementById('difficulty-dropdown').classList.remove('open');
 
     // Cambiare difficolta' annulla la partita in corso
@@ -106,7 +105,7 @@ function renderBest() {
         el.innerText = '\u2014';
         return;
     }
-    el.innerText = best.moves + ' mosse \u00B7 ' + formatTime(best.seconds);
+    el.innerText = best.moves + ' ' + t('games.unit_moves') + ' \u00B7 ' + formatTime(best.seconds);
 }
 
 // -------- Timer --------
@@ -129,7 +128,6 @@ function showOverlay(title, text, buttonLabel, buttonAction, icon) {
     document.getElementById('overlay-icon').innerHTML = icon || '&#9670;';
     document.getElementById('overlay-title').innerText = title;
     document.getElementById('overlay-text').innerText = text;
-
     const btn = document.getElementById('overlay-btn');
     if (buttonLabel) {
         btn.style.display = 'inline-block';
@@ -138,7 +136,6 @@ function showOverlay(title, text, buttonLabel, buttonAction, icon) {
     } else {
         btn.style.display = 'none';
     }
-
     overlay.classList.add('visible');
 }
 
@@ -153,7 +150,8 @@ function updateControls() {
 
     btnPause.disabled = (gameState !== 'running' && gameState !== 'paused');
     btnStop.disabled = (gameState === 'idle');
-    btnPause.innerText = (gameState === 'paused') ? 'Riprendi' : 'Pausa';
+
+    btnPause.innerText = (gameState === 'paused') ? t('games.resume') : t('games.pause');
     btnPause.classList.toggle('active', gameState === 'paused');
 
     board.classList.toggle('blurred', gameState === 'paused');
@@ -187,12 +185,13 @@ function resetToIdle() {
     document.getElementById('memory-win').classList.remove('open');
 
     showOverlay(
-        'Memory',
-        'Scegli la difficolta\' e premi Nuova partita per iniziare.',
-        'Nuova partita',
+        t('games.memory_title'),
+        t('games.memory_intro'),
+        t('games.new_game'),
         startGame,
         '&#9670;'
     );
+
     updateControls();
 }
 
@@ -228,8 +227,8 @@ function startGame() {
     document.getElementById('memory-moves').innerText = '0';
     document.getElementById('memory-time').innerText = '00:00';
     document.getElementById('memory-pairs').innerText = '0 / ' + available;
-    renderBest();
 
+    renderBest();
     renderBoard();
     updateControls();
 }
@@ -237,12 +236,10 @@ function startGame() {
 // -------- Ferma partita --------
 function stopGame() {
     if (gameState === 'idle') return;
-
     const wasPlaying = (gameState === 'running' || gameState === 'paused');
     resetToIdle();
-
     if (wasPlaying) {
-        showToast('Partita annullata.', 'info');
+        showToast(t('games.game_cancelled'), 'info');
     }
 }
 
@@ -255,14 +252,13 @@ function togglePause() {
         lockBoard = true;
 
         showOverlay(
-            'Partita in Pausa',
-            'Il tempo e\' fermo e il tavolo e\' oscurato.',
-            'Riprendi',
+            t('games.memory_paused_title'),
+            t('games.memory_paused_text'),
+            t('games.resume'),
             togglePause,
             '&#10074;&#10074;'
         );
         updateControls();
-
     } else if (gameState === 'paused') {
         gameState = 'running';
         hideOverlay();
@@ -338,7 +334,6 @@ function layoutBoard() {
     const n = deck.length;
     const gap = 14;
     const padding = 20;
-
     const boardTop = board.getBoundingClientRect().top;
     const availW = board.clientWidth - (padding * 2);
     const availH = window.innerHeight - boardTop - (padding * 2) - 20;
@@ -379,7 +374,6 @@ window.addEventListener('orientationchange', function () {
 if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', layoutBoard);
 }
-
 
 // -------- Gioco --------
 function flipTile(tile) {
@@ -436,7 +430,7 @@ async function endGame() {
     updateControls();
 
     document.getElementById('memory-win-stats').innerText =
-        moves + ' mosse in ' + formatTime(seconds);
+        moves + ' ' + t('games.unit_moves') + ' in ' + formatTime(seconds);
     document.getElementById('memory-win-record').style.display = 'none';
 
     try {
@@ -458,7 +452,7 @@ async function endGame() {
         }
     } catch (e) {
         console.error(e);
-        showToast('Record non salvato: errore di connessione.', 'error');
+        showToast(t('games.memory_record_not_saved'), 'error');
     }
 
     schedule(function () {
@@ -487,7 +481,6 @@ document.addEventListener('keydown', function (e) {
 function showToast(message, type, duration) {
     type = type || 'info';
     duration = duration || 3000;
-
     const container = document.getElementById('toast-container');
     if (!container) return;
 
@@ -512,8 +505,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     } catch (e) {
         console.error(e);
         showOverlay(
-            'Errore',
-            'Impossibile caricare le carte. Ricarica la pagina.',
+            t('common.generic_error'),
+            t('toast.cards_load_error'),
             null,
             null,
             '&#9888;'

@@ -1,34 +1,29 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-
 	<link rel="icon" href="/static/wallpaper/favicon.ico">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <!-- ===== PWA / Aggiungi a Home ===== -->
     <link rel="manifest" href="/static/manifest.json">
     <meta name="theme-color" content="#05020d">
-
     <!-- iOS Safari: apri a schermo intero come app -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Monarch Hoard">
-
     <!-- Icona sulla Home di iPhone (180x180 consigliata) -->
     <link rel="apple-touch-icon" href="/static/wallpaper/icon-180.png">
     <!-- ===== fine PWA ===== -->
-
-    <title>Monarch Hoard – La tua collezione</title>
+    <title>{{ t('titles.index') }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
-
 </head>
+<script>window.MH_LANG = {{ lang_json|tojson }};</script>
+<script src="/static/js/i18n.js"></script>
+<script src="/static/js/lang-switcher.js"></script>
 <script src="/static/js/mobile-menu.js"></script>
 <body>
-
 <div class="app-shell">
-
     <!-- SIDEBAR SINISTRA -->
     <aside class="sidebar">
         <div class="sidebar-top">
@@ -60,42 +55,42 @@
 		
 			<button id="btn-view-dashboard" class="side-nav-btn" onclick="switchView('DASHBOARD')">
 				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_dashboard.png">
-				<span>Dashboard</span>
+				<span>{{ t('nav.dashboard') }}</span>
 			</button>
 		
 			<button id="btn-view-collezione" class="side-nav-btn active" onclick="switchView('COLLEZIONE')">
 				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_collection.png">
-				<span>Collezione</span>
+				<span>{{ t('nav.collection') }}</span>
 			</button>
 		
 			<button id="btn-view-wishlist" class="side-nav-btn" onclick="switchView('WISHLIST')">
 				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_wishlist.png">
-				<span>Wishlist</span>
+				<span>{{ t('nav.wishlist') }}</span>
 			</button>
 		
 			<button class="side-nav-btn" onclick="location.href='/showcase'">
 				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_vetrina.png">
-				<span>Vetrina</span>
+				<span>{{ t('nav.showcase') }}</span>
 			</button>
 		
 			<button class="side-nav-btn disabled" disabled>
 				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_progressionset.png">
-				<span>Progressione Set</span>
+				<span>{{ t('nav.set_progress') }}</span>
 			</button>
 		
 			<button class="side-nav-btn disabled" disabled>
 				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_exchanges.png">
-				<span>Scambi</span>
+				<span>{{ t('nav.trades') }}</span>
 			</button>
 		
 			<button id="btn-view-giochi" class="side-nav-btn" onclick="location.href='/games/memory'">
 				<img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_games.png">
-				<span>Giochi</span>
+				<span>{{ t('nav.games') }}</span>
 			</button>
 		
             <button class="side-nav-btn" onclick="location.href='/settings'">
                 <img class="side-nav-icon" src="/static/wallpaper/symbols_leftbar_settings.png">
-                <span>Impostazioni</span>
+                <span>{{ t('nav.settings') }}</span>
             </button>
 		
 		</nav>
@@ -107,202 +102,174 @@
                     <line x1="21" y1="12" x2="9" y2="12"></line>
                 </svg>
             </span>
-            <span class="sidebar-logout-text">Logout</span>
+            <span class="sidebar-logout-text">{{ t('nav.logout') }}</span>
         </a>
     </aside>
 	<div class="main-content"> 
     <div class="top-bar">
         <div class="top-bar-left">
             <img src="/static/wallpaper/Solo_Leveling_Title.png" class="top-bar-img" alt="Solo Leveling Title">
+            <div class="dropdown-filter lang-switcher-wrap">
+                <button id="lang-switcher-btn" class="dropdown-button lang-switcher-btn" type="button" onclick="toggleLangDropdown()">
+                    &#127760; {{ lang_code|upper }} &#9660;
+                </button>
+                <div id="lang-switcher-dropdown" class="dropdown-content lang-switcher-dropdown">
+                    {% for lang in available_langs %}
+                    <a href="{{ url_for('set_language_route', lang_code=lang.code) }}" class="lang-option{{ ' active' if lang.code == lang_code else '' }}">{{ lang.flag }} {{ lang.name }}</a>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
-        <div class="top-bar-right"></div>
+        <div class="top-bar-right">
+            <section class="hero-panel">
+                <div class="hero-stats">
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-icon">
+                            <img src="/static/wallpaper/icon_total_cards.png" alt="{{ t('topbar.total_cards') }}">
+                        </div>
+                        <div>
+                            <div class="hero-stat-label">{{ t('topbar.total_cards') }}</div>
+                            <div class="hero-stat-value" id="total-cards">0</div>
+                        </div>
+                    </div>
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-icon">
+                            <img src="/static/wallpaper/icon_owned_cards.png" alt="{{ t('topbar.owned_cards') }}">
+                        </div>
+                        <div>
+                            <div class="hero-stat-label">{{ t('topbar.owned_cards') }}</div>
+                            <div class="hero-stat-value" id="owned-cards">0</div>
+                        </div>
+                    </div>
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-icon">
+                            <img src="/static/wallpaper/icon_total_copies.png" alt="{{ t('topbar.total_copies') }}">
+                        </div>
+                        <div>
+                            <div class="hero-stat-label">{{ t('topbar.total_copies') }}</div>
+                            <div class="hero-stat-value" id="total-copies">0</div>
+                        </div>
+                    </div>
+                    <div class="hero-stat-card">
+                        <div class="hero-stat-icon">
+                            <img src="/static/wallpaper/icon_completed_sets.png" alt="{{ t('topbar.completed_sets') }}">
+                        </div>
+                        <div>
+                            <div class="hero-stat-label">{{ t('topbar.completed_sets') }}</div>
+                            <div class="hero-stat-value" id="completed-sets">0 / 0</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
-
     <!-- AREA CENTRALE -->
     <main class="main-area">
-
-        <!-- HERO TOP -->
-        <section class="hero-panel">
-
-            <div class="hero-stats">
-
-                <div class="hero-stat-card">
-
-					<div class="hero-stat-icon">
-						<img src="/static/wallpaper/icon_total_cards.png" alt="Totale Carte">
-					</div>
-
-                    <div>
-                        <div class="hero-stat-label">Totale Carte</div>
-                        <div class="hero-stat-value" id="total-cards">0</div>
-                    </div>
-                </div>
-
-                <div class="hero-stat-card">
-
-					<div class="hero-stat-icon">
-						<img src="/static/wallpaper/icon_owned_cards.png" alt="Possedute">
-					</div>
-
-                    <div>
-                        <div class="hero-stat-label">Possedute</div>
-                        <div class="hero-stat-value" id="owned-cards">0</div>
-                    </div>
-                </div>
-
-                <div class="hero-stat-card">
-					<div class="hero-stat-icon">
-						<img src="/static/wallpaper/icon_total_copies.png" alt="Copie Totali">
-					</div>
-                    <div>
-                        <div class="hero-stat-label">Copie Totali</div>
-                        <div class="hero-stat-value" id="total-copies">0</div>
-                    </div>
-                </div>
-
-                <div class="hero-stat-card">
-
-					<div class="hero-stat-icon">
-						<img src="/static/wallpaper/icon_completed_sets.png" alt="Set Completati">
-					</div>
-
-                    <div>
-                        <div class="hero-stat-label">Set Completati</div>
-                        <div class="hero-stat-value" id="completed-sets">0 / 0</div>
-                    </div>
-                </div>
-
-            </div>
-
-        </section>
-
         <!-- FILTRI -->
         <section class="search-bar">
-
             <div class="search-row">
                 <input
                     type="text"
                     id="search-input"
                     class="search-input"
-                    placeholder="Cerca nome o codice..."
+                    placeholder="{{ t('collection.search_placeholder') }}"
                     oninput="handleSearch()">
             </div>
-
             <div class="filters-row">
-
                 <div class="dropdown-filter">
                     <button id="rarity-button" class="dropdown-button" onclick="toggleDropdown('rarity-dropdown')">
-                        Rarità ▼
+                        {{ t('collection.filter_rarity') }} &#9660;
                     </button>
-
                     <div id="rarity-dropdown" class="dropdown-content">
                         <div id="rarity-filter"></div>
-
                         <div class="dropdown-footer">
-                            <button class="dropdown-action" onclick="selectAllInDropdown('rarity-filter')">Seleziona tutte</button>
-                            <button class="dropdown-action" onclick="clearDropdown('rarity-filter')">Deseleziona</button>
+                            <button class="dropdown-action" onclick="selectAllInDropdown('rarity-filter')">{{ t('common.select_all') }}</button>
+                            <button class="dropdown-action" onclick="clearDropdown('rarity-filter')">{{ t('common.deselect') }}</button>
                         </div>
                     </div>
                 </div>
-
                 <div class="dropdown-filter">
                     <button id="set-button" class="dropdown-button" onclick="toggleDropdown('set-dropdown')">
-                        Set ▼
+                        {{ t('collection.filter_set') }} &#9660;
                     </button>
-
                     <div id="set-dropdown" class="dropdown-content">
                         <div id="set-filter"></div>
-
                         <div class="dropdown-footer">
-                            <button class="dropdown-action" onclick="selectAllInDropdown('set-filter')">Seleziona tutti</button>
-                            <button class="dropdown-action" onclick="clearDropdown('set-filter')">Deseleziona</button>
+                            <button class="dropdown-action" onclick="selectAllInDropdown('set-filter')">{{ t('common.select_all_m') }}</button>
+                            <button class="dropdown-action" onclick="clearDropdown('set-filter')">{{ t('common.deselect') }}</button>
                         </div>
                     </div>
                 </div>
-
                 <div class="dropdown-filter">
 					<button id="owned-button" class="dropdown-button" onclick="toggleDropdown('owned-dropdown')">
-						Tutte ▼
+						{{ t('collection.filter_status_all') }} &#9660;
 					</button>
-
                     <div id="owned-dropdown" class="dropdown-content">
                         <div id="owned-filter"></div>
-
                         <div class="dropdown-footer">
-                            <button class="dropdown-action" onclick="selectAllInDropdown('owned-filter')">Seleziona tutte</button>
-                            <button class="dropdown-action" onclick="clearDropdown('owned-filter')">Deseleziona</button>
+                            <button class="dropdown-action" onclick="selectAllInDropdown('owned-filter')">{{ t('common.select_all') }}</button>
+                            <button class="dropdown-action" onclick="clearDropdown('owned-filter')">{{ t('common.deselect') }}</button>
                         </div>
                     </div>
                 </div>
-
                 <div class="dropdown-filter">
                     <button id="sort-cards-button" class="dropdown-button" onclick="toggleDropdown('sort-cards-dropdown')">
-                        Ordina Carte: CardCode ▼
+                        {{ t('collection.sort_cards_button_prefix') }}: {{ t('collection.sort_cards_code') }} &#9660;
                     </button>
-
                     <div id="sort-cards-dropdown" class="dropdown-content">
                         <div id="sort-cards-filter">
-                            <div class="filter-chip" data-value="db-id" onclick="selectSortCard(event, 'db-id', 'Ordina Carte: ID')">ID</div>
-                            <div class="filter-chip active" data-value="id" onclick="selectSortCard(event, 'id', 'Ordina Carte: CardCode')">CardCode</div>
-                            <div class="filter-chip" data-value="name" onclick="selectSortCard(event, 'name', 'Ordina Carte: Nome (A-Z)')">Nome (A-Z)</div>
-							<div class="filter-chip" data-value="rarity-asc" onclick="selectSortCard(event, 'rarity-asc', 'Ordina Carte: Rarità Min-Max')">Rarità Min-Max</div>
-							<div class="filter-chip" data-value="rarity-desc" onclick="selectSortCard(event, 'rarity-desc', 'Ordina Carte: Rarità Max-Min')">Rarità Max-Min</div>
-                            <div class="filter-chip" data-value="qty-desc" onclick="selectSortCard(event, 'qty-desc', 'Ordina Carte: Quantità Max-Min')">Quantità Max-Min</div>
-							<div class="filter-chip" data-value="qty-asc" onclick="selectSortCard(event, 'qty-asc', 'Ordina Carte: Quantità Min-Max')">Quantità Min-Max</div>
+                            <div class="filter-chip" data-value="db-id" onclick="selectSortCard(event, 'db-id', '{{ t('collection.sort_cards_button_prefix') }}: {{ t('collection.sort_cards_id') }}')">{{ t('collection.sort_cards_id') }}</div>
+                            <div class="filter-chip active" data-value="id" onclick="selectSortCard(event, 'id', '{{ t('collection.sort_cards_button_prefix') }}: {{ t('collection.sort_cards_code') }}')">{{ t('collection.sort_cards_code') }}</div>
+                            <div class="filter-chip" data-value="name" onclick="selectSortCard(event, 'name', '{{ t('collection.sort_cards_button_prefix') }}: {{ t('collection.sort_cards_name') }}')">{{ t('collection.sort_cards_name') }}</div>
+							<div class="filter-chip" data-value="rarity-asc" onclick="selectSortCard(event, 'rarity-asc', '{{ t('collection.sort_cards_button_prefix') }}: {{ t('collection.sort_cards_rarity_asc') }}')">{{ t('collection.sort_cards_rarity_asc') }}</div>
+							<div class="filter-chip" data-value="rarity-desc" onclick="selectSortCard(event, 'rarity-desc', '{{ t('collection.sort_cards_button_prefix') }}: {{ t('collection.sort_cards_rarity_desc') }}')">{{ t('collection.sort_cards_rarity_desc') }}</div>
+                            <div class="filter-chip" data-value="qty-desc" onclick="selectSortCard(event, 'qty-desc', '{{ t('collection.sort_cards_button_prefix') }}: {{ t('collection.sort_cards_qty_desc') }}')">{{ t('collection.sort_cards_qty_desc') }}</div>
+							<div class="filter-chip" data-value="qty-asc" onclick="selectSortCard(event, 'qty-asc', '{{ t('collection.sort_cards_button_prefix') }}: {{ t('collection.sort_cards_qty_asc') }}')">{{ t('collection.sort_cards_qty_asc') }}</div>
                         </div>
                     </div>
                 </div>
-
                 <div class="dropdown-filter">
                     <button id="sort-set-button" class="dropdown-button" onclick="toggleDropdown('sort-set-dropdown')">
-                        Ordina Set: Crescente ▼
+                        {{ t('collection.sort_set_button_prefix') }}: {{ t('collection.sort_set_asc') }} &#9660;
                     </button>
-
                     <div id="sort-set-dropdown" class="dropdown-content">
                         <div id="sort-set-filter">
-                            <div class="filter-chip active" data-value="asc" onclick="selectSortSet(event, 'asc', 'Ordina Set: Crescente')">Crescente</div>
-                            <div class="filter-chip" data-value="desc" onclick="selectSortSet(event, 'desc', 'Ordina Set: Decrescente')">Decrescente</div>
+                            <div class="filter-chip active" data-value="asc" onclick="selectSortSet(event, 'asc', '{{ t('collection.sort_set_button_prefix') }}: {{ t('collection.sort_set_asc') }}')">{{ t('collection.sort_set_asc') }}</div>
+                            <div class="filter-chip" data-value="desc" onclick="selectSortSet(event, 'desc', '{{ t('collection.sort_set_button_prefix') }}: {{ t('collection.sort_set_desc') }}')">{{ t('collection.sort_set_desc') }}</div>
                         </div>
                     </div>
                 </div>
-
 				<button class="set-toggle-btn" onclick="openAllSets()">
-					Espandi tutti
+					{{ t('collection.btn_expand_all') }}
 				</button>
 				
 				<button class="set-toggle-btn" onclick="closeAllSets()">
-					Comprimi tutti
+					{{ t('collection.btn_collapse_all') }}
 				</button>
 				
 				<button id="group-toggle-btn" class="set-toggle-btn" onclick="toggleGroupMode()">
-					Vista: Per Set
+					{{ t('collection.btn_view_by_set') }}
 				</button>
 				
 				<button id="graded-toggle-btn" class="set-toggle-btn" onclick="toggleGradedFilter()">
-					Gradate: Tutte
+					{{ t('collection.btn_graded_all') }}
 				</button>
 				
 				<button class="set-toggle-btn csv-open-btn" onclick="openCsvModal()">
-					Backup CSV
+					{{ t('collection.btn_backup_csv') }}
 				</button>
 				
 				<button class="action-filter-btn" onclick="clearFilters()">
-					Reset filtri
+					{{ t('collection.btn_reset_filters') }}
 				</button>
-
             </div>
-
         </section>
-
         <!-- CONTENUTI -->
         <div id="dashboard-container" class="hidden"></div>
 		<div id="results-counter" class="results-counter"></div>
         <div id="sets-container"></div>
-
     </main>
-
 </div>
-
 <!-- MODAL CARTA -->
 <div id="card-modal" class="modal">
     <div class="modal-content">
@@ -313,125 +280,103 @@
             <img id="modal-card-img" class="modal-img" src onerror="this.src='/static/cards/TRANSPARENT/No_Image_Available.webp';">
             <button id="modal-nav-next" class="modal-nav-btn modal-nav-next" type="button" onclick="navigateModal(1)" aria-label="Successiva"></button>
         </div>
-
         <div class="modal-title-row">
             <div class="modal-title-texts">
                 <h2 id="modal-card-name"></h2>
                 <p id="modal-card-code"></p>
             </div>
         </div>
-
         <div class="quantity-control modal-quantity-control">
             <button class="btn-qty" id="modal-btn-minus" type="button" aria-label="Diminuisci quantita'">-</button>
             <input class="qty-input" id="modal-qty-input" type="number" min="0" value="0" aria-label="Quantita' posseduta">
             <button class="btn-qty" id="modal-btn-plus" type="button" aria-label="Aumenta quantita'">+</button>
         </div>
-
         <div id="modal-serial-block" class="serial-block" style="display:none;">
-            <div class="serial-title">Numerazione SG · 001 – 300</div>
+            <div class="serial-title">{{ t('card_modal.serial_title') }}</div>
             <div id="modal-serial-inputs" class="serial-inputs"></div>
         </div>
         <div id="modal-grading-block" class="grading-block">
             <div class="grading-row">
-                <span class="grading-label">Gradata</span>
+                <span class="grading-label">{{ t('card_modal.grading_label') }}</span>
                 <div class="grading-toggle">
-                    <button id="grading-toggle-no" class="grading-toggle-btn active" type="button">No</button>
-                    <button id="grading-toggle-yes" class="grading-toggle-btn" type="button">Si'</button>
+                    <button id="grading-toggle-no" class="grading-toggle-btn active" type="button">{{ t('common.no') }}</button>
+                    <button id="grading-toggle-yes" class="grading-toggle-btn" type="button">{{ t('common.yes') }}</button>
                 </div>
             </div>
             <div id="grading-details" class="grading-details" style="display:none;">
                 <div class="grading-field">
-                    <label>DA</label>
+                    <label>{{ t('card_modal.grading_company_label') }}</label>
                     <select id="grading-company" class="grading-select">
-                        <option value="">&mdash; Seleziona &mdash;</option>
+                        <option value="">{{ t('card_modal.grading_company_placeholder') }}</option>
                         <option value="PSA">PSA</option>
                         <option value="BGS">BGS (Beckett)</option>
                         <option value="CGC">CGC</option>
                         <option value="SGC">SGC</option>
                         <option value="TAG">TAG</option>
-                        <option value="Altro">Altro...</option>
+                        <option value="Altro">{{ t('card_modal.grading_other') }}</option>
                     </select>
-                    <input id="grading-company-other" class="grading-input" style="display:none;" placeholder="Nome azienda" maxlength="30">
+                    <input id="grading-company-other" class="grading-input" style="display:none;" placeholder="{{ t('card_modal.grading_company_other_placeholder') }}" maxlength="30">
                 </div>
                 <div class="grading-field">
-                    <label>Voto</label>
+                    <label>{{ t('card_modal.grading_grade_label') }}</label>
                     <input id="grading-grade" class="grading-input grading-grade" placeholder="es. 10, 9.5" maxlength="10">
                 </div>
             </div>
         </div>
         <div id="modal-notes-block" class="notes-block">
-            <div class="notes-title">Note personali</div>
+            <div class="notes-title">{{ t('card_modal.notes_title') }}</div>
             <textarea id="modal-notes-input" class="notes-input" maxlength="500"
-                      placeholder="Aggiungi una nota: dove l'hai presa, condizione, se e' da scambiare..."></textarea>
+                      placeholder="{{ t('card_modal.notes_placeholder') }}"></textarea>
             <div id="modal-notes-hint" class="notes-hint"></div>
         </div>
-
         <div class="modal-footer">
-            <button class="close-btn" onclick="closeModal()">Chiudi</button>
-            <button id="modal-showcase-btn" class="showcase-toggle-btn" type="button" aria-label="Aggiungi o togli dalla vetrina" onclick="toggleShowcaseFromModal()">+ Vetrina</button>
-            <button id="modal-wishlist-btn" class="wishlist-btn modal-wishlist-btn" type="button" aria-label="Aggiungi o togli dalla wishlist" onclick="toggleWishlistFromModal()">🤍</button>
+            <button class="close-btn" onclick="closeModal()">{{ t('common.close') }}</button>
+            <button id="modal-showcase-btn" class="showcase-toggle-btn" type="button" aria-label="Aggiungi o togli dalla vetrina" onclick="toggleShowcaseFromModal()">{{ t('card_modal.add_showcase') }}</button>
+            <button id="modal-wishlist-btn" class="wishlist-btn modal-wishlist-btn" type="button" aria-label="Aggiungi o togli dalla wishlist" onclick="toggleWishlistFromModal()">&#129292;</button>
         </div>
     </div>
 </div>
-
-
 <!-- MODAL BACKUP CSV -->
 <div id="csv-modal" class="modal">
     <div class="modal-content csv-modal-content">
-        <h2>Backup Collezione</h2>
-
+        <h2>{{ t('csv.modal_title') }}</h2>
         <div class="csv-section">
-            <div class="csv-section-title">Esporta</div>
+            <div class="csv-section-title">{{ t('csv.export_title') }}</div>
             <p class="csv-section-text">
-                Scarica un file CSV con tutte le carte, quantita', wishlist e numerazioni.
-                Aprilo con Excel o conservalo come backup.
+                {{ t('csv.export_text') }}
             </p>
             <button class="overlay-action-btn csv-export-btn" onclick="exportCsv()">
-                Scarica CSV
+                {{ t('csv.export_btn') }}
             </button>
         </div>
-
         <div class="csv-divider"></div>
-
         <div class="csv-section">
-            <div class="csv-section-title">Importa</div>
+            <div class="csv-section-title">{{ t('csv.import_title') }}</div>
             <p class="csv-section-text">
-                Scarica il modello con tutte le carte esistenti, compila la
-                colonna <b>Quantity</b> con Excel e reimportalo.
-                Le colonne <b>Wishlist</b> e <b>Serials</b> sono facoltative.
-                Non modificare mai la colonna <b>CardCode</b>.
+                {{ t('csv.import_text') }}
             </p>
             <button class="csv-example-btn" onclick="downloadExampleCsv()">
-                Scarica modello vuoto
+                {{ t('csv.download_template_btn') }}
             </button>
-
             <div id="csv-dropzone" class="csv-dropzone" onclick="triggerCsvFilePicker()">
                 <div class="csv-dropzone-icon">&#8681;</div>
-                <div class="csv-dropzone-text">Trascina qui il file oppure clicca per sceglierlo</div>
-                <div id="csv-file-name" class="csv-file-name">Nessun file selezionato</div>
+                <div class="csv-dropzone-text">{{ t('csv.dropzone_text') }}</div>
+                <div id="csv-file-name" class="csv-file-name">{{ t('csv.no_file_selected') }}</div>
             </div>
-
             <input type="file" id="csv-file-input" accept=".csv,text/csv" style="display:none;">
-
             <button id="csv-import-btn" class="overlay-action-btn csv-import-btn" onclick="importCsv()" disabled>
-                Importa
+                {{ t('csv.import_btn') }}
             </button>
-
             <div id="csv-report" class="csv-report"></div>
         </div>
-
         <div class="modal-footer">
-            <button class="close-btn" onclick="closeCsvModal()">Chiudi</button>
+            <button class="close-btn" onclick="closeCsvModal()">{{ t('common.close') }}</button>
         </div>
     </div>
 </div>
-
 <!-- Container per le notifiche toast -->
 <div id="toast-container"></div>
-
 <script src="/static/js/main.js"></script>
-
 <script src="/static/js/csvtools.js"></script>
-
 </body>
 </html>

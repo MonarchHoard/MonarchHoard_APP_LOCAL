@@ -1,7 +1,6 @@
 // =========================================================
 // INDOVINA LA CARTA - Monarch Hoard
 // =========================================================
-
 const QUESTIONS_PER_GAME = 10;
 const SECONDS_PER_QUESTION = 15;
 
@@ -84,7 +83,7 @@ function setQuizDifficulty(event, level, label) {
         c.classList.remove('active');
     });
     event.currentTarget.classList.add('active');
-    document.getElementById('quiz-difficulty-button').innerText = 'Difficolta\': ' + label + ' \u25BC';
+    document.getElementById('quiz-difficulty-button').innerText = t('games.difficulty_label') + ': ' + label + ' \u25BC';
     document.getElementById('quiz-difficulty-dropdown').classList.remove('open');
 
     // Cambiare difficolta' annulla la partita in corso
@@ -106,7 +105,7 @@ async function fetchBests() {
 function renderBest() {
     const el = document.getElementById('quiz-best');
     const best = bestScores[String(difficulty)];
-    el.innerText = best ? (best.score + ' pt') : '\u2014';
+    el.innerText = best ? (best.score + ' ' + t('games.unit_points')) : '\u2014';
 }
 
 // -------- Overlay e stato pulsanti --------
@@ -115,7 +114,6 @@ function showOverlay(title, text, buttonLabel, buttonAction, icon) {
     document.getElementById('overlay-icon').innerHTML = icon || '&#9670;';
     document.getElementById('overlay-title').innerText = title;
     document.getElementById('overlay-text').innerText = text;
-
     const btn = document.getElementById('overlay-btn');
     if (buttonLabel) {
         btn.style.display = 'inline-block';
@@ -124,7 +122,6 @@ function showOverlay(title, text, buttonLabel, buttonAction, icon) {
     } else {
         btn.style.display = 'none';
     }
-
     overlay.classList.add('visible');
 }
 
@@ -139,7 +136,8 @@ function updateControls() {
 
     btnPause.disabled = (gameState !== 'running' && gameState !== 'paused');
     btnStop.disabled = (gameState === 'idle');
-    btnPause.innerText = (gameState === 'paused') ? 'Riprendi' : 'Pausa';
+
+    btnPause.innerText = (gameState === 'paused') ? t('games.resume') : t('games.pause');
     btnPause.classList.toggle('active', gameState === 'paused');
 
     stage.classList.toggle('blurred', gameState === 'paused');
@@ -214,12 +212,13 @@ function resetToIdle() {
     document.getElementById('quiz-win').classList.remove('open');
 
     showOverlay(
-        'Indovina la Carta',
-        'Scegli la difficolta\' e premi Nuova partita per iniziare.',
-        'Nuova partita',
+        t('games.quiz_title'),
+        t('games.quiz_intro'),
+        t('games.new_game'),
         startQuiz,
         '&#9670;'
     );
+
     updateControls();
 }
 
@@ -227,8 +226,8 @@ function resetToIdle() {
 function startQuiz() {
     if (quizCards.length < 4) {
         showOverlay(
-            'Carte insufficienti',
-            'Servono almeno 4 carte per giocare.',
+            t('games.quiz_not_enough_cards_title'),
+            t('games.quiz_not_enough_cards_text'),
             null,
             null,
             '&#9888;'
@@ -261,12 +260,10 @@ function startQuiz() {
 // -------- Ferma partita --------
 function stopQuiz() {
     if (gameState === 'idle') return;
-
     const wasPlaying = (gameState === 'running' || gameState === 'paused');
     resetToIdle();
-
     if (wasPlaying) {
-        showToast('Partita annullata.', 'info');
+        showToast(t('games.game_cancelled'), 'info');
     }
 }
 
@@ -279,14 +276,13 @@ function togglePause() {
         clearPending();
 
         showOverlay(
-            'Partita in Pausa',
-            'Il tempo e\' fermo e la carta e\' nascosta.',
-            'Riprendi',
+            t('games.memory_paused_title'),
+            t('games.quiz_paused_text'),
+            t('games.resume'),
             togglePause,
             '&#10074;&#10074;'
         );
         updateControls();
-
     } else if (gameState === 'paused') {
         gameState = 'running';
         hideOverlay();
@@ -338,9 +334,9 @@ function showQuestion() {
     // Indizio: rarita' e set sono gia' nei dati
     const hint = document.getElementById('quiz-hint');
     if (difficulty === 1) {
-        hint.innerText = 'Set: ' + (q.card.set_name || '?') + ' \u00B7 Rarita\': ' + (q.card.rarity || '?');
+        hint.innerText = t('games.hint_set_word') + ': ' + (q.card.set_name || '?') + ' \u00B7 ' + t('games.hint_rarity_word') + ': ' + (q.card.rarity || '?');
     } else if (difficulty === 2) {
-        hint.innerText = 'Set: ' + (q.card.set_name || '?');
+        hint.innerText = t('games.hint_set_word') + ': ' + (q.card.set_name || '?');
     } else {
         hint.innerText = '';
     }
@@ -368,7 +364,6 @@ function showQuestion() {
 // -------- Timer della domanda --------
 function resumeQuestionTimer() {
     clearInterval(questionTimer);
-
     const fill = document.getElementById('quiz-timer-fill');
     const maxTime = SECONDS_PER_QUESTION * 10;
 
@@ -377,11 +372,9 @@ function resumeQuestionTimer() {
 
     questionTimer = setInterval(function () {
         if (gameState !== 'running') return;
-
         timeLeft--;
         const pct = (timeLeft / maxTime) * 100;
         fill.style.width = pct + '%';
-
         if (pct <= 30) fill.classList.add('low');
 
         if (timeLeft <= 0) {
@@ -425,13 +418,13 @@ function answer(code, buttonEl) {
         const timeBonus = Math.round((timeLeft / 10) * 5);
         const diffBonus = difficulty === 3 ? 60 : (difficulty === 2 ? 30 : 0);
         const gained = Math.round((100 + timeBonus + diffBonus) * multiplier);
-
         score += gained;
-        feedback.innerText = 'Corretto  +' + gained + ' pt';
+
+        feedback.innerText = t('games.quiz_correct') + '  +' + gained + ' ' + t('games.unit_points');
         feedback.className = 'quiz-feedback ok';
     } else {
         streak = 0;
-        feedback.innerText = code === null ? 'Tempo scaduto' : 'Sbagliato';
+        feedback.innerText = code === null ? t('games.quiz_time_out') : t('games.quiz_wrong');
         feedback.className = 'quiz-feedback ko';
     }
 
@@ -451,18 +444,17 @@ async function endQuiz() {
     updateControls();
 
     const accuracy = Math.round((correctCount / questions.length) * 100);
-
     let title;
-    if (accuracy === 100) title = 'Memoria da Monarca';
-    else if (accuracy >= 70) title = 'Ottimo Hunter';
-    else if (accuracy >= 40) title = 'Puoi Fare Meglio';
-    else title = 'Serve Allenamento';
+    if (accuracy === 100) title = t('games.quiz_result_perfect');
+    else if (accuracy >= 70) title = t('games.quiz_result_great');
+    else if (accuracy >= 40) title = t('games.quiz_result_ok');
+    else title = t('games.quiz_result_bad');
 
     document.getElementById('quiz-win-title').innerText = title;
-    document.getElementById('quiz-win-stats').innerText = score + ' punti';
+    document.getElementById('quiz-win-stats').innerText = score + ' ' + t('games.unit_points');
     document.getElementById('quiz-win-detail').innerHTML =
-        correctCount + ' / ' + questions.length + ' corrette &middot; ' +
-        accuracy + '% &middot; streak max x' + bestStreak;
+        correctCount + ' / ' + questions.length + ' ' + t('games.quiz_win_correct_word') + ' &middot; ' +
+        accuracy + '% &middot; ' + t('games.quiz_win_streak_word') + ' x' + bestStreak;
     document.getElementById('quiz-win-record').style.display = 'none';
 
     try {
@@ -485,7 +477,7 @@ async function endQuiz() {
         }
     } catch (e) {
         console.error(e);
-        showToast('Punteggio non salvato: errore di connessione.', 'error');
+        showToast(t('games.quiz_score_not_saved'), 'error');
     }
 
     schedule(function () {
@@ -505,13 +497,11 @@ document.addEventListener('keydown', function (e) {
         togglePause();
         return;
     }
-
     // ESC = ferma partita
     if (e.key === 'Escape' && gameState !== 'idle') {
         stopQuiz();
         return;
     }
-
     // 1-4 = risposta rapida
     if (!answering || gameState !== 'running') return;
     const n = parseInt(e.key, 10);
@@ -525,7 +515,6 @@ document.addEventListener('keydown', function (e) {
 function showToast(message, type, duration) {
     type = type || 'info';
     duration = duration || 3000;
-
     const container = document.getElementById('toast-container');
     if (!container) return;
 
@@ -550,8 +539,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     } catch (e) {
         console.error(e);
         showOverlay(
-            'Errore',
-            'Impossibile caricare le carte. Ricarica la pagina.',
+            t('common.generic_error'),
+            t('toast.cards_load_error'),
             null,
             null,
             '&#9888;'

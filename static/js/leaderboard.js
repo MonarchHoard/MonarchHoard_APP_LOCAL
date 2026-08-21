@@ -1,38 +1,39 @@
 // =========================================================
 // CLASSIFICHE - Monarch Hoard
 // =========================================================
-
-const LB_CONFIG = {
-    memory: {
-        label: 'Memory',
-        endpoint: function (d) { return '/api/memory/leaderboard/' + d; },
-        difficulties: [
-            { value: 6,  label: 'Facile' },
-            { value: 8,  label: 'Normale' },
-            { value: 12, label: 'Difficile' },
-            { value: 18, label: 'Monarca' }
-        ],
-        defaultDifficulty: 8,
-        headScore: 'Mosse',
-        headDetail: 'Tempo',
-        score: function (row) { return row.moves + ' mosse'; },
-        detail: function (row) { return formatTime(row.seconds); }
-    },
-    quiz: {
-        label: 'Indovina la Carta',
-        endpoint: function (d) { return '/api/games/leaderboard/quiz/' + d; },
-        difficulties: [
-            { value: 1, label: 'Facile' },
-            { value: 2, label: 'Normale' },
-            { value: 3, label: 'Monarca' }
-        ],
-        defaultDifficulty: 2,
-        headScore: 'Punti',
-        headDetail: 'Corrette',
-        score: function (row) { return row.score + ' pt'; },
-        detail: function (row) { return row.detail || '\u2014'; }
-    }
-};
+function getLbConfig() {
+    return {
+        memory: {
+            label: t('nav.memory'),
+            endpoint: function (d) { return '/api/memory/leaderboard/' + d; },
+            difficulties: [
+                { value: 6,  label: t('games.difficulty_easy') },
+                { value: 8,  label: t('games.difficulty_normal') },
+                { value: 12, label: t('games.difficulty_hard') },
+                { value: 18, label: t('games.difficulty_monarch') }
+            ],
+            defaultDifficulty: 8,
+            headScore: t('games.leaderboard_col_moves'),
+            headDetail: t('games.leaderboard_col_time'),
+            score: function (row) { return row.moves + ' ' + t('games.unit_moves'); },
+            detail: function (row) { return formatTime(row.seconds); }
+        },
+        quiz: {
+            label: t('nav.quiz'),
+            endpoint: function (d) { return '/api/games/leaderboard/quiz/' + d; },
+            difficulties: [
+                { value: 1, label: t('games.difficulty_easy') },
+                { value: 2, label: t('games.difficulty_normal') },
+                { value: 3, label: t('games.difficulty_monarch') }
+            ],
+            defaultDifficulty: 2,
+            headScore: t('games.leaderboard_col_score'),
+            headDetail: t('games.leaderboard_col_correct'),
+            score: function (row) { return row.score + ' ' + t('games.unit_points'); },
+            detail: function (row) { return row.detail || '\u2014'; }
+        }
+    };
+}
 
 let currentGame = 'memory';
 let currentDifficulty = 8;
@@ -84,24 +85,27 @@ document.addEventListener('click', function (e) {
 
 // -------- Selezione gioco / difficolta' --------
 function selectGame(game) {
-    if (!LB_CONFIG[game]) return;
+    const cfg = getLbConfig();
+    if (!cfg[game]) return;
+
     currentGame = game;
-    currentDifficulty = LB_CONFIG[game].defaultDifficulty;
+    currentDifficulty = cfg[game].defaultDifficulty;
 
     document.getElementById('tab-memory').classList.toggle('active', game === 'memory');
     document.getElementById('tab-quiz').classList.toggle('active', game === 'quiz');
 
-    document.getElementById('lb-head-score').innerText = LB_CONFIG[game].headScore;
-    document.getElementById('lb-head-detail').innerText = LB_CONFIG[game].headDetail;
+    document.getElementById('lb-head-score').innerText = cfg[game].headScore;
+    document.getElementById('lb-head-detail').innerText = cfg[game].headDetail;
 
     renderDifficultyChips();
     loadLeaderboard();
 }
 
 function renderDifficultyChips() {
+    const cfg = getLbConfig();
     const wrap = document.getElementById('lb-difficulty-list');
     wrap.innerHTML = '';
-    LB_CONFIG[currentGame].difficulties.forEach(function (d) {
+    cfg[currentGame].difficulties.forEach(function (d) {
         const chip = document.createElement('div');
         chip.className = 'filter-chip' + (d.value === currentDifficulty ? ' active' : '');
         chip.innerText = d.label;
@@ -112,11 +116,12 @@ function renderDifficultyChips() {
 }
 
 function updateDifficultyButton() {
-    const d = LB_CONFIG[currentGame].difficulties.find(function (x) {
+    const cfg = getLbConfig();
+    const d = cfg[currentGame].difficulties.find(function (x) {
         return x.value === currentDifficulty;
     });
     document.getElementById('lb-difficulty-button').innerText =
-        'Difficolta\': ' + (d ? d.label : '?') + ' \u25BC';
+        t('games.difficulty_label') + ': ' + (d ? d.label : '?') + ' \u25BC';
 }
 
 function setDifficulty(value, label) {
@@ -130,19 +135,18 @@ function setDifficulty(value, label) {
 async function loadLeaderboard() {
     const rowsEl = document.getElementById('lb-rows');
     const podiumEl = document.getElementById('lb-podium');
-    rowsEl.innerHTML = '<div class="lb-loading">Caricamento...</div>';
+    rowsEl.innerHTML = `<div class="lb-loading">${t('common.loading')}</div>`;
     podiumEl.innerHTML = '';
 
-    const cfg = LB_CONFIG[currentGame];
+    const cfg = getLbConfig()[currentGame];
 
     try {
         const data = await fetchJSON(cfg.endpoint(currentDifficulty));
-
         document.getElementById('lb-count').innerText = data.length;
 
         if (!Array.isArray(data) || data.length === 0) {
             rowsEl.innerHTML =
-                '<div class="lb-empty">Nessun record per questa difficolta\'. Sii il primo!</div>';
+                `<div class="lb-empty">${t('games.leaderboard_empty')}</div>`;
             document.getElementById('lb-myrank').innerText = '\u2014';
             return;
         }
@@ -152,8 +156,8 @@ async function loadLeaderboard() {
         renderMyRank(data);
     } catch (e) {
         console.error(e);
-        rowsEl.innerHTML = '<div class="lb-empty">Errore nel caricamento della classifica.</div>';
-        showToast('Impossibile caricare la classifica.', 'error');
+        rowsEl.innerHTML = `<div class="lb-empty">${t('games.leaderboard_load_error')}</div>`;
+        showToast(t('games.leaderboard_load_error'), 'error');
     }
 }
 
@@ -161,13 +165,14 @@ function renderPodium(data, cfg) {
     const podiumEl = document.getElementById('lb-podium');
     const top = data.slice(0, 3);
     const order = [1, 0, 2]; // secondo - primo - terzo
-    let html = '';
 
+    let html = '';
     order.forEach(function (i) {
         if (!top[i]) return;
         const row = top[i];
         const place = i + 1;
         const isMe = myName && row.player === myName;
+
         html +=
             '<div class="lb-podium-slot place-' + place + (isMe ? ' is-me' : '') + '">' +
                 '<div class="lb-podium-medal">' + place + '</div>' +
@@ -187,6 +192,7 @@ function renderRows(data, cfg) {
     data.forEach(function (row, i) {
         const pos = i + 1;
         const isMe = myName && row.player === myName;
+
         html +=
             '<div class="lb-row' + (isMe ? ' is-me' : '') + (pos <= 3 ? ' top' : '') + '">' +
                 '<div class="lb-col-pos">' + pos + '</div>' +
@@ -207,7 +213,7 @@ function renderMyRank(data) {
         return;
     }
     const idx = data.findIndex(function (r) { return r.player === myName; });
-    el.innerText = idx === -1 ? 'Fuori classifica' : ('#' + (idx + 1));
+    el.innerText = idx === -1 ? t('games.leaderboard_out_of_rank') : ('#' + (idx + 1));
 }
 
 // -------- Nome utente --------
@@ -230,10 +236,12 @@ function showToast(message, type, duration) {
     duration = duration || 3000;
     const container = document.getElementById('toast-container');
     if (!container) return;
+
     const toast = document.createElement('div');
     toast.className = 'toast toast-' + type;
     toast.textContent = message;
     container.appendChild(toast);
+
     setTimeout(function () {
         toast.classList.add('toast-out');
         setTimeout(function () { toast.remove(); }, 300);

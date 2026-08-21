@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, redirect, url_for, session, Response
+from flask import Flask, render_template, jsonify, request, redirect, url_for, session, Response, g
 from functools import wraps
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import timedelta, datetime
@@ -6,6 +6,7 @@ import database
 import os
 import csv
 import io
+import json
 import secrets
 import re
 import email_sender
@@ -17,7 +18,6 @@ from threading import Lock
 
 _rate_lock = Lock()
 _rate_hits = defaultdict(list)  # chiave -> lista di orari dei tentativi
-
 
 def rate_limit(key, max_calls, period_seconds):
     """True se la richiesta e' consentita, False se ha superato il limite."""
@@ -31,14 +31,12 @@ def rate_limit(key, max_calls, period_seconds):
         _rate_hits[key] = recent
         return True
 
-
 def client_ip():
     """IP reale del visitatore (PythonAnywhere lo passa in X-Forwarded-For)."""
     fwd = request.headers.get("X-Forwarded-For", "")
     if fwd:
         return fwd.split(",")[0].strip()
     return request.remote_addr or "unknown"
-
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("MH_SECRET_KEY")
@@ -54,17 +52,117 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(days=30)
 )
 
+# =========================================================
+# SISTEMA DI TRADUZIONE (i18n)
+# =========================================================
+LANG_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "lang")
+SUPPORTED_LANGS = ["it", "en"]
+DEFAULT_LANG = "it"
+
+_lang_cache = {}
+
+def load_lang(code):
+    """Carica il file lang/<code>.json una sola volta e lo tiene in memoria
+    (non viene riletto dal disco ad ogni richiesta)."""
+    if code in _lang_cache:
+        return _lang_cache[code]
+    path = os.path.join(LANG_DIR, f"{code}.json")
+    if not os.path.exists(path):
+        code = DEFAULT_LANG
+        path = os.path.join(LANG_DIR, f"{code}.json")
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    _lang_cache[code] = data
+    return data
+
+def get_current_lang():
+    """Legge la lingua scelta dal cookie, con fallback sicuro all'italiano
+    se il cookie manca o contiene un valore non supportato."""
+    code = request.cookies.get("mh_lang", DEFAULT_LANG)
+    if code not in SUPPORTED_LANGS:
+        code = DEFAULT_LANG
+    return code
+
+def get_available_langs():
+    """Costruisce l'elenco delle lingue disponibili per il selettore,
+    leggendo nome e bandiera dal blocco _meta di ciascun file lang/*.json.
+    Cosi' il menu si aggiorna da solo quando in futuro aggiungerai una
+    nuova lingua: basta creare il file JSON, senza toccare l'HTML."""
+    langs = []
+    for code in SUPPORTED_LANGS:
+        data = load_lang(code)
+        meta = data.get('_meta', {})
+        langs.append({
+            'code': code,
+            'name': meta.get('lang_name', code.upper()),
+            'flag': meta.get('lang_flag', '')
+        })
+    return langs
+
+@app.before_request
+def set_language():
+    g.lang_code = get_current_lang()
+    g.lang_data = load_lang(g.lang_code)
+
+def translate(key, **kwargs):
+    """Cerca una chiave tipo 'categoria.nome_chiave' (es. 'common.close')
+    nel dizionario della lingua corrente. Se una chiave manca, mostra la
+    chiave stessa invece di andare in errore: utile per accorgersi subito
+    di una traduzione dimenticata."""
+    parts = key.split(".")
+    node = g.lang_data
+    for p in parts:
+        if isinstance(node, dict) and p in node:
+            node = node[p]
+        else:
+            return key
+    if isinstance(node, str) and kwargs:
+        try:
+            return node.format(**kwargs)
+        except (KeyError, IndexError):
+            return node
+    return node
+
+@app.context_processor
+def inject_lang():
+    """Rende 't' (funzione di traduzione), 'lang_code', 'lang_json'
+    (l'intero dizionario, che serve al JavaScript) e 'available_langs'
+    (elenco lingue per il bottone) disponibili in TUTTI i template
+    automaticamente, senza doverli passare a mano in ogni singola
+    render_template()."""
+    return {
+        "t": translate,
+        "lang_code": g.lang_code,
+        "lang_json": g.lang_data,
+        "available_langs": get_available_langs()
+    }
+
+@app.route('/set_language/<lang_code>')
+def set_language_route(lang_code):
+    """Cambia lingua: salva la scelta in un cookie valido 1 anno e torna
+    alla pagina da cui l'utente ha cliccato il bottone. Se l'utente ha
+    effettuato il login, la lingua viene salvata anche sul suo account:
+    cosi' verra' riproposta automaticamente ad ogni futuro accesso,
+    anche da un browser o dispositivo diverso."""
+    if lang_code not in SUPPORTED_LANGS:
+        lang_code = DEFAULT_LANG
+    if "user_id" in session:
+        database.set_user_language(session["user_id"], lang_code)
+    target = request.referrer or url_for('index')
+    resp = redirect(target)
+    resp.set_cookie('mh_lang', lang_code, max_age=60 * 60 * 24 * 365)
+    return resp
+
 
 def login_required(route_function):
     @wraps(route_function)
     def wrapper(*args, **kwargs):
         if "user_id" not in session:
             if request.path.startswith("/api/"):
-                return jsonify({"status": "error", "message": "Login richiesto"}), 401
+                return jsonify({"status": "error", "message": translate('server.login_required')}), 401
             return redirect(url_for("login"))
         return route_function(*args, **kwargs)
     return wrapper
-
 
 def create_default_user():
     admin_password = os.environ.get("MH_ADMIN_PASSWORD")
@@ -75,72 +173,74 @@ def create_default_user():
         password_hash = generate_password_hash(admin_password)
         database.create_user("admin", password_hash, "Hunter", is_verified=1)
 
-
 create_default_user()
-
 
 @app.route('/')
 @login_required
 def index():
     return render_template('index.html')
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
     if request.method == 'POST':
         if not rate_limit("login:" + client_ip(), max_calls=10, period_seconds=900):
-            error = "Troppi tentativi di accesso. Riprova tra qualche minuto."
+            error = translate('server.rate_limit_login')
             return render_template('login.html', error=error)
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
         user = database.get_user_by_username(username)
         if user and check_password_hash(user["PasswordHash"], password):
             if not user["IsVerified"]:
-                error = "Devi prima confermare la tua email. Controlla la posta."
+                error = translate('server.email_not_verified')
                 return render_template('login.html', error=error)
             session["user_id"] = user["Id"]
             session.permanent = True
             session["username"] = user["Username"]
             session["display_name"] = user["DisplayName"] or user["Username"]
-            return redirect(url_for("index"))
-        error = "Username o password non validi"
+            resp = redirect(url_for("index"))
+            # Se l'account ha una lingua preferita salvata, la applichiamo
+            # subito con un cookie: funziona anche su un dispositivo dove
+            # l'utente non ha mai scelto una lingua prima d'ora.
+            preferred_lang = database.get_user_language(user["Id"])
+            if preferred_lang and preferred_lang in SUPPORTED_LANGS:
+                resp.set_cookie('mh_lang', preferred_lang, max_age=60 * 60 * 24 * 365)
+            return resp
+        error = translate('server.invalid_credentials')
     return render_template('login.html', error=error)
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     error = None
     if request.method == 'POST':
         if not rate_limit("register:" + client_ip(), max_calls=5, period_seconds=3600):
-            error = "Troppi tentativi di registrazione. Riprova tra un'ora."
+            error = translate('server.rate_limit_register')
             return render_template('register.html', error=error)
-
         email = request.form.get('email', '').strip().lower()
         username = email
         display_name = request.form.get('display_name', '').strip()
         password = request.form.get('password', '').strip()
         password2 = request.form.get('password2', '').strip()
         if not email or not password:
-            error = "Email e password sono obbligatori"
+            error = translate('server.email_password_required')
         elif not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-            error = "Indirizzo email non valido"
+            error = translate('server.invalid_email')
         elif password != password2:
-            error = "Le due password non coincidono"
+            error = translate('server.password_mismatch')
         elif len(password) < 8:
-            error = "La password deve avere almeno 8 caratteri"
+            error = translate('server.password_min_length')
         elif not re.search(r"[A-Z]", password):
-            error = "La password deve contenere almeno una lettera maiuscola"
+            error = translate('server.password_need_upper')
         elif not re.search(r"[a-z]", password):
-            error = "La password deve contenere almeno una lettera minuscola"
+            error = translate('server.password_need_lower')
         elif not re.search(r"[0-9]", password):
-            error = "La password deve contenere almeno un numero"
+            error = translate('server.password_need_number')
         elif not re.search(r"[^A-Za-z0-9]", password):
-            error = "La password deve contenere almeno un carattere speciale (es. ! ? @ #)"
+            error = translate('server.password_need_special')
         elif database.get_user_by_username(username):
-            error = "Username gia' esistente"
+            error = translate('server.username_exists')
         elif database.get_user_by_email(email):
-            error = "Email gia' registrata"
+            error = translate('server.email_exists')
         else:
             password_hash = generate_password_hash(password)
             token = secrets.token_urlsafe(32)
@@ -154,16 +254,14 @@ def register():
                 # l'utente potra' usare il bottone "Reinvia email".
                 return render_template('register.html', success=True,
                                        email=email, email_error=(not sent))
-            error = "Registrazione non riuscita, riprova"
+            error = translate('server.registration_failed')
     return render_template('register.html', error=error)
-
 
 @app.route('/verify/<token>', methods=['GET', 'POST'])
 def verify_email(token):
     user = database.get_user_by_token(token)
     if not user:
-        return render_template('login.html', error="Link di conferma non valido o gia' usato")
-
+        return render_template('login.html', error=translate('server.invalid_or_used_token'))
     # Il link di conferma scade dopo 24 ore
     created_at = user["TokenCreatedAt"]
     if created_at:
@@ -172,24 +270,21 @@ def verify_email(token):
             if datetime.utcnow() - token_time > timedelta(hours=24):
                 return render_template(
                     'login.html',
-                    error="Il link di conferma e' scaduto. Richiedine uno nuovo dalla pagina di accesso."
+                    error=translate('server.token_expired')
                 )
         except (ValueError, TypeError):
             pass  # data illeggibile: non blocchiamo la conferma
-
     database.set_user_verified(user["Id"])
-    return render_template('login.html', success="Email confermata! Ora puoi accedere.")
-
+    return render_template('login.html', success=translate('server.email_confirmed'))
 
 @app.route('/resend_verification', methods=['POST'])
 def resend_verification():
     data = request.json or {}
     if not rate_limit("resend:" + client_ip(), max_calls=3, period_seconds=3600):
-        return jsonify({"status": "error", "message": "Troppe richieste. Riprova piu' tardi."}), 429
-
+        return jsonify({"status": "error", "message": translate('server.too_many_requests')}), 429
     email = str(data.get('email') or '').strip().lower()
     if not email:
-        return jsonify({"status": "error", "message": "Email mancante"}), 400
+        return jsonify({"status": "error", "message": translate('server.email_missing')}), 400
     user = database.get_user_by_email(email)
     # Per privacy NON riveliamo se l'email esiste: rispondiamo sempre "success".
     # Inviamo davvero solo se l'utente esiste e non e' ancora verificato.
@@ -200,12 +295,10 @@ def resend_verification():
         email_sender.send_verification_email(email, verify_link)
     return jsonify({"status": "success"})
 
-
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for("login"))
-
 
 @app.route('/api/me')
 @login_required
@@ -214,7 +307,6 @@ def get_current_user():
         "username": session.get("username"),
         "display_name": session.get("display_name")
     })
-
 
 @app.route('/api/cards')
 @login_required
@@ -245,13 +337,11 @@ def get_cards():
         })
     return jsonify(cards)
 
-
 @app.route('/api/stats')
 @login_required
 def get_stats():
     # Recuperiamo l'ID dell'utente dalla sessione attiva
     user_id = session["user_id"]
-
     # Passiamo user_id alla funzione del database
     total, owned, copies, wishlist = database.get_collection_stats(user_id)
     percentage = round((owned / total) * 100, 1) if total else 0
@@ -262,7 +352,6 @@ def get_stats():
         "wishlist": wishlist,
         "percentage": percentage
     })
-
 
 @app.route('/api/set_progress')
 @login_required
@@ -280,7 +369,6 @@ def get_set_progress():
         })
     return jsonify(result)
 
-
 @app.route('/api/update_quantity', methods=['POST'])
 @login_required
 def update_quantity():
@@ -288,21 +376,17 @@ def update_quantity():
     data = request.json
     card_code = data.get('card_code')
     raw_quantity = data.get('quantity')
-
     try:
         new_quantity = int(raw_quantity)
         if new_quantity < 0:
-            return jsonify({"status": "error", "message": "Quantita' negativa"}), 400
+            return jsonify({"status": "error", "message": translate('server.negative_quantity')}), 400
     except (TypeError, ValueError):
-        return jsonify({"status": "error", "message": "Quantita' non valida"}), 400
-
+        return jsonify({"status": "error", "message": translate('server.invalid_quantity')}), 400
     if card_code is not None:
         # Passiamo user_id come primo parametro
         database.update_card_quantity(user_id, card_code, new_quantity)
         return jsonify({"status": "success"})
-
-    return jsonify({"status": "error", "message": "Dati mancanti"}), 400
-
+    return jsonify({"status": "error", "message": translate('server.missing_data')}), 400
 
 @app.route('/api/toggle_wishlist', methods=['POST'])
 @login_required
@@ -311,14 +395,11 @@ def toggle_wishlist():
     data = request.json
     card_code = data.get('card_code')
     is_wishlisted = data.get('is_wishlisted')
-
     if card_code is not None and is_wishlisted is not None:
         # Passiamo user_id come primo parametro
         database.update_wishlist(user_id, card_code, is_wishlisted)
         return jsonify({"status": "success"})
-
-    return jsonify({"status": "error", "message": "Dati mancanti"}), 400
-
+    return jsonify({"status": "error", "message": translate('server.missing_data')}), 400
 
 @app.route('/api/update_serials', methods=['POST'])
 @login_required
@@ -328,7 +409,7 @@ def update_serials():
     card_code = data.get('card_code')
     serials = data.get('serials', [])
     if not card_code or not isinstance(serials, list):
-        return jsonify({"status": "error", "message": "Dati mancanti"}), 400
+        return jsonify({"status": "error", "message": translate('server.missing_data')}), 400
     clean = []
     for s in serials:
         s = str(s).strip()
@@ -336,14 +417,14 @@ def update_serials():
             clean.append("")
             continue
         if not s.isdigit():
-            return jsonify({"status": "error", "message": f"'{s}' non e' un numero valido"}), 400
+            return jsonify({"status": "error", "message": translate('server.invalid_serial_number', value=s)}), 400
         n = int(s)
         if n < 1 or n > 300:
-            return jsonify({"status": "error", "message": "Il numero deve essere tra 001 e 300"}), 400
+            return jsonify({"status": "error", "message": translate('server.serial_range')}), 400
         clean.append(f"{n:03d}")
     filled = [c for c in clean if c]
     if len(set(filled)) != len(filled):
-        return jsonify({"status": "error", "message": "Hai inserito due volte lo stesso numero"}), 400
+        return jsonify({"status": "error", "message": translate('server.duplicate_serial')}), 400
     serials_text = ",".join(clean)
     database.update_serials(user_id, card_code, serials_text)
     return jsonify({"status": "success", "serials": serials_text})
@@ -356,9 +437,9 @@ def update_notes():
     card_code = data.get('card_code')
     notes = str(data.get('notes', ''))
     if not card_code:
-        return jsonify({"status": "error", "message": "Codice mancante"}), 400
+        return jsonify({"status": "error", "message": translate('server.missing_code')}), 400
     if len(notes) > 500:
-        return jsonify({"status": "error", "message": "Nota troppo lunga (max 500 caratteri)"}), 400
+        return jsonify({"status": "error", "message": translate('server.note_too_long')}), 400
     database.update_notes(user_id, card_code, notes.strip())
     return jsonify({"status": "success"})
 
@@ -372,7 +453,7 @@ def update_grading():
     data = request.json or {}
     card_code = data.get('card_code')
     if not card_code:
-        return jsonify({"status": "error", "message": "Codice mancante"}), 400
+        return jsonify({"status": "error", "message": translate('server.missing_code')}), 400
     graded = 1 if data.get('graded') else 0
     grader = str(data.get('grader', '') or '').strip()[:30]
     grade = str(data.get('grade', '') or '').strip()[:10]
@@ -383,15 +464,12 @@ def update_grading():
     database.update_grading(user_id, card_code, graded, grader, grade)
     return jsonify({"status": "success"})
 
-
 @app.route('/games/memory')
 @login_required
 def game_memory():
     return render_template('memory.html')
 
-
 VALID_DIFFICULTIES = (6, 8, 12, 18)
-
 
 @app.route('/api/memory/best')
 @login_required
@@ -407,7 +485,6 @@ def memory_best():
         }
     return jsonify(result)
 
-
 @app.route('/api/memory/score', methods=['POST'])
 @login_required
 def memory_score():
@@ -418,13 +495,13 @@ def memory_score():
         moves = int(data.get("moves"))
         seconds = int(data.get("seconds"))
     except (TypeError, ValueError):
-        return jsonify({"status": "error", "message": "Dati non validi"}), 400
+        return jsonify({"status": "error", "message": translate('server.invalid_data')}), 400
     if difficulty not in VALID_DIFFICULTIES:
-        return jsonify({"status": "error", "message": "Difficolta' non valida"}), 400
+        return jsonify({"status": "error", "message": translate('server.invalid_difficulty')}), 400
     if moves < difficulty or moves > 9999:
-        return jsonify({"status": "error", "message": "Numero di mosse non valido"}), 400
+        return jsonify({"status": "error", "message": translate('server.invalid_moves')}), 400
     if seconds < 0 or seconds > 86400:
-        return jsonify({"status": "error", "message": "Tempo non valido"}), 400
+        return jsonify({"status": "error", "message": translate('server.invalid_time')}), 400
     is_record, best_moves, best_seconds = database.save_memory_score(
         user_id, difficulty, moves, seconds
     )
@@ -434,12 +511,11 @@ def memory_score():
         "best": {"moves": best_moves, "seconds": best_seconds}
     })
 
-
 @app.route('/api/memory/leaderboard/<int:difficulty>')
 @login_required
 def memory_leaderboard(difficulty):
     if difficulty not in VALID_DIFFICULTIES:
-        return jsonify({"status": "error", "message": "Difficolta' non valida"}), 400
+        return jsonify({"status": "error", "message": translate('server.invalid_difficulty')}), 400
     rows = database.get_memory_leaderboard(difficulty)
     result = []
     for row in rows:
@@ -451,21 +527,18 @@ def memory_leaderboard(difficulty):
         })
     return jsonify(result)
 
-
 VALID_GAME_TYPES = ('quiz',)
-
 
 @app.route('/games/quiz')
 @login_required
 def game_quiz():
     return render_template('quiz.html')
 
-
 @app.route('/api/games/best/<game_type>')
 @login_required
 def games_best(game_type):
     if game_type not in VALID_GAME_TYPES:
-        return jsonify({"status": "error", "message": "Gioco non valido"}), 400
+        return jsonify({"status": "error", "message": translate('server.invalid_game')}), 400
     rows = database.get_game_bests(session["user_id"], game_type)
     result = {}
     for row in rows:
@@ -476,23 +549,22 @@ def games_best(game_type):
         }
     return jsonify(result)
 
-
 @app.route('/api/games/score', methods=['POST'])
 @login_required
 def games_score():
     data = request.json or {}
     game_type = data.get("game_type")
     if game_type not in VALID_GAME_TYPES:
-        return jsonify({"status": "error", "message": "Gioco non valido"}), 400
+        return jsonify({"status": "error", "message": translate('server.invalid_game')}), 400
     try:
         difficulty = int(data.get("difficulty"))
         score = int(data.get("score"))
     except (TypeError, ValueError):
-        return jsonify({"status": "error", "message": "Dati non validi"}), 400
+        return jsonify({"status": "error", "message": translate('server.invalid_data')}), 400
     if difficulty not in (1, 2, 3):
-        return jsonify({"status": "error", "message": "Difficolta' non valida"}), 400
+        return jsonify({"status": "error", "message": translate('server.invalid_difficulty')}), 400
     if score < 0 or score > 100000:
-        return jsonify({"status": "error", "message": "Punteggio non valido"}), 400
+        return jsonify({"status": "error", "message": translate('server.invalid_score')}), 400
     detail = str(data.get("detail", ""))[:40]
     is_record, best_score, best_detail = database.save_game_score(
         session["user_id"], game_type, difficulty, score, detail
@@ -503,12 +575,11 @@ def games_score():
         "best": {"score": best_score, "detail": best_detail}
     })
 
-
 @app.route('/api/games/leaderboard/<game_type>/<int:difficulty>')
 @login_required
 def games_leaderboard(game_type, difficulty):
     if game_type not in VALID_GAME_TYPES or difficulty not in (1, 2, 3):
-        return jsonify({"status": "error", "message": "Parametri non validi"}), 400
+        return jsonify({"status": "error", "message": translate('server.invalid_parameters')}), 400
     rows = database.get_game_leaderboard(game_type, difficulty)
     return jsonify([{
         "player": row["DisplayName"] or row["Username"],
@@ -517,15 +588,12 @@ def games_leaderboard(game_type, difficulty):
         "created_at": row["CreatedAt"]
     } for row in rows])
 
-
 @app.route('/games/leaderboard')
 @login_required
 def game_leaderboard():
     return render_template('leaderboard.html')
 
-
 MAX_IMPORT_BYTES = 2 * 1024 * 1024   # 2 MB
-
 
 def _normalize_serials(raw_value):
     """Ritorna (serials_text, errore). Accetta '001,045' oppure '1, 45'."""
@@ -539,16 +607,15 @@ def _normalize_serials(raw_value):
             clean.append("")
             continue
         if not p.isdigit():
-            return None, f"numerazione '{p}' non valida"
+            return None, translate('server.invalid_serial_in_row', value=p)
         n = int(p)
         if n < 1 or n > 300:
-            return None, f"numerazione '{p}' fuori range 001-300"
+            return None, translate('server.serial_out_of_range_row', value=p)
         clean.append(f"{n:03d}")
     filled = [c for c in clean if c]
     if len(set(filled)) != len(filled):
-        return None, "numerazione duplicata"
+        return None, translate('server.duplicate_serial_row')
     return ",".join(clean), None
-
 
 @app.route('/api/export/csv')
 @login_required
@@ -586,7 +653,6 @@ def export_csv():
         headers={"Content-Disposition": 'attachment; filename="%s"' % filename}
     )
 
-
 @app.route('/api/export/template')
 @login_required
 def export_template():
@@ -622,18 +688,17 @@ def export_template():
         }
     )
 
-
 @app.route('/api/import/csv', methods=['POST'])
 @login_required
 def import_csv():
     uploaded = request.files.get('file')
     if not uploaded or not uploaded.filename:
-        return jsonify({"status": "error", "message": "Nessun file selezionato"}), 400
+        return jsonify({"status": "error", "message": translate('server.no_file_selected')}), 400
     raw = uploaded.read(MAX_IMPORT_BYTES + 1)
     if len(raw) > MAX_IMPORT_BYTES:
-        return jsonify({"status": "error", "message": "File troppo grande (max 2 MB)"}), 413
+        return jsonify({"status": "error", "message": translate('server.file_too_large')}), 413
     if not raw:
-        return jsonify({"status": "error", "message": "File vuoto"}), 400
+        return jsonify({"status": "error", "message": translate('server.empty_file')}), 400
     try:
         text = raw.decode("utf-8-sig")
     except UnicodeDecodeError:
@@ -642,14 +707,14 @@ def import_csv():
     delimiter = ';' if sample.count(';') >= sample.count(',') else ','
     reader = csv.DictReader(io.StringIO(text), delimiter=delimiter)
     if not reader.fieldnames:
-        return jsonify({"status": "error", "message": "CSV senza intestazione"}), 400
+        return jsonify({"status": "error", "message": translate('server.csv_no_header')}), 400
     headers = {}
     for name in reader.fieldnames:
         headers[(name or "").strip().lower()] = name
     if "cardcode" not in headers:
         return jsonify({
             "status": "error",
-            "message": "Colonna 'CardCode' mancante nel CSV"
+            "message": translate('server.csv_missing_cardcode_column')
         }), 400
     col_code = headers["cardcode"]
     col_qty = headers.get("quantity")
@@ -667,7 +732,7 @@ def import_csv():
     for row in reader:
         line += 1
         if len(records) > 20000:
-            errors.append("Troppe righe: import interrotto")
+            errors.append(translate('server.too_many_rows'))
             break
         code = str(row.get(col_code) or "").strip()
         if not code:
@@ -685,10 +750,10 @@ def import_csv():
                 try:
                     quantity = int(float(raw_qty.replace(",", ".")))
                 except ValueError:
-                    errors.append(f"Riga {line}: quantita' '{raw_qty}' non valida")
+                    errors.append(translate('server.invalid_quantity_row', line=line, value=raw_qty))
                     continue
                 if quantity < 0 or quantity > 9999:
-                    errors.append(f"Riga {line}: quantita' fuori range")
+                    errors.append(translate('server.quantity_out_of_range_row', line=line))
                     continue
         wishlist = None
         if col_wish is not None:
@@ -699,13 +764,13 @@ def import_csv():
                 elif raw_wish in ("0", "false", "no", ""):
                     wishlist = 0
                 else:
-                    errors.append(f"Riga {line}: wishlist '{raw_wish}' non valida")
+                    errors.append(translate('server.invalid_wishlist_row', line=line, value=raw_wish))
                     continue
         serials = None
         if col_ser is not None:
             serials, ser_error = _normalize_serials(row.get(col_ser))
             if ser_error:
-                errors.append(f"Riga {line}: {ser_error}")
+                errors.append(translate('server.row_error', line=line, error=ser_error))
                 continue
         graded = None
         if col_graded is not None:
@@ -715,20 +780,16 @@ def import_csv():
                     graded = 1
                 elif raw_g in ("0", "false", "no", ""):
                     graded = 0
-
         grader = None
         if col_grader is not None:
             grader = str(row.get(col_grader) or "").strip()[:30]
-
         grade = None
         if col_grade is not None:
             grade = str(row.get(col_grade) or "").strip()[:10]
-
         # Se la carta non e' gradata, i dettagli non hanno senso
         if graded == 0:
             grader = ""
             grade = ""
-
         records.append({
             "code": code,
             "quantity": quantity,
@@ -740,14 +801,9 @@ def import_csv():
         })
     if not records:
         if unknown > 0 and not errors:
-            message = (
-                "Nessun CardCode del file corrisponde a una carta esistente "
-                f"({unknown} codici sconosciuti). Se hai usato il CSV di esempio, "
-                "ricorda che i suoi codici sono inventati: scarica il CSV della tua "
-                "collezione e modifica quello."
-            )
+            message = translate('server.no_matching_cardcode', unknown=unknown)
         else:
-            message = "Nessuna riga valida da importare"
+            message = translate('server.no_valid_rows')
         return jsonify({
             "status": "error",
             "message": message,
@@ -763,7 +819,6 @@ def import_csv():
         "error_count": len(errors)
     })
 
-
 # =========================================================
 # VETRINA - Monarch Hoard
 # =========================================================
@@ -771,7 +826,6 @@ def import_csv():
 @login_required
 def showcase_page():
     return render_template('showcase.html')
-
 
 @app.route('/api/showcase')
 @login_required
@@ -792,7 +846,6 @@ def api_get_showcase():
             }
     return jsonify({"slots": slots})
 
-
 @app.route('/api/showcase/add', methods=['POST'])
 @login_required
 def api_showcase_add():
@@ -800,14 +853,13 @@ def api_showcase_add():
     data = request.json or {}
     card_code = data.get('card_code')
     if not card_code:
-        return jsonify({"status": "error", "message": "Codice mancante"}), 400
+        return jsonify({"status": "error", "message": translate('server.missing_code')}), 400
     if not database.user_owns_card(user_id, card_code):
-        return jsonify({"status": "error", "message": "Devi possedere la carta per aggiungerla"}), 400
+        return jsonify({"status": "error", "message": translate('server.must_own_card')}), 400
     ok, result = database.add_to_showcase(user_id, card_code)
     if not ok:
-        return jsonify({"status": "error", "message": result}), 400
+        return jsonify({"status": "error", "message": translate('server.' + result)}), 400
     return jsonify({"status": "success", "slot": result})
-
 
 @app.route('/api/showcase/remove', methods=['POST'])
 @login_required
@@ -816,10 +868,9 @@ def api_showcase_remove():
     data = request.json or {}
     card_code = data.get('card_code')
     if not card_code:
-        return jsonify({"status": "error", "message": "Codice mancante"}), 400
+        return jsonify({"status": "error", "message": translate('server.missing_code')}), 400
     database.remove_from_showcase(user_id, card_code)
     return jsonify({"status": "success"})
-
 
 @app.route('/api/showcase/move', methods=['POST'])
 @login_required
@@ -830,16 +881,15 @@ def api_showcase_move():
     try:
         direction = int(data.get('direction'))
     except (TypeError, ValueError):
-        return jsonify({"status": "error", "message": "Direzione non valida"}), 400
+        return jsonify({"status": "error", "message": translate('server.invalid_direction')}), 400
     if direction not in (-1, 1, -3, 3):
-        return jsonify({"status": "error", "message": "Direzione non valida"}), 400
+        return jsonify({"status": "error", "message": translate('server.invalid_direction')}), 400
     if not card_code:
-        return jsonify({"status": "error", "message": "Codice mancante"}), 400
+        return jsonify({"status": "error", "message": translate('server.missing_code')}), 400
     ok, result = database.move_showcase(user_id, card_code, direction)
     if not ok:
-        return jsonify({"status": "error", "message": result}), 400
+        return jsonify({"status": "error", "message": translate('server.' + result)}), 400
     return jsonify({"status": "success", "slot": result})
-
 
 @app.route('/api/showcase/set', methods=['POST'])
 @login_required
@@ -850,20 +900,18 @@ def api_showcase_set():
     try:
         slot_position = int(data.get('slot_position'))
     except (TypeError, ValueError):
-        return jsonify({"status": "error", "message": "Posizione non valida"}), 400
+        return jsonify({"status": "error", "message": translate('server.invalid_position')}), 400
     if not card_code:
-        return jsonify({"status": "error", "message": "Codice mancante"}), 400
+        return jsonify({"status": "error", "message": translate('server.missing_code')}), 400
     if not database.user_owns_card(user_id, card_code):
-        return jsonify({"status": "error", "message": "Devi possedere la carta per aggiungerla"}), 400
+        return jsonify({"status": "error", "message": translate('server.must_own_card')}), 400
     ok, result = database.set_showcase_slot(user_id, card_code, slot_position)
     if not ok:
-        return jsonify({"status": "error", "message": result}), 400
+        return jsonify({"status": "error", "message": translate('server.' + result)}), 400
     return jsonify({"status": "success", "slot": result})
-
 
 # Elenco degli id sfondo validi (deve combaciare con la lista nel JS)
 VALID_SHOWCASE_BG = ('none', 'nebula')
-
 
 @app.route('/api/showcase/bg', methods=['GET'])
 @login_required
@@ -871,36 +919,32 @@ def api_showcase_bg_get():
     bg = database.get_showcase_bg(session["user_id"])
     return jsonify({"status": "success", "bg": bg})
 
-
 @app.route('/api/showcase/bg', methods=['POST'])
 @login_required
 def api_showcase_bg_set():
     data = request.json or {}
     bg_id = str(data.get('bg') or '').strip()
     if bg_id not in VALID_SHOWCASE_BG:
-        return jsonify({"status": "error", "message": "Sfondo non valido"}), 400
+        return jsonify({"status": "error", "message": translate('server.invalid_background')}), 400
     database.set_showcase_bg(session["user_id"], bg_id)
     return jsonify({"status": "success", "bg": bg_id})
-
 
 @app.route('/settings')
 @login_required
 def settings_page():
     return render_template('settings.html')
 
-
 @app.route('/api/settings/profile', methods=['GET'])
 @login_required
 def api_settings_profile():
     user = database.get_user_by_id(session["user_id"])
     if not user:
-        return jsonify({"status": "error", "message": "Utente non trovato"}), 404
+        return jsonify({"status": "error", "message": translate('server.user_not_found')}), 404
     return jsonify({
         "status": "success",
         "email": user["Email"] or "",
         "display_name": user["DisplayName"] or user["Username"]
     })
-
 
 @app.route('/api/settings/display_name', methods=['POST'])
 @login_required
@@ -908,13 +952,12 @@ def api_settings_display_name():
     data = request.json or {}
     name = str(data.get('display_name') or '').strip()
     if len(name) < 2:
-        return jsonify({"status": "error", "message": "Il nome deve avere almeno 2 caratteri"}), 400
+        return jsonify({"status": "error", "message": translate('server.name_min_length')}), 400
     if len(name) > 40:
-        return jsonify({"status": "error", "message": "Il nome e' troppo lungo (max 40)"}), 400
+        return jsonify({"status": "error", "message": translate('server.name_max_length')}), 400
     database.update_display_name(session["user_id"], name)
     session["display_name"] = name
     return jsonify({"status": "success", "display_name": name})
-
 
 @app.route('/api/settings/password', methods=['POST'])
 @login_required
@@ -924,20 +967,19 @@ def api_settings_password():
     new = str(data.get('new_password') or '')
     user = database.get_user_by_id(session["user_id"])
     if not user or not check_password_hash(user["PasswordHash"], old):
-        return jsonify({"status": "error", "message": "Password attuale errata"}), 400
+        return jsonify({"status": "error", "message": translate('server.wrong_current_password')}), 400
     if len(new) < 8:
-        return jsonify({"status": "error", "message": "La nuova password deve avere almeno 8 caratteri"}), 400
+        return jsonify({"status": "error", "message": translate('server.new_password_min_length')}), 400
     if not re.search(r"[A-Z]", new):
-        return jsonify({"status": "error", "message": "Serve almeno una lettera maiuscola"}), 400
+        return jsonify({"status": "error", "message": translate('server.need_uppercase')}), 400
     if not re.search(r"[a-z]", new):
-        return jsonify({"status": "error", "message": "Serve almeno una lettera minuscola"}), 400
+        return jsonify({"status": "error", "message": translate('server.need_lowercase')}), 400
     if not re.search(r"[0-9]", new):
-        return jsonify({"status": "error", "message": "Serve almeno un numero"}), 400
+        return jsonify({"status": "error", "message": translate('server.need_number')}), 400
     if not re.search(r"[^A-Za-z0-9]", new):
-        return jsonify({"status": "error", "message": "Serve almeno un carattere speciale"}), 400
+        return jsonify({"status": "error", "message": translate('server.need_special')}), 400
     database.update_password(session["user_id"], generate_password_hash(new))
     return jsonify({"status": "success"})
-
 
 # =========================================================
 # ELIMINA ACCOUNT (GDPR)
@@ -950,7 +992,7 @@ def api_settings_delete_account():
     # Ri-autenticazione: chiediamo la password prima di un'azione irreversibile
     user = database.get_user_by_id(session["user_id"])
     if not user or not check_password_hash(user["PasswordHash"], password):
-        return jsonify({"status": "error", "message": "Password errata"}), 400
+        return jsonify({"status": "error", "message": translate('server.wrong_password')}), 400
     database.delete_user_account(session["user_id"])
     # Chiudiamo la sessione: l'utente non esiste piu' come tale
     session.clear()

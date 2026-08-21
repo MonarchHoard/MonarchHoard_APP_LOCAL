@@ -14,10 +14,23 @@
     <!-- Icona sulla Home di iPhone (180x180 consigliata) -->
     <link rel="apple-touch-icon" href="/static/wallpaper/icon-180.png">
     <!-- ===== fine PWA ===== -->
-    <title>Login - Monarch Hoard</title>
+    <title>{{ t('titles.login') }}</title>
     <link rel="stylesheet" href="/static/css/style.css">
 </head>
+<script>window.MH_LANG = {{ lang_json|tojson }};</script>
+<script src="/static/js/i18n.js"></script>
+<script src="/static/js/lang-switcher.js"></script>
 <body class="login-body">
+    <div class="login-lang-switcher dropdown-filter lang-switcher-wrap">
+        <button id="lang-switcher-btn" class="dropdown-button lang-switcher-btn" type="button" onclick="toggleLangDropdown()">
+            &#127760; {{ lang_code|upper }} &#9660;
+        </button>
+        <div id="lang-switcher-dropdown" class="dropdown-content lang-switcher-dropdown">
+            {% for lang in available_langs %}
+            <a href="{{ url_for('set_language_route', lang_code=lang.code) }}" class="lang-option{{ ' active' if lang.code == lang_code else '' }}">{{ lang.flag }} {{ lang.name }}</a>
+            {% endfor %}
+        </div>
+    </div>
     <div class="login-panel">
         <div class="login-logo">
             <img src="/static/wallpaper/logo_monarchhoard.png" alt="Logo Monarch Hoard">
@@ -26,7 +39,7 @@
         <h1>
             <img src="/static/wallpaper/Scritta_MonarchHoard.png" alt="Monarch Hoard">
         </h1>
-        <p class="login-subtitle">Accesso Hunter</p>
+        <p class="login-subtitle">{{ t('auth.login_title') }}</p>
 		{% if success %}
 			<div class="login-error" style="background:rgba(77,255,155,0.12); border-color:rgba(77,255,155,0.35); color:#9bffcb;">
 				{{ success }}
@@ -36,13 +49,13 @@
 			<div class="login-error">{{ error }}</div>
 		{% endif %}
         <form method="POST" action="{{ url_for('login') }}" class="login-form">
-            <input type="text" name="username" placeholder="Username" autocomplete="username" aria-label="Username" required>
-            <input type="password" name="password" placeholder="Password" autocomplete="current-password" aria-label="Password" required>
-            <button type="submit">Entra</button>
+            <input type="text" name="username" placeholder="{{ t('auth.login_username_placeholder') }}" autocomplete="username" aria-label="Username" required>
+            <input type="password" name="password" placeholder="{{ t('auth.login_password_placeholder') }}" autocomplete="current-password" aria-label="Password" required>
+            <button type="submit">{{ t('auth.login_submit') }}</button>
         </form>
 		<div class="login-hint">
-			Non hai un account?
-			<a href="{{ url_for('register') }}">Registrati qui</a>
+			{{ t('auth.login_no_account') }}
+			<a href="{{ url_for('register') }}">{{ t('auth.login_register_link') }}</a>
 		</div>
     </div>
 </body>

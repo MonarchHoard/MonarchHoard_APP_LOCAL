@@ -79,9 +79,11 @@ h3 {
 
 .main-area {
     padding: 30px;
-    max-width: 1560px;
+    max-width: 2200px;   /* prima era 1560px: ora si adatta a schermi molto piu' larghi */
     width: 100%;
     min-width: 810px;
+    margin: 0 auto;      /* rete di sicurezza: su monitor ultra-wide lo spazio residuo
+                             si distribuisce ai lati invece di restare tutto a destra */
 }
 
 /* ---------------------------------------------------------
@@ -282,48 +284,44 @@ h3 {
 .hero-panel {
     position: relative;
     min-height: 0px;
-    margin-bottom: 5px;
+    margin: 0;
     border-radius: 0;
     border: none;
     overflow: visible;
     background: transparent;
     box-shadow: none;
 }
-
 .hero-stats {
     position: relative;
     z-index: 3;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, auto);
     gap: 0;
-    max-width: 930px;
+    max-width: none;
     margin: 0;
-    border-radius: 6px;
+    border-radius: 8px;
     background: rgba(5, 4, 14, 0.76);
     border: 1px solid rgba(155, 77, 255, 0.20);
-    box-shadow: inset 0 0 20px rgba(155, 77, 255, 0.06),
-        0 12px 34px rgba(0, 0, 0, 0.42);
+    box-shadow: inset 0 0 14px rgba(155, 77, 255, 0.06),
+        0 6px 16px rgba(0, 0, 0, 0.38);
     backdrop-filter: blur(8px);
     overflow: hidden;
 }
-
 .hero-stat-card {
     min-height: 0px;
-    padding: 18px 26px;
+    padding: 8px 14px;
     background: rgba(4, 3, 12, 0.42);
     border-right: 1px solid rgba(155, 77, 255, 0.18);
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 10px;
 }
-
 .hero-stat-card:last-child {
     border-right: none;
 }
-
 .hero-stat-icon {
-    width: 46px;
-    height: 46px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -332,27 +330,26 @@ h3 {
     box-shadow: none;
     border-radius: 0;
 }
-
 .hero-stat-icon img {
-    width: 80px;
-    height: 80px;
+    width: 32px;
+    height: 32px;
     object-fit: contain;
     filter: none;
 }
-
 .hero-stat-label {
     color: #9f91bd;
-    font-size: 0.66rem;
+    font-size: 0.56rem;
     text-transform: uppercase;
-    letter-spacing: 1.5px;
-    margin-bottom: 7px;
+    letter-spacing: 1px;
+    margin-bottom: 2px;
+    white-space: nowrap;
 }
-
 .hero-stat-value {
     color: #ffffff;
-    font-size: 1.55rem;
+    font-size: 0.98rem;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
 /* ---------------------------------------------------------
@@ -3656,14 +3653,47 @@ body:has(#memory-board) .search-bar {
     gap: 10px;
     padding: 12px 16px;
     }
-
-    .hero-stats {
-    grid-template-columns: repeat(2, 1fr) !important;
-    max-width: 100% !important;
+    .top-bar-right {
+    width: 100%;
+    justify-content: center;
     }
-
+    /* Le 4 statistiche diventano mini-schede indipendenti che vanno a capo
+       da sole solo quando non c'e' piu' spazio per stare tutte in riga */
+    .hero-stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: stretch;
+    gap: 8px;
+    max-width: 100%;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    backdrop-filter: none;
+    overflow: visible;
+    }
     .hero-stat-card {
+    flex: 0 0 auto;
     border-right: none;
+    border: 1px solid rgba(155, 77, 255, 0.20);
+    border-radius: 8px;
+    background: rgba(5, 4, 14, 0.76);
+    box-shadow: inset 0 0 10px rgba(155, 77, 255, 0.06),
+        0 4px 12px rgba(0, 0, 0, 0.30);
+    padding: 6px 12px;
+    gap: 8px;
+    }
+    .hero-stat-icon,
+    .hero-stat-icon img {
+    width: 26px;
+    height: 26px;
+    }
+    .hero-stat-value {
+    font-size: 0.82rem;
+    }
+    .hero-stat-label {
+    font-size: 0.5rem;
     }
 
     .search-row {
@@ -3687,12 +3717,12 @@ body:has(#memory-board) .search-bar {
 
 @media (max-width: 600px) {
     .hero-stat-value {
-    font-size: 1.2rem;
+    font-size: 0.78rem;
     }
-
+    .hero-stat-icon,
     .hero-stat-icon img {
-    width: 54px;
-    height: 54px;
+    width: 22px;
+    height: 22px;
     }
 
     .filters-row {
@@ -3774,10 +3804,6 @@ body:has(#memory-board) .search-bar {
      ========================================================= */
 
 @media (max-width: 430px) {
-    .hero-stats {
-    grid-template-columns: 1fr !important;
-    }
-
     .dropdown-filter,
     .dropdown-button,
     .set-toggle-btn,
@@ -6256,4 +6282,93 @@ html {
 }
 .sidebar-nav {
     margin-bottom: 4px;  /* piccolo respiro extra prima del logout */
+}
+FILE DA MODIFICARE: static/css/style.css
+=========================================
+Incolla questo blocco IN FONDO al file (dopo l'ultima sezione esistente,
+la "77 - FIX bottone Logout sovrapposto..."). Non cancellare nulla.
+
+
+/* =========================================================
+   78. SELETTORE LINGUA
+   \---------------------------------------------------------
+   Riusa lo stile dei dropdown gia' esistenti (.dropdown-button,
+   .dropdown-content): qui aggiungiamo solo le rifiniture specifiche
+   del selettore lingua.
+   ========================================================= */
+.lang-switcher-btn {
+    min-width: 92px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+/* Il menu si apre allineato a destra del bottone, non a sinistra:
+   il bottone e' quasi sempre l'elemento piu' a destra della topbar,
+   quindi aprendo verso sinistra il menu non esce mai dallo schermo */
+.lang-switcher-dropdown {
+    width: 190px;
+    left: 0;
+    right: auto;
+}
+.lang-option {
+    display: block;
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: #e4d8ff;
+    text-decoration: none;
+    font-size: 0.82rem;
+    margin: 2px 0;
+    transition: 0.18s ease;
+}
+.lang-option:hover {
+    color: #ffffff;
+    background: rgba(155, 77, 255, 0.18);
+}
+.lang-option.active {
+    color: #ffffff;
+    background: rgba(155, 77, 255, 0.28);
+    box-shadow: 0 0 12px rgba(155, 77, 255, 0.3);
+}
+/* --- Pagine Login / Registrazione: switcher fisso in alto a destra --- */
+.login-lang-switcher {
+    position: fixed;
+    top: 22px;
+    right: 22px;
+    z-index: 500;
+}
+@media (max-width: 600px) {
+    .login-lang-switcher {
+        top: 14px;
+        right: 14px;
+    }
+    .lang-switcher-btn {
+        min-width: 0;
+        padding: 0 12px;
+        font-size: 0.72rem;
+    }
+}
+/* =========================================================
+   79. SETTINGS-CHOICE COME LINK (selettore lingua)
+   ========================================================= */
+a.settings-choice {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-sizing: border-box;
+    gap: 6px;
+}
+/* =========================================================
+   80. SELETTORE LINGUA VICINO AL LOGO - protezione mobile
+   ========================================================= */
+.top-bar-left .lang-switcher-wrap {
+    flex: 0 0 auto;
+}
+@media (max-width: 600px) {
+    .top-bar-left .lang-switcher-wrap .lang-switcher-btn {
+        min-width: 0;
+        padding: 0 10px;
+        font-size: 0.68rem;
+    }
 }

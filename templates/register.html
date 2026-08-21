@@ -10,10 +10,23 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Monarch Hoard">
 <link rel="apple-touch-icon" href="/static/wallpaper/icon-180.png">
-<title>Registrazione - Monarch Hoard</title>
+<title>{{ t('titles.register') }}</title>
 <link rel="stylesheet" href="/static/css/style.css">
 </head>
+<script>window.MH_LANG = {{ lang_json|tojson }};</script>
+<script src="/static/js/i18n.js"></script>
+<script src="/static/js/lang-switcher.js"></script>
 <body class="login-body">
+    <div class="login-lang-switcher dropdown-filter lang-switcher-wrap">
+        <button id="lang-switcher-btn" class="dropdown-button lang-switcher-btn" type="button" onclick="toggleLangDropdown()">
+            &#127760; {{ lang_code|upper }} &#9660;
+        </button>
+        <div id="lang-switcher-dropdown" class="dropdown-content lang-switcher-dropdown">
+            {% for lang in available_langs %}
+            <a href="{{ url_for('set_language_route', lang_code=lang.code) }}" class="lang-option{{ ' active' if lang.code == lang_code else '' }}">{{ lang.flag }} {{ lang.name }}</a>
+            {% endfor %}
+        </div>
+    </div>
 <div class="login-panel">
     <div class="login-logo">
         <img src="/static/wallpaper/logo_monarchhoard.png" alt="Logo Monarch Hoard">
@@ -21,41 +34,40 @@
     <h1>
         <img src="/static/wallpaper/Scritta_MonarchHoard.png" alt="Monarch Hoard">
     </h1>
-
     {% if success %}
-        <p class="login-subtitle">Registrazione completata</p>
+        <p class="login-subtitle">{{ t('auth.register_done_title') }}</p>
         <div class="login-error" style="background:rgba(77,255,155,0.12); border-color:rgba(77,255,155,0.35); color:#9bffcb;">
-            Account creato! Conferma la tua email per accedere.
+            {{ t('auth.register_done_message') }}
         </div>
         <!-- FASE 1: link mostrato a schermo per il test. In FASE 2 arrivera' via email. -->
         {% if verify_link %}
-            <p class="login-hint" style="margin-top:14px;">Non hai ricevuto l'email? Usa questo link:</p>
+            <p class="login-hint" style="margin-top:14px;">{{ t('auth.register_resend_hint') }}</p>
             <a class="login-link" style="word-break:break-all;" href="{{ verify_link }}">{{ verify_link }}</a>
         {% else %}
-            <p class="login-hint" style="margin-top:14px;">Ti abbiamo inviato un'email di conferma. Controlla anche lo spam.</p>
+            <p class="login-hint" style="margin-top:14px;">{{ t('auth.register_email_sent_hint') }}</p>
         {% endif %}
         <div class="login-hint" style="margin-top:22px;">
-            <a href="{{ url_for('login') }}">Vai al login</a>
+            <a href="{{ url_for('login') }}">{{ t('auth.register_go_login') }}</a>
         </div>
     {% else %}
-        <p class="login-subtitle">Nuovo Hunter</p>
+        <p class="login-subtitle">{{ t('auth.register_title') }}</p>
         {% if error %}
             <div class="login-error">{{ error }}</div>
         {% endif %}
         <form method="POST" class="login-form">
-            <input type="email" name="email" placeholder="Email" autocomplete="email" aria-label="Email" required>
-            <input type="text" name="display_name" placeholder="Nome visualizzato (opzionale)" autocomplete="nickname" aria-label="Nome visualizzato">
-            <input type="password" name="password" id="pwd" placeholder="Password" autocomplete="new-password" aria-label="Password" oninput="checkPwdStrength()" required>
+            <input type="email" name="email" placeholder="{{ t('auth.register_email_placeholder') }}" autocomplete="email" aria-label="Email" required>
+            <input type="text" name="display_name" placeholder="{{ t('auth.register_display_name_placeholder') }}" autocomplete="nickname" aria-label="Nome visualizzato">
+            <input type="password" name="password" id="pwd" placeholder="{{ t('auth.register_password_placeholder') }}" autocomplete="new-password" aria-label="Password" oninput="checkPwdStrength()" required>
             <div id="pwd-bar" style="height:6px; border-radius:99px; background:rgba(255,255,255,0.08); overflow:hidden; margin-top:-6px;">
                 <div id="pwd-fill" style="height:100%; width:0%; transition:width 0.3s ease, background 0.3s ease;"></div>
             </div>
             <div id="pwd-msg" style="font-size:0.7rem; text-align:left; color:#9a8ab8; min-height:14px;"></div>
-            <input type="password" name="password2" placeholder="Ripeti password" autocomplete="new-password" aria-label="Ripeti password" required>
-            <button type="submit">Registrati</button>
+            <input type="password" name="password2" placeholder="{{ t('auth.register_password2_placeholder') }}" autocomplete="new-password" aria-label="Ripeti password" required>
+            <button type="submit">{{ t('auth.register_submit') }}</button>
         </form>
         <div class="login-hint">
-            Hai gia' un account?
-            <a href="{{ url_for('login') }}">Accedi</a>
+            {{ t('auth.register_have_account') }}
+            <a href="{{ url_for('login') }}">{{ t('auth.register_login_link') }}</a>
         </div>
     {% endif %}
 </div>
@@ -70,14 +82,13 @@ function checkPwdStrength() {
     if (/[a-z]/.test(pwd)) score++;
     if (/[0-9]/.test(pwd)) score++;
     if (/[^A-Za-z0-9]/.test(pwd)) score++;
-
     const levels = [
         { w: '0%',   c: 'transparent', t: '' },
-        { w: '20%',  c: '#ff4d6d',     t: 'Molto debole' },
-        { w: '40%',  c: '#ff8f4d',     t: 'Debole' },
-        { w: '60%',  c: '#ffd166',     t: 'Media' },
-        { w: '80%',  c: '#9bde6b',     t: 'Buona' },
-        { w: '100%', c: '#4dff9b',     t: 'Forte' }
+        { w: '20%',  c: '#ff4d6d',     t: t('auth.password_strength_very_weak') },
+        { w: '40%',  c: '#ff8f4d',     t: t('auth.password_strength_weak') },
+        { w: '60%',  c: '#ffd166',     t: t('auth.password_strength_medium') },
+        { w: '80%',  c: '#9bde6b',     t: t('auth.password_strength_good') },
+        { w: '100%', c: '#4dff9b',     t: t('auth.password_strength_strong') }
     ];
     const lvl = levels[score];
     fill.style.width = lvl.w;

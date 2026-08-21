@@ -7,7 +7,7 @@ let currentSortSet = 'asc';
 let visibleCardsOrder = [];
 let savedCollapsedSets = localStorage.getItem('collapsedSets');
 let collapsedSets = new Set(savedCollapsedSets ? JSON.parse(savedCollapsedSets) : []);
-// Modalità di visualizzazione: 'bySet' (divisa per set) | 'flat' (tutte insieme)
+// Modalita' di visualizzazione: 'bySet' (divisa per set) | 'flat' (tutte insieme)
 let collectionGroupMode = localStorage.getItem('groupMode') || 'bySet';
 let currentGroupMode = collectionGroupMode;
 let showcaseCodes = new Set(); // codici carta attualmente in vetrina
@@ -15,34 +15,28 @@ let gradedFilterOn = false;    // filtro "solo gradate"
 
 async function fetchJSON(url, options = {}) {
     const response = await fetch(url, options);
-
     if (!response.ok) {
         throw new Error(`Errore HTTP ${response.status} su ${url}`);
     }
-
     return response.json();
 }
 
 document.addEventListener('click', (e) => {
 	const btn = e.target.closest('.btn-qty');
 	if (!btn) return;
-
 	const code = btn.dataset.code;
 	const change = parseInt(btn.dataset.change);
-
 	changeQty(code, change, e);
 });
 
 async function loadStats() {
     try {
         const data = await fetchJSON('/api/stats');
-
         document.getElementById('total-cards').innerText = data.total;
         document.getElementById('owned-cards').innerText = data.owned;
         document.getElementById('total-copies').innerText = data.copies;
 
         const sets = await fetchJSON('/api/set_progress');
-
         const totalSets = sets.length;
         const completedSets = sets.filter(set => set.owned === set.total && set.total > 0).length;
 
@@ -50,10 +44,9 @@ async function loadStats() {
         if (completedSetsEl) {
             completedSetsEl.innerText = `${completedSets} / ${totalSets}`;
         }
-
     } catch (error) {
         console.error(error);
-        showToast("Errore nel caricamento delle statistiche.", 'error');
+        showToast(t('toast.stats_load_error'), 'error');
     }
 }
 
@@ -88,8 +81,8 @@ async function loadCards() {
 		updateGroupToggleLabel();
     } catch (error) {
         console.error(error);
-        container.innerHTML = `<div class="mh-empty-message">Errore nel caricamento delle carte.</div>`;
-        showToast("Impossibile caricare le carte.", 'error');
+        container.innerHTML = `<div class="mh-empty-message">${t('dashboard.load_error')}</div>`;
+        showToast(t('toast.cards_load_error'), 'error');
     }
 }
 
@@ -107,21 +100,19 @@ function populateDropdowns() {
 		}
 	});
 
-
 	// --------------------------
 	// RARITA'
 	// --------------------------
 	const rarityContainer = document.getElementById("rarity-filter");
 	rarityContainer.innerHTML = "";
+
 	Array.from(rarityMap.entries())
     .sort((a, b) => {
         const orderA = Number(a[1] ?? 999);
         const orderB = Number(b[1] ?? 999);
-
         if (orderA !== orderB) {
             return orderA - orderB;
         }
-
         return a[0].localeCompare(b[0]);
     })
     .forEach(([rarity]) => {
@@ -142,15 +133,14 @@ function populateDropdowns() {
 	// --------------------------
 	const setContainer = document.getElementById("set-filter");
 	setContainer.innerHTML = "";
+
 	Array.from(setMap.entries())
     .sort((a, b) => {
         const orderA = Number(a[1] ?? 999);
         const orderB = Number(b[1] ?? 999);
-
         if (orderA !== orderB) {
             return orderA - orderB;
         }
-
         return a[0].localeCompare(b[0]);
     })
     .forEach(([setName]) => {
@@ -173,10 +163,10 @@ function populateDropdowns() {
 	ownedContainer.innerHTML = "";
 	
 	const ownedOptions = [
-		{ value: 'ALL', label: 'Tutte' },
-		{ value: 'OWNED', label: 'Possedute' },
-		{ value: 'NOT_OWNED', label: 'Mancanti' },
-		{ value: 'DUPLICATES', label: 'Doppioni' }
+		{ value: 'ALL', label: t('collection.filter_status_all') },
+		{ value: 'OWNED', label: t('collection.filter_status_owned') },
+		{ value: 'NOT_OWNED', label: t('collection.filter_status_not_owned') },
+		{ value: 'DUPLICATES', label: t('collection.filter_status_duplicates') }
 	];
 
 	ownedOptions.forEach(opt => {
@@ -206,59 +196,49 @@ function populateDropdowns() {
 //--------------------------------------------------
 // APERTURA MENU
 //--------------------------------------------------
-
 function toggleDropdown(id){
-
 	document
 		.querySelectorAll(".dropdown-content")
 		.forEach(menu=>{
-
 			if(menu.id!==id)
 				menu.classList.remove("open");
-
 		});
-
 	document
 		.getElementById(id)
 		.classList.toggle("open");
-
 }
 
 //--------------------------------------------------
 // CHIUSURA MENU CLIC FUORI
 //--------------------------------------------------
-
 document.addEventListener("click",function(e){
-
 	if(e.target.closest(".dropdown-filter"))
 		return;
-
 	document
 		.querySelectorAll(".dropdown-content")
 		.forEach(menu=>menu.classList.remove("open"));
-
 });
 
 function updateDropdownTitles() {
 	const raritySelected = document.querySelectorAll("#rarity-filter .filter-chip.active").length;
 	const setSelected = document.querySelectorAll("#set-filter .filter-chip.active").length;
 	
-	// Per "Possedute", se "Tutte" è selezionato mostra "Tutte", altrimenti conta le attive
+	// Per "Possedute", se "Tutte" e' selezionato mostra "Tutte", altrimenti conta le attive
 	const ownedChips = [...document.querySelectorAll("#owned-filter .filter-chip")];
 	const activeOwned = ownedChips.filter(c => c.classList.contains("active"));
 
-	document.getElementById("rarity-button").innerText = 
-		raritySelected > 0 ? `Rarità (${raritySelected}) ▼` : "Rarità ▼";
+	document.getElementById("rarity-button").innerText =
+		raritySelected > 0 ? `${t('collection.filter_rarity')} (${raritySelected}) \u25BC` : `${t('collection.filter_rarity')} \u25BC`;
 
-	document.getElementById("set-button").innerText = 
-		setSelected > 0 ? `Set (${setSelected}) ▼` : "Set ▼";
+	document.getElementById("set-button").innerText =
+		setSelected > 0 ? `${t('collection.filter_set')} (${setSelected}) \u25BC` : `${t('collection.filter_set')} \u25BC`;
 
 	// Mostra il testo dell'elemento attivo per le possedute, o "Stato ▼" di default
-	let ownedText = "Stato ▼";
+	let ownedText = `${t('collection.filter_status_default')} \u25BC`;
 	if (activeOwned.length === 1) {
-		ownedText = activeOwned[0].textContent.trim() + " ▼";
+		ownedText = activeOwned[0].textContent.trim() + " \u25BC";
 	} else if (activeOwned.length === 0 || activeOwned.find(c => c.dataset.value === 'ALL')) {
-		ownedText = "Tutte ▼";
+		ownedText = `${t('collection.filter_status_all')} \u25BC`;
 	}
 	document.getElementById("owned-button").innerText = ownedText;
 }
@@ -278,6 +258,7 @@ function filterCards() {
 			(card.rarity || '').toLowerCase().includes(searchText) ||
 			(card.serials || '').toLowerCase().includes(searchText) ||
 			(card.set_name || '').toLowerCase().includes(searchText);
+
 		const matchesRarity = selectedRarities.length === 0 || selectedRarities.includes(card.rarity);
 		const matchesSet = selectedSets.length === 0 || selectedSets.includes(card.set_name);
 		
@@ -307,19 +288,14 @@ function filterCards() {
 }
 
 function selectAllInDropdown(containerId){
-
 	document
 		.querySelectorAll(`#${containerId} .filter-chip`)
 		.forEach(chip=>chip.classList.add("active"));
-
 	updateDropdownTitles();
-
 	filterCards();
-
 }
 
 function clearFilters() {
-
 	const searchEl = document.getElementById('search-input');
 	if (searchEl) searchEl.value = '';
 
@@ -329,7 +305,6 @@ function clearFilters() {
 	// reset owned su "ALL"
 	document.querySelectorAll("#owned-filter .filter-chip")
 		.forEach(c => c.classList.remove("active"));
-
 	const allChip = document.querySelector('#owned-filter .filter-chip[data-value="ALL"]');
 	if (allChip) allChip.classList.add("active");
 
@@ -338,7 +313,7 @@ function clearFilters() {
 	const sortCardIdChip = document.querySelector('#sort-cards-filter .filter-chip[data-value="id"]');
 	if (sortCardIdChip) sortCardIdChip.classList.add("active");
 	const sortCardsButton = document.getElementById("sort-cards-button");
-	if (sortCardsButton) sortCardsButton.innerText = "Ordina Carte: CardCode ▼";
+	if (sortCardsButton) sortCardsButton.innerText = `${t('collection.sort_cards_button_prefix')}: ${t('collection.sort_cards_code')} \u25BC`;
 	currentSortCard = 'id';
 	
 	// Reset Ordinamento Set a Crescente
@@ -346,7 +321,7 @@ function clearFilters() {
 	const sortSetAscChip = document.querySelector('#sort-set-filter .filter-chip[data-value="asc"]');
 	if (sortSetAscChip) sortSetAscChip.classList.add("active");
 	const sortSetButton = document.getElementById("sort-set-button");
-	if (sortSetButton) sortSetButton.innerText = "Ordina Set: Crescente ▼";
+	if (sortSetButton) sortSetButton.innerText = `${t('collection.sort_set_button_prefix')}: ${t('collection.sort_set_asc')} \u25BC`;
 	currentSortSet = 'asc';
 
 	updateDropdownTitles();
@@ -365,8 +340,8 @@ function switchView(viewName) {
     const collection = document.getElementById('sets-container');
     const heroPanel = document.querySelector('.hero-panel');
     const searchBar = document.querySelector('.search-bar');
-
     const isDashboard = viewName === 'DASHBOARD';
+
 	// Imposta la vista in base alla sezione
     if (viewName === 'WISHLIST') {
         currentGroupMode = 'flat';               // Wishlist: sempre tutte insieme
@@ -389,7 +364,6 @@ function switchView(viewName) {
     }
 }
 
-
 function handleSearch() {
 	clearTimeout(searchTimeout);
 	searchTimeout = setTimeout(() => {
@@ -399,23 +373,22 @@ function handleSearch() {
 
 function highlightText(text, search) {
     const safeText = escapeHTML(text);
-
     if (!search) return safeText;
-
     const escapedSearch = escapeHTML(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const regex = new RegExp(`(${escapedSearch})`, 'ig');
-
     return safeText.replace(regex, '<span class="search-highlight">$1</span>');
 }
 
 // ----- Cambio vista Per Set / Tutte insieme -----
 function toggleGroupMode() {
     currentGroupMode = (currentGroupMode === 'bySet') ? 'flat' : 'bySet';
-    // In Wishlist il cambio è temporaneo: la preferenza salvata resta quella della Collezione
+
+    // In Wishlist il cambio e' temporaneo: la preferenza salvata resta quella della Collezione
     if (currentView !== 'WISHLIST') {
         collectionGroupMode = currentGroupMode;
         localStorage.setItem('groupMode', currentGroupMode);
     }
+
     updateGroupToggleLabel();
     filterCards();
 }
@@ -423,7 +396,7 @@ function toggleGroupMode() {
 function updateGroupToggleLabel() {
     const btn = document.getElementById('group-toggle-btn');
     if (!btn) return;
-    btn.innerText = (currentGroupMode === 'flat') ? 'Vista: Tutte' : 'Vista: Per Set';
+    btn.innerText = (currentGroupMode === 'flat') ? t('collection.btn_view_flat') : t('collection.btn_view_by_set');
 }
 
 // Costruisce una singola card (usata da entrambe le viste)
@@ -443,6 +416,7 @@ function buildCardElement(card) {
             e.target.tagName === 'INPUT' ||
             e.target.classList.contains('btn-qty') ||
             e.target.closest('.wishlist-btn');
+
         if (isInteractive) return;
         openModal(card);
     });
@@ -457,7 +431,7 @@ function buildCardElement(card) {
         <div class="card-name">${highlightedName}</div>
         <div class="card-wishlist-row">
             <button class="wishlist-btn ${card.is_wishlisted ? 'active' : ''}" data-code="${escapeHTML(card.card_code)}" onclick="toggleWishlist('${escapeAttr(card.card_code)}', event)">
-                ${card.is_wishlisted ? '❤️' : '🤍'}
+                ${card.is_wishlisted ? '\u2764\uFE0F' : '\uD83E\uDD0D'}
             </button>
         </div>
         <div class="quantity-control">
@@ -478,13 +452,14 @@ function renderCards(cardsToRender) {
     container.innerHTML = '';
 
     if (cardsToRender.length === 0) {
-        container.innerHTML = `<p style="text-align:center; color:#64748b; margin-top:40px;">Nessuna carta corrisponde ai criteri correnti.</p>`;
+        container.innerHTML = `<p style="text-align:center; color:#64748b; margin-top:40px;">${t('collection.no_cards_match')}</p>`;
         return;
     }
 
     // 1. Ordinamento delle CARTE
     const sortedCards = [...cardsToRender];
     const sortBy = currentSortCard || 'id';
+
     sortedCards.sort((a, b) => {
         if (sortBy === 'name') {
             return (a.card_name || '').localeCompare(b.card_name || '');
@@ -531,11 +506,12 @@ function renderCards(cardsToRender) {
         }
         return orderA - orderB;
     });
+
 	const orderedCodes = [];
+
     sortedSetCodes.forEach(setCode => {
         const setSection = document.createElement('div');
         setSection.className = 'set-section';
-
         if (collapsedSets.has(setCode)) {
             setSection.classList.add('collapsed');
         }
@@ -558,6 +534,7 @@ function renderCards(cardsToRender) {
         setSection.style.backgroundRepeat = 'no-repeat';
 
         const setImgName = `pacchetto_${setCode.toUpperCase()}.png`;
+        const setLabel = t('collection.set_label_prefix');
 
         header.innerHTML = `
             <div style="display:flex; align-items:center; gap:15px; width:100%;">
@@ -568,7 +545,7 @@ function renderCards(cardsToRender) {
                 <div style="flex:1;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                         <span class="set-title-text set-count" data-set-code="${setCode}">
-                            Set: ${setCode} (${ownedInSet}/${totalInSet})
+                            ${setLabel}: ${setCode} (${ownedInSet}/${totalInSet})
                         </span>
                         <span class="set-percent" style="color:white; font-weight:bold;">
                             ${progressPercent}%
@@ -583,7 +560,7 @@ function renderCards(cardsToRender) {
                     </div>
                 </div>
                 <span style="color:white; background:black; padding:6px 8px; border-radius:4px; border:1px solid #444; font-size:0.8rem;">
-                    ▼
+                    \u25BC
                 </span>
             </div>
         `;
@@ -601,6 +578,7 @@ function renderCards(cardsToRender) {
 
         const grid = document.createElement('div');
         grid.className = 'set-grid';
+
         groups[setCode].forEach(card => {
             grid.appendChild(buildCardElement(card));
 			orderedCodes.push(card.card_code);
@@ -611,7 +589,7 @@ function renderCards(cardsToRender) {
         footer.className = 'set-footer';
         footer.innerHTML = `
             <span class="set-footer-arrow">&#9650;</span>
-            <span>Comprimi il set</span>
+            <span>${t('collection.footer_collapse_set')}</span>
             <span class="set-footer-arrow">&#9650;</span>
         `;
         footer.onclick = () => {
@@ -639,10 +617,8 @@ async function changeQty(cardCode, change, event) {
     if (!qtyElement) return;
 
     const buttons = document.querySelectorAll(`.btn-qty[data-code="${cardCode}"]`);
-
     let currentQty = parseInt(qtyElement.value || "0");
     let newQty = currentQty + change;
-
     if (newQty < 0) newQty = 0;
 
     qtyElement.value = newQty;
@@ -665,7 +641,6 @@ async function changeQty(cardCode, change, event) {
 
         if (data.status === 'success') {
             const cardIndex = allCardsData.findIndex(c => c.card_code === cardCode);
-
 			if (cardIndex !== -1) {
 				allCardsData[cardIndex].quantity = newQty;
 			
@@ -675,10 +650,12 @@ async function changeQty(cardCode, change, event) {
 			}
 
 			updateCardVisual(cardCode, newQty);
+
 			// Feedback visivo +1 / -1 sul bottone cliccato
 			if (event && event.target) {
 				showFloatFeedback(event.target, change);
 			}
+
 			updateSetHeaderForCard(cardCode);
 			loadStats();
 			
@@ -702,15 +679,13 @@ async function changeQty(cardCode, change, event) {
 					filterCards();
 				}
 			}
-
-
         } else {
-            showToast("Errore durante l'aggiornamento della quantità.", 'error');
+            showToast(t('toast.qty_update_error'), 'error');
             qtyElement.value = currentQty;
         }
     } catch (error) {
         console.error(error);
-        showToast("Errore di connessione. Riprova.", 'error');
+        showToast(t('common.connection_error'), 'error');
         qtyElement.value = currentQty;
     } finally {
         buttons.forEach(btn => {
@@ -723,6 +698,7 @@ async function changeQty(cardCode, change, event) {
 
 function updateCardVisual(cardCode, newQty) {
     updateHunterProgress();
+
     if (newQty === 0 && showcaseCodes.has(cardCode)) {
         fetchJSON('/api/showcase/remove', {
             method: 'POST',
@@ -734,13 +710,14 @@ function updateCardVisual(cardCode, newQty) {
                 const btn = document.getElementById('modal-showcase-btn');
                 if (btn) {
                     btn.classList.remove('active');
-                    btn.innerText = '+ Vetrina';
+                    btn.innerText = t('card_modal.add_showcase');
                     btn.disabled = true;
                 }
             }
-            showToast('Carta rimossa anche dalla vetrina (quantità a 0).', 'info');
+            showToast(t('showcase.auto_removed_qty_zero'), 'info');
         }).catch(function (e) { console.error(e); });
     }
+
     const cardEl = document.getElementById(`card-${cardCode}`);
     if (!cardEl) return;
 
@@ -777,6 +754,7 @@ function updateCardVisual(cardCode, newQty) {
 function updateSetHeaderForCard(cardCode) {
     const card = allCardsData.find(c => c.card_code === cardCode);
     if (!card) return;
+
     const setCode = card.set_name || "Altri";
     const setCards = allCardsData.filter(c => (c.set_name || "Altri") === setCode);
     const totalInSet = setCards.length;
@@ -785,7 +763,7 @@ function updateSetHeaderForCard(cardCode) {
 
     const countEl = document.querySelector(`.set-count[data-set-code="${setCode}"]`);
     if (countEl) {
-        countEl.innerText = `Set: ${setCode} (${ownedInSet}/${totalInSet})`;
+        countEl.innerText = `${t('collection.set_label_prefix')}: ${setCode} (${ownedInSet}/${totalInSet})`;
     }
 
     const section = countEl ? countEl.closest(".set-section") : null;
@@ -801,12 +779,9 @@ function updateSetHeaderForCard(cardCode) {
     }
 }
 
-
 async function setQty(cardCode, value) {
     const qtyElement = document.getElementById(`qty-${cardCode}`);
-
     let newQty = parseInt(value);
-
     if (isNaN(newQty) || newQty < 0) {
         newQty = 0;
     }
@@ -829,7 +804,6 @@ async function setQty(cardCode, value) {
 
         if (data.status === 'success') {
             const cardIndex = allCardsData.findIndex(c => c.card_code === cardCode);
-
 			if (cardIndex !== -1) {
 				allCardsData[cardIndex].quantity = newQty;
 			
@@ -846,19 +820,19 @@ async function setQty(cardCode, value) {
 			} else {
 				filterCards();
 			}
-
         } else {
-            showToast("Errore durante il salvataggio.", 'error');
+            showToast(t('toast.generic_save_error'), 'error');
         }
     } catch (error) {
         console.error(error);
-        showToast("Errore di connessione. Riprova.", 'error');
+        showToast(t('common.connection_error'), 'error');
     }
 }
 
 function openModal(card) {
     const fullCardData = allCardsData.find(c => c.card_code === card.card_code) || card;
     const modalImg = document.getElementById('modal-card-img');
+
     currentModalCardCode = fullCardData.card_code;
 
     const qtyInput = document.getElementById(`qty-${fullCardData.card_code}`);
@@ -871,9 +845,11 @@ function openModal(card) {
         modalImg.style.filter = 'none';
         modalImg.style.opacity = '1';
     }
+
     modalImg.src = fullCardData.image_url;
     document.getElementById('modal-card-name').innerText = fullCardData.card_name;
-    document.getElementById('modal-card-code').innerText = `Codice: ${fullCardData.card_code}`;
+    document.getElementById('modal-card-code').innerText = `${t('common.code_label')}: ${fullCardData.card_code}`;
+
 	const rarityEl = document.getElementById('modal-card-rarity');
 	rarityEl.innerText = fullCardData.rarity;
 	if (currentQty > 0 && (fullCardData.rarity_Order || 0) >= 35) {
@@ -881,6 +857,7 @@ function openModal(card) {
 	} else {
 		rarityEl.classList.remove('shine');
 	}
+
     // Badge doppioni
     const dupBadge = document.getElementById('modal-duplicate-badge');
     if (currentQty > 1) {
@@ -890,17 +867,17 @@ function openModal(card) {
         dupBadge.style.display = 'none';
     }
 
-    // Input quantità
+    // Input quantita'
     document.getElementById('modal-qty-input').value = currentQty;
 
     // Wishlist
     const modalWishBtn = document.getElementById('modal-wishlist-btn');
     if (fullCardData.is_wishlisted) {
         modalWishBtn.classList.add('active');
-        modalWishBtn.innerText = '❤️';
+        modalWishBtn.innerText = '\u2764\uFE0F';
     } else {
         modalWishBtn.classList.remove('active');
-        modalWishBtn.innerText = '🤍';
+        modalWishBtn.innerText = '\uD83E\uDD0D';
     }
 
     // Vetrina
@@ -908,10 +885,10 @@ function openModal(card) {
     if (modalShowcaseBtn) {
         const inShowcase = showcaseCodes.has(fullCardData.card_code);
         modalShowcaseBtn.classList.toggle('active', inShowcase);
-        modalShowcaseBtn.innerText = inShowcase ? '★ Nella Vetrina' : '+ Vetrina';
+        modalShowcaseBtn.innerText = inShowcase ? `\u2605 ${t('card_modal.in_showcase')}` : t('card_modal.add_showcase');
         modalShowcaseBtn.disabled = (!inShowcase && currentQty === 0);
         modalShowcaseBtn.title = (!inShowcase && currentQty === 0)
-            ? 'Devi possedere almeno una copia per aggiungerla alla vetrina'
+            ? t('card_modal.showcase_need_owned')
             : '';
     }
 
@@ -941,29 +918,28 @@ document.addEventListener('keydown', (e) => {
     const activeTag = document.activeElement ? document.activeElement.tagName : '';
     const isTyping = activeTag === 'INPUT' || activeTag === 'TEXTAREA';
 
-    // ESC → chiude modale
+    // ESC -> chiude modale
     if (e.key === 'Escape') {
         closeModal();
         return;
     }
 
-    // "/" → focus sulla barra di ricerca (solo se non stai già scrivendo)
+    // "/" -> focus sulla barra di ricerca (solo se non stai gia' scrivendo)
     if (e.key === '/' && !isTyping && !modalOpen) {
         e.preventDefault();
         if (searchInput) searchInput.focus();
         return;
     }
 
-	// Frecce ← → nella modale → carta precedente/successiva dello stesso set
+	// Frecce ← → nella modale -> carta precedente/successiva dello stesso set
 	if (modalOpen && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
-		// Blocca SOLO se stai scrivendo nell'input quantità della modale stessa
+		// Blocca SOLO se stai scrivendo nell'input quantita' della modale stessa
 		const ae = document.activeElement;
 		if (ae && (ae.id === 'modal-qty-input' || ae.classList.contains('serial-input'))) return;
 		e.preventDefault();
 		navigateModal(e.key === 'ArrowRight' ? 1 : -1);
 		return;
 	}
-
 });
 
 document.getElementById('card-modal').addEventListener('click', (e) => {
@@ -986,7 +962,7 @@ function toggleWishlist(cardCode, event) {
 	const btn = document.querySelector(`.wishlist-btn[data-code="${cardCode}"]`);
 	if (btn) {
 		btn.classList.toggle('active', newStatus);
-		btn.innerText = newStatus ? '❤️' : '🤍';
+		btn.innerText = newStatus ? '\u2764\uFE0F' : '\uD83E\uDD0D';
 		if (newStatus) {
 			btn.classList.remove('pulse-once');
 			void btn.offsetWidth; // forza il reset dell'animazione
@@ -995,7 +971,6 @@ function toggleWishlist(cardCode, event) {
 			btn.classList.remove('pulse-once');
 		}
 	}
-
 	
 	// Se siamo in vista Wishlist e leviamo il cuore, ricarichiamo i filtri per toglierla dalla vista
 	if (currentView === 'WISHLIST' && !newStatus) {
@@ -1012,14 +987,14 @@ function toggleWishlist(cardCode, event) {
 		})
 	}).catch(error => {
 		console.error(error);
-		showToast("Errore durante l'aggiornamento della wishlist.", 'error');
+		showToast(t('toast.wishlist_update_error'), 'error');
 	
 		allCardsData[cardIndex].is_wishlisted = currentStatus;
 	
 		const btn = document.querySelector(`.wishlist-btn[data-code="${cardCode}"]`);
 		if (btn) {
 			btn.classList.toggle('active', newStatus);
-			btn.innerText = newStatus ? '❤️' : '🤍';
+			btn.innerText = newStatus ? '\u2764\uFE0F' : '\uD83E\uDD0D';
 			if (newStatus) {
 				btn.classList.remove('pulse-once');
 				void btn.offsetWidth; // forza il reset dell'animazione
@@ -1028,26 +1003,20 @@ function toggleWishlist(cardCode, event) {
 				btn.classList.remove('pulse-once');
 			}
 		}
-
 	});
 }
 
 function clearDropdown(containerId){
-
 	document
 		.querySelectorAll(`#${containerId} .filter-chip`)
 		.forEach(chip=>chip.classList.remove("active"));
-
 	updateDropdownTitles();
-
 	filterCards();
-
 }
 
 function openAllSets() {
     collapsedSets.clear();
     localStorage.setItem('collapsedSets', JSON.stringify([]));
-
     if (currentView === 'COLLEZIONE' || currentView === 'WISHLIST') {
         filterCards();
     }
@@ -1059,10 +1028,8 @@ function closeAllSets() {
             .map(card => card.set_name)
             .filter(Boolean)
     )];
-
     collapsedSets = new Set(allSetNames);
     localStorage.setItem('collapsedSets', JSON.stringify([...collapsedSets]));
-
     if (currentView === 'COLLEZIONE' || currentView === 'WISHLIST') {
         filterCards();
     }
@@ -1071,12 +1038,13 @@ function closeAllSets() {
 function toggleWishlistFromModal() {
     if (!currentModalCardCode) return;
     toggleWishlist(currentModalCardCode, null);
+
     const cardData = allCardsData.find(c => c.card_code === currentModalCardCode);
     const modalWishBtn = document.getElementById('modal-wishlist-btn');
+
     if (cardData && modalWishBtn) {
         modalWishBtn.classList.toggle('active', cardData.is_wishlisted);
-        modalWishBtn.innerText = cardData.is_wishlisted ? '❤️' : '🤍';
-
+        modalWishBtn.innerText = cardData.is_wishlisted ? '\u2764\uFE0F' : '\uD83E\uDD0D';
         if (cardData.is_wishlisted) {
             modalWishBtn.classList.remove('pulse-once');
             void modalWishBtn.offsetWidth;
@@ -1085,6 +1053,7 @@ function toggleWishlistFromModal() {
             modalWishBtn.classList.remove('pulse-once');
         }
     }
+
     if (currentView === 'DASHBOARD') {
         renderDashboard();
     }
@@ -1093,26 +1062,20 @@ function toggleWishlistFromModal() {
 function selectSortCard(event, value, labelText) {
     document.querySelectorAll("#sort-cards-filter .filter-chip")
         .forEach(c => c.classList.remove("active"));
-
     event.currentTarget.classList.add("active");
-
     currentSortCard = value;
-    document.getElementById("sort-cards-button").innerText = labelText + " ▼";
+    document.getElementById("sort-cards-button").innerText = labelText + " \u25BC";
     document.getElementById("sort-cards-dropdown").classList.remove("open");
-
     filterCards();
 }
 
 function selectSortSet(event, value, labelText) {
     document.querySelectorAll("#sort-set-filter .filter-chip")
         .forEach(c => c.classList.remove("active"));
-
     event.currentTarget.classList.add("active");
-
     currentSortSet = value;
-    document.getElementById("sort-set-button").innerText = labelText + " ▼";
+    document.getElementById("sort-set-button").innerText = labelText + " \u25BC";
     document.getElementById("sort-set-dropdown").classList.remove("open");
-
     filterCards();
 }
 
@@ -1135,8 +1098,9 @@ function buildRarityBreakdownHTML() {
     // Ordina dalla piu' rara alla piu' comune
     const rows = [...map.entries()].sort((a, b) => b[1].order - a[1].order);
 
-    let html = '<div class="mh-rarity-title">Completamento per Rarita\'</div>';
+    let html = `<div class="mh-rarity-title">${t('dashboard.rarity_breakdown_title')}</div>`;
     html += '<div class="mh-rarity-list">';
+
     rows.forEach(([rarity, data]) => {
         const pct = data.total > 0 ? Math.round((data.owned / data.total) * 100) : 0;
         const isHigh = (data.order || 0) >= 35;
@@ -1149,6 +1113,7 @@ function buildRarityBreakdownHTML() {
                 <span class="mh-rarity-count">${data.owned}/${data.total}</span>
             </div>`;
     });
+
     html += '</div>';
     return html;
 }
@@ -1162,7 +1127,6 @@ async function renderDashboard() {
         }
 
         const container = document.getElementById("dashboard-container");
-
         const percentage = Number(stats.percentage || 0);
         const missing = stats.total - stats.owned;
 
@@ -1181,108 +1145,96 @@ async function renderDashboard() {
 
         container.innerHTML = `
             <div class="mh-dashboard-grid">
-
                 <section class="mh-panel mh-collection-progress">
-                    <div class="mh-panel-title">Collection Progress</div>
-
+                    <div class="mh-panel-title">${t('dashboard.collection_progress')}</div>
                     <div class="mh-progress-content">
                         <div class="mh-progress-ring" style="--progress:${percentage};">
                             <div class="mh-progress-inner">
                                 <div class="mh-progress-number">${percentage}%</div>
                                 <div class="mh-progress-sub">${stats.owned} / ${stats.total}</div>
-                                <div class="mh-progress-label">Carte</div>
+                                <div class="mh-progress-label">${t('dashboard.cards')}</div>
                             </div>
                         </div>
-
                         <div class="mh-progress-creature mh-rarity-breakdown">${buildRarityBreakdownHTML()}</div>
                     </div>
-
                     <div class="mh-mini-stats">
                         <div class="mh-mini-stat">
 						<div class="mh-mini-icon">
 							<img src="/static/wallpaper/icon_collection_progress_carte.png">
 						</div>
                             <div class="mh-mini-value">${stats.owned}</div>
-                            <div class="mh-mini-label">Carte</div>
+                            <div class="mh-mini-label">${t('dashboard.cards')}</div>
                         </div>
-
                         <div class="mh-mini-stat">
 						<div class="mh-mini-icon">
 							<img src="/static/wallpaper/icon_collection_progress_copie.png">
 						</div>
                             <div class="mh-mini-value">${stats.copies}</div>
-                            <div class="mh-mini-label">Copie</div>
+                            <div class="mh-mini-label">${t('dashboard.copies')}</div>
                         </div>
-
                         <div class="mh-mini-stat">
 						<div class="mh-mini-icon">
 							<img src="/static/wallpaper/icon_collection_progress_wishlist.png">
 						</div>
                             <div class="mh-mini-value">${stats.wishlist}</div>
-                            <div class="mh-mini-label">Wishlist</div>
+                            <div class="mh-mini-label">${t('dashboard.wishlist')}</div>
                         </div>
-
                         <div class="mh-mini-stat">
 						<div class="mh-mini-icon">
 							<img src="/static/wallpaper/icon_collection_progress_mancanti.png">
 						</div>
                             <div class="mh-mini-value">${missing}</div>
-                            <div class="mh-mini-label">Mancanti</div>
+                            <div class="mh-mini-label">${t('dashboard.missing')}</div>
                         </div>
                         <div class="mh-mini-stat">
                             <div class="mh-mini-icon" style="font-size:1.8rem;">&#127894;</div>
                             <div class="mh-mini-value">${allCardsData.filter(c => c.graded).length}</div>
-                            <div class="mh-mini-label">Gradate</div>
+                            <div class="mh-mini-label">${t('dashboard.graded')}</div>
                         </div>
                     </div>
                 </section>
 
                 <section class="mh-panel mh-set-panel">
                     <div class="mh-panel-header">
-                        <div class="mh-panel-title">Progressione Set</div>
-                        <button class="mh-link-btn" onclick="switchView('COLLEZIONE')">Vedi tutti</button>
+                        <div class="mh-panel-title">${t('dashboard.set_progression')}</div>
+                        <button class="mh-link-btn" onclick="switchView('COLLEZIONE')">${t('dashboard.see_all')}</button>
                     </div>
-
                     <div id="dashboard-set-progress" class="mh-set-list"></div>
                 </section>
 
                 <section class="mh-panel mh-latest-panel">
-                    <div class="mh-panel-title">Ultime Carte Aggiunte</div>
+                    <div class="mh-panel-title">${t('dashboard.latest_added')}</div>
                     <div class="mh-card-row">
                         ${latestCards.length > 0 ? latestCards.map(card => renderDashboardSmallCard(card)).join('') : `
-                            <div class="mh-empty-message">Nessuna carta posseduta.</div>
+                            <div class="mh-empty-message">${t('dashboard.no_owned_cards')}</div>
                         `}
                     </div>
-
                     <button class="mh-wide-btn" onclick="switchView('COLLEZIONE')">
-                        Vedi tutte le carte →
+                        ${t('dashboard.see_all_cards')} \u2192
                     </button>
                 </section>
 
                 <section class="mh-panel mh-wishlist-panel">
                     <div class="mh-panel-header">
-                        <div class="mh-panel-title">Wishlist</div>
-                        <button class="mh-link-btn" onclick="switchView('WISHLIST')">Vedi tutto</button>
+                        <div class="mh-panel-title">${t('dashboard.wishlist')}</div>
+                        <button class="mh-link-btn" onclick="switchView('WISHLIST')">${t('dashboard.see_all')}</button>
                     </div>
-
                     <div class="mh-card-row compact">
                         ${wishlistPreview.length > 0 ? wishlistPreview.map(card => renderDashboardSmallCard(card)).join('') : `
-                            <div class="mh-empty-message">Wishlist vuota.</div>
+                            <div class="mh-empty-message">${t('dashboard.empty_wishlist')}</div>
                         `}
                     </div>
                 </section>
-
             </div>
         `;
 
         loadDashboardSets();
-
     } catch (error) {
         console.error(error);
         const container = document.getElementById("dashboard-container");
         container.innerHTML = `
             <div class="mh-panel">
-                Errore nel caricamento della dashboard.
+                ${t('dashboard.load_error')}
             </div>
         `;
     }
@@ -1295,6 +1247,7 @@ function renderDashboardSmallCard(card) {
     const safeCode = escapeHTML(card.card_code);
     const safeRarity = escapeHTML(card.rarity);
     const notOwned = (card.quantity > 0) ? '' : 'not-owned';
+
     return `
         <div class="mh-small-card ${notOwned}" onclick="openModalByCode('${escapeAttr(card.card_code)}')">
             <div class="mh-small-rarity">${safeRarity}</div>
@@ -1316,6 +1269,7 @@ async function loadDashboardSets() {
     try {
         const sets = await fetchJSON("/api/set_progress");
         const container = document.getElementById("dashboard-set-progress");
+        const setLabel = t('collection.set_label_prefix');
 
         let html = "";
 
@@ -1330,16 +1284,13 @@ async function loadDashboardSets() {
                              alt="${safeSetName}" 
                              onerror="this.style.display='none';">
                     </div>
-
                     <div class="mh-set-info">
                         <div class="mh-set-name">${safeSetName}</div>
-                        <div class="mh-set-sub">Set</div>
-
+                        <div class="mh-set-sub">${setLabel}</div>
                         <div class="mh-set-bar">
                             <div class="mh-set-fill" style="width:${percentage}%;"></div>
                         </div>
                     </div>
-
                     <div class="mh-set-numbers">
                         <div>${set.owned} / ${set.total}</div>
                         <span>${percentage}%</span>
@@ -1350,17 +1301,16 @@ async function loadDashboardSets() {
 
         html += `
             <button class="mh-wide-btn" onclick="switchView('COLLEZIONE')">
-                Vedi tutti i set →
+                ${t('dashboard.see_all_sets')} \u2192
             </button>
         `;
 
         container.innerHTML = html;
-
     } catch (error) {
         console.error(error);
         const container = document.getElementById("dashboard-set-progress");
         container.innerHTML = `
-            <div class="mh-empty-message">Errore nel caricamento dei set.</div>
+            <div class="mh-empty-message">${t('dashboard.sets_load_error')}</div>
         `;
     }
 }
@@ -1388,7 +1338,7 @@ function escapeAttr(value) {
 
 async function loadUserInfo() {
     try {
-        // Sfruttiamo la tua funzione fetchJSON già esistente
+        // Sfruttiamo la tua funzione fetchJSON gia' esistente
         const data = await fetchJSON('/api/me');
         
         if (data && data.display_name) {
@@ -1405,16 +1355,15 @@ async function loadUserInfo() {
     }
 }
 
-// -------- Gestione +/- e input quantità nella modale --------
+// -------- Gestione +/- e input quantita' nella modale --------
 async function updateQtyFromModal(newQty, triggerButton = null) {
     const cardCode = currentModalCardCode;
     if (!cardCode) return;
     if (isNaN(newQty) || newQty < 0) newQty = 0;
 	
-    // Calcola differenza rispetto alla quantità attuale
+    // Calcola differenza rispetto alla quantita' attuale
     const oldQty = parseInt(document.getElementById('modal-qty-input').value || "0");
     const change = newQty - oldQty;
-
 
     try {
         const data = await fetchJSON('/api/update_quantity', {
@@ -1422,6 +1371,7 @@ async function updateQtyFromModal(newQty, triggerButton = null) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ card_code: cardCode, quantity: newQty })
         });
+
         if (data.status === 'success') {
             const idx = allCardsData.findIndex(c => c.card_code === cardCode);
             if (idx !== -1) {
@@ -1430,6 +1380,7 @@ async function updateQtyFromModal(newQty, triggerButton = null) {
             }
 
             document.getElementById('modal-qty-input').value = newQty;
+
             renderSerialInputs(allCardsData[idx], newQty, true);
 
             const dupBadge = document.getElementById('modal-duplicate-badge');
@@ -1440,7 +1391,7 @@ async function updateQtyFromModal(newQty, triggerButton = null) {
                 dupBadge.style.display = 'none';
             }
 
-            // Shine rarità in tempo reale
+            // Shine rarita' in tempo reale
             const rarityEl = document.getElementById('modal-card-rarity');
             const cardObj = allCardsData.find(c => c.card_code === cardCode);
             if (rarityEl && cardObj) {
@@ -1463,6 +1414,7 @@ async function updateQtyFromModal(newQty, triggerButton = null) {
             // sincronizza la carta piccola sottostante
             const qtyEl = document.getElementById(`qty-${cardCode}`);
             if (qtyEl) qtyEl.value = newQty;
+
             updateCardVisual(cardCode, newQty);
 
              // Feedback visivo +1 / -1 nella modale
@@ -1472,11 +1424,12 @@ async function updateQtyFromModal(newQty, triggerButton = null) {
 
             updateSetHeaderForCard(cardCode);
             loadStats();
+
             if (currentView === 'DASHBOARD') renderDashboard();
         }
     } catch (err) {
         console.error(err);
-        showToast("Errore durante l'aggiornamento della quantità.", 'error');
+        showToast(t('toast.qty_update_error'), 'error');
     }
 }
 
@@ -1487,13 +1440,13 @@ document.addEventListener('DOMContentLoaded', () => {
     loadCards();
     loadShowcaseCodes();
 
-    // Ripristina l'ultima vista usata (se diversa da COLLEZIONE, che è il default)
+    // Ripristina l'ultima vista usata (se diversa da COLLEZIONE, che e' il default)
     const savedView = localStorage.getItem('lastView');
     if (savedView && savedView !== 'COLLEZIONE') {
         switchView(savedView);
     }
 
-    // Listener bottoni +/- e input quantità nella modale
+    // Listener bottoni +/- e input quantita' nella modale
     const btnPlus = document.getElementById('modal-btn-plus');
     const btnMinus = document.getElementById('modal-btn-minus');
     const qtyIn = document.getElementById('modal-qty-input');
@@ -1519,13 +1472,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (inp) inp.value = inp.value.replace(/\D/g, '').slice(0, 3);
         });
 
-        // Uscita dal campo → salva
+        // Uscita dal campo -> salva
         serialWrap.addEventListener('focusout', (e) => {
             const inp = e.target.closest('.serial-input');
             if (inp) autoSaveSerials(inp);
         });
 
-        // Enter → esce dal campo (e quindi salva) · Tab funziona già da solo
+        // Enter -> esce dal campo (e quindi salva) - Tab funziona gia' da solo
         serialWrap.addEventListener('keydown', (e) => {
             const inp = e.target.closest('.serial-input');
             if (!inp) return;
@@ -1590,6 +1543,7 @@ function navigateModal(direction) {
         // ignorando i filtri.
         const currentCard = allCardsData.find(c => c.card_code === currentModalCardCode);
         if (!currentCard) return;
+
         const fallbackCards = allCardsData
             .filter(c => (c.set_name || "Altri") === (currentCard.set_name || "Altri"))
             .sort((a, b) => {
@@ -1602,12 +1556,13 @@ function navigateModal(direction) {
                 if (sortBy === 'db-id')       return (a.cards_id || 999999) - (b.cards_id || 999999);
                 return (a.cards_display_order || '').localeCompare(b.cards_display_order || '');
             });
+
         codeList = fallbackCards.map(c => c.card_code);
         currentIndex = codeList.indexOf(currentModalCardCode);
         if (currentIndex === -1) return;
     }
 
-    // Calcola il nuovo indice (con wrap-around: dopo l'ultima → prima)
+    // Calcola il nuovo indice (con wrap-around: dopo l'ultima -> prima)
     let newIndex = currentIndex + direction;
     if (newIndex < 0) newIndex = codeList.length - 1;
     if (newIndex >= codeList.length) newIndex = 0;
@@ -1630,6 +1585,7 @@ function updateResultsCounter(shownCount) {
         el.style.display = 'none';
         return;
     }
+
     el.style.display = 'block';
 
 	// Mostra il contatore SOLO se ci sono filtri attivi (shownCount < total)
@@ -1639,10 +1595,9 @@ function updateResultsCounter(shownCount) {
     } else {
         el.style.display = 'block';
         el.classList.add('filtered');
-        el.innerHTML = `Mostrando <span class="counter-highlight">${shownCount}</span> di <span class="counter-highlight">${total}</span> carte`;
+        el.innerHTML = t('collection.results_showing', { shown: `<span class="counter-highlight">${shownCount}</span>`, total: `<span class="counter-highlight">${total}</span>` });
     }
 }
-
 
 // -------- Numerazione carte SG --------
 function isSGCard(card) {
@@ -1662,13 +1617,13 @@ function renderSerialInputs(card, qtyOverride = null, preserveTyped = false) {
 
     block.style.display = 'block';
 
-    // La quantità arriva dal chiamante: nessun ritardo di lettura dal DOM
+    // La quantita' arriva dal chiamante: nessun ritardo di lettura dal DOM
     const qty = (qtyOverride !== null && !isNaN(qtyOverride))
         ? qtyOverride
         : parseInt(document.getElementById('modal-qty-input').value || "0");
 
     if (qty <= 0) {
-        wrap.innerHTML = `<div class="serial-empty">Aggiungi almeno una copia per inserire la numerazione.</div>`;
+        wrap.innerHTML = `<div class="serial-empty">${t('card_modal.serial_empty_hint')}</div>`;
         return;
     }
 
@@ -1685,11 +1640,12 @@ function renderSerialInputs(card, qtyOverride = null, preserveTyped = false) {
         const val = escapeHTML(raw);
         html += `
         <div class="serial-item">
-            <span class="serial-index">Copia ${i + 1}</span>
+            <span class="serial-index">${t('card_modal.serial_copy_label', { n: i + 1 })}</span>
             <span class="serial-hash">#</span>
             <input type="text" class="serial-input" inputmode="numeric" maxlength="3" placeholder="000" value="${val}">
         </div>`;
     }
+
     wrap.innerHTML = html;
 }
 
@@ -1734,7 +1690,7 @@ async function autoSaveSerials(focusedInput = null) {
         const data = await res.json();
 
         if (!res.ok || data.status !== 'success') {
-            showToast(data.message || "Errore nel salvataggio.", 'error');
+            showToast(data.message || t('toast.generic_save_error'), 'error');
             flashSerialInput(focusedInput, 'error');
             return;
         }
@@ -1750,10 +1706,9 @@ async function autoSaveSerials(focusedInput = null) {
 
         updateSerialTag(cardCode);
         flashSerialInput(focusedInput, 'ok');
-
     } catch (err) {
         console.error(err);
-        showToast("Errore di connessione.", 'error');
+        showToast(t('common.connection_error'), 'error');
         flashSerialInput(focusedInput, 'error');
     } finally {
         serialSaveInProgress = false;
@@ -1772,21 +1727,27 @@ function renderNotes(card) {
     const input = document.getElementById('modal-notes-input');
     const hint = document.getElementById('modal-notes-hint');
     if (!input) return;
+
     input.value = (card && card.notes) ? card.notes : '';
     if (hint) { hint.innerText = ''; hint.className = 'notes-hint'; }
 }
 
 let notesSaveInProgress = false;
+
 async function autoSaveNotes() {
     const input = document.getElementById('modal-notes-input');
     if (!input || !currentModalCardCode || notesSaveInProgress) return;
+
     const cardCode = currentModalCardCode;
     const card = allCardsData.find(c => c.card_code === cardCode);
     const newVal = input.value.trim();
     const oldVal = (card && card.notes) ? card.notes : '';
+
     if (newVal === oldVal) return; // niente di nuovo da salvare
+
     notesSaveInProgress = true;
     const hint = document.getElementById('modal-notes-hint');
+
     try {
         const res = await fetch('/api/update_notes', {
             method: 'POST',
@@ -1794,17 +1755,20 @@ async function autoSaveNotes() {
             body: JSON.stringify({ card_code: cardCode, notes: newVal })
         });
         const data = await res.json();
+
         if (!res.ok || data.status !== 'success') {
-            if (hint) { hint.innerText = data.message || 'Errore nel salvataggio.'; hint.className = 'notes-hint error'; }
+            if (hint) { hint.innerText = data.message || t('toast.notes_save_error'); hint.className = 'notes-hint error'; }
             return;
         }
+
         const idx = allCardsData.findIndex(c => c.card_code === cardCode);
         if (idx !== -1) allCardsData[idx].notes = newVal;
-        if (hint) { hint.innerText = 'Nota salvata'; hint.className = 'notes-hint ok'; }
+
+        if (hint) { hint.innerText = t('card_modal.notes_saved'); hint.className = 'notes-hint ok'; }
         updateNoteBadge(cardCode);
     } catch (e) {
         console.error(e);
-        if (hint) { hint.innerText = 'Errore di connessione.'; hint.className = 'notes-hint error'; }
+        if (hint) { hint.innerText = t('common.connection_error'); hint.className = 'notes-hint error'; }
     } finally {
         notesSaveInProgress = false;
     }
@@ -1814,8 +1778,10 @@ function updateNoteBadge(cardCode, element = null) {
     const cardEl = element || document.getElementById(`card-${cardCode}`);
     const card = allCardsData.find(c => c.card_code === cardCode);
     if (!cardEl || !card) return;
+
     const old = cardEl.querySelector('.note-badge');
     if (old) old.remove();
+
     if (card.notes && card.notes.trim() !== '') {
         const badge = document.createElement('div');
         badge.className = 'note-badge';
@@ -1829,20 +1795,25 @@ function updateSerialTag(cardCode, element = null) {
     const cardEl = element || document.getElementById(`card-${cardCode}`);
     const card = allCardsData.find(c => c.card_code === cardCode);
     if (!cardEl || !card) return;
+
     const old = cardEl.querySelector('.serial-tag');
     if (old) old.remove();
+
     if (!isSGCard(card)) return;
+
     const qty = Math.max(0, parseInt(card.quantity) || 0);
     const list = String(card.serials || '')
         .split(',')
         .map(s => s.trim())
         .filter(Boolean)
         .slice(0, qty);   // considera solo le numerazioni fino alle copie possedute
+
     if (list.length === 0) return;
+
     const tag = document.createElement('div');
     tag.className = 'serial-tag';
     tag.innerText = list.length === 1 ? `#${list[0]}` : `#${list[0]} +${list.length - 1}`;
-    tag.title = list.map(s => '#' + s).join(' · ');
+    tag.title = list.map(s => '#' + s).join(' \u00B7 ');
     cardEl.appendChild(tag);
 }
 
@@ -1903,6 +1874,7 @@ function observeImages() {
 (function () {
     const modal = document.getElementById('card-modal');
     if (!modal) return;
+
     let startX = 0, startY = 0, tracking = false, isHorizontal = null;
 
     modal.addEventListener('touchstart', function (e) {
@@ -1918,13 +1890,13 @@ function observeImages() {
         const dx = e.touches[0].clientX - startX;
         const dy = e.touches[0].clientY - startY;
 
-        // Decide la direzione appena il dito si è mosso un po'
+        // Decide la direzione appena il dito si e' mosso un po'
         if (isHorizontal === null && (Math.abs(dx) > 10 || Math.abs(dy) > 10)) {
             isHorizontal = Math.abs(dx) > Math.abs(dy);
         }
 
-        // Blocca lo scroll della pagina SOLO se il gesto è orizzontale
-        // (swipe per cambiare carta). Se è verticale, lascia scrollare.
+        // Blocca lo scroll della pagina SOLO se il gesto e' orizzontale
+        // (swipe per cambiare carta). Se e' verticale, lascia scrollare.
         if (isHorizontal) {
             e.preventDefault();
         }
@@ -1933,9 +1905,11 @@ function observeImages() {
     modal.addEventListener('touchend', function (e) {
         if (!tracking) return;
         tracking = false;
+
         const dx = e.changedTouches[0].clientX - startX;
         const dy = e.changedTouches[0].clientY - startY;
-        // swipe valido: > 50px e più orizzontale che verticale
+
+        // swipe valido: > 50px e piu' orizzontale che verticale
         if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
             if (dx < 0) {
                 navigateModal(1);    // dito verso sinistra -> successiva
@@ -1961,8 +1935,10 @@ async function loadShowcaseCodes() {
 
 async function toggleShowcaseFromModal() {
     if (!currentModalCardCode) return;
+
     const inShowcase = showcaseCodes.has(currentModalCardCode);
     const btn = document.getElementById('modal-showcase-btn');
+
     try {
         if (inShowcase) {
             const data = await fetchJSON('/api/showcase/remove', {
@@ -1972,7 +1948,7 @@ async function toggleShowcaseFromModal() {
             });
             if (data.status === 'success') {
                 showcaseCodes.delete(currentModalCardCode);
-                showToast('Rimossa dalla vetrina.', 'success');
+                showToast(t('showcase.removed'), 'success');
             }
         } else {
             const data = await fetchJSON('/api/showcase/add', {
@@ -1982,22 +1958,24 @@ async function toggleShowcaseFromModal() {
             });
             if (data.status === 'success') {
                 showcaseCodes.add(currentModalCardCode);
-                showToast('Aggiunta alla vetrina!', 'success');
+                showToast(t('showcase.added'), 'success');
             } else {
-                showToast(data.message || 'Impossibile aggiungere alla vetrina.', 'error');
+                showToast(data.message || t('showcase.cannot_add'), 'error');
                 return;
             }
         }
+
         if (btn) {
             const nowIn = showcaseCodes.has(currentModalCardCode);
             btn.classList.toggle('active', nowIn);
-            btn.innerText = nowIn ? '★ Nella Vetrina' : '+ Vetrina';
+            btn.innerText = nowIn ? `\u2605 ${t('card_modal.in_showcase')}` : t('card_modal.add_showcase');
         }
     } catch (e) {
         console.error(e);
-        showToast('Errore di connessione.', 'error');
+        showToast(t('common.connection_error'), 'error');
     }
 }
+
 // -------- Note personali: salvataggio automatico all'uscita dal campo --------
 document.addEventListener('DOMContentLoaded', function () {
     const notesInput = document.getElementById('modal-notes-input');
@@ -2005,6 +1983,7 @@ document.addEventListener('DOMContentLoaded', function () {
         notesInput.addEventListener('focusout', function () { autoSaveNotes(); });
     }
 });
+
 // =========================================================
 //  GRADAZIONE CARTE
 // =========================================================
@@ -2014,6 +1993,7 @@ function setGradingToggle(isYes) {
     const yes = document.getElementById('grading-toggle-yes');
     const no = document.getElementById('grading-toggle-no');
     const details = document.getElementById('grading-details');
+
     if (yes) yes.classList.toggle('active', isYes);
     if (no) no.classList.toggle('active', !isYes);
     if (details) details.style.display = isYes ? 'block' : 'none';
@@ -2023,10 +2003,13 @@ function renderGrading(card) {
     const isYes = !!(card && card.graded);
     const grader = (card && card.grader) ? card.grader : '';
     const grade = (card && card.grade) ? card.grade : '';
+
     setGradingToggle(isYes);
+
     const select = document.getElementById('grading-company');
     const other = document.getElementById('grading-company-other');
     const gradeInput = document.getElementById('grading-grade');
+
     if (select && other) {
         if (grader && KNOWN_GRADERS.indexOf(grader) === -1) {
             select.value = 'Altro';
@@ -2038,17 +2021,22 @@ function renderGrading(card) {
             other.value = '';
         }
     }
+
     if (gradeInput) gradeInput.value = grade;
 }
 
 let gradingSaveInProgress = false;
+
 async function autoSaveGrading() {
     if (!currentModalCardCode || gradingSaveInProgress) return;
+
     const cardCode = currentModalCardCode;
     const card = allCardsData.find(c => c.card_code === cardCode);
+
     const isYes = document.getElementById('grading-toggle-yes').classList.contains('active');
     let grader = '';
     let grade = '';
+
     if (isYes) {
         const select = document.getElementById('grading-company');
         if (select && select.value === 'Altro') {
@@ -2059,12 +2047,16 @@ async function autoSaveGrading() {
         const gi = document.getElementById('grading-grade');
         grade = gi ? gi.value.trim() : '';
     }
+
     const graded = isYes ? 1 : 0;
     const oldGraded = (card && card.graded) ? 1 : 0;
     const oldGrader = (card && card.grader) ? card.grader : '';
     const oldGrade = (card && card.grade) ? card.grade : '';
+
     if (graded === oldGraded && grader === oldGrader && grade === oldGrade) return;
+
     gradingSaveInProgress = true;
+
     try {
         const res = await fetch('/api/update_grading', {
             method: 'POST',
@@ -2072,6 +2064,7 @@ async function autoSaveGrading() {
             body: JSON.stringify({ card_code: cardCode, graded: graded, grader: grader, grade: grade })
         });
         const data = await res.json();
+
         if (res.ok && data.status === 'success') {
             const idx = allCardsData.findIndex(c => c.card_code === cardCode);
             if (idx !== -1) {
@@ -2081,11 +2074,11 @@ async function autoSaveGrading() {
             }
             updateGradingBadge(cardCode);
         } else {
-            showToast(data.message || 'Errore nel salvataggio della gradazione.', 'error');
+            showToast(data.message || t('toast.grading_save_error'), 'error');
         }
     } catch (e) {
         console.error(e);
-        showToast('Errore di connessione.', 'error');
+        showToast(t('common.connection_error'), 'error');
     } finally {
         gradingSaveInProgress = false;
     }
@@ -2104,8 +2097,10 @@ function updateGradingBadge(cardCode, element = null) {
     const cardEl = element || document.getElementById(`card-${cardCode}`);
     const card = allCardsData.find(c => c.card_code === cardCode);
     if (!cardEl || !card) return;
+
     const old = cardEl.querySelector('.grading-badge');
     if (old) old.remove();
+
     const row = cardEl.querySelector('.card-wishlist-row');
     if (card.graded && row) {
         const badge = document.createElement('span');
@@ -2113,9 +2108,9 @@ function updateGradingBadge(cardCode, element = null) {
         let txt = card.grader || 'GRD';
         if (card.grade) txt += ' ' + card.grade;
         badge.innerText = txt;
-        badge.title = 'Gradata' +
-            (card.grader ? ' da ' + card.grader : '') +
-            (card.grade ? ' - voto ' + card.grade : '');
+        badge.title = t('card_modal.grading_badge_graded') +
+            (card.grader ? ' ' + t('card_modal.grading_badge_by') + ' ' + card.grader : '') +
+            (card.grade ? ' - ' + t('card_modal.grading_badge_grade_word') + ' ' + card.grade : '');
         row.insertBefore(badge, row.firstChild); // a sinistra del cuore
     }
 }
@@ -2126,30 +2121,36 @@ document.addEventListener('DOMContentLoaded', function () {
     const sel = document.getElementById('grading-company');
     const other = document.getElementById('grading-company-other');
     const grade = document.getElementById('grading-grade');
+
     if (tYes) tYes.addEventListener('click', function () { setGradingToggle(true); autoSaveGrading(); });
     if (tNo) tNo.addEventListener('click', function () { setGradingToggle(false); autoSaveGrading(); });
+
     if (sel) sel.addEventListener('change', function () {
         document.getElementById('grading-company-other').style.display =
             (sel.value === 'Altro') ? 'block' : 'none';
         autoSaveGrading();
     });
+
     if (other) other.addEventListener('focusout', function () { autoSaveGrading(); });
+
     if (grade) {
         // Trasforma il campo voto in un menu a tendina di valori validi
         buildGradeOptions();
         grade.addEventListener('change', function () { autoSaveGrading(); });
     }
 });
+
 // -------- Filtro "solo gradate" --------
 function toggleGradedFilter() {
     gradedFilterOn = !gradedFilterOn;
     const btn = document.getElementById('graded-toggle-btn');
     if (btn) {
-        btn.innerText = gradedFilterOn ? 'Gradate: Solo si\'' : 'Gradate: Tutte';
+        btn.innerText = gradedFilterOn ? t('collection.btn_graded_only') : t('collection.btn_graded_all');
         btn.classList.toggle('active', gradedFilterOn);
     }
     filterCards();
 }
+
 // -------- Voto gradazione: opzioni valide (10 -> 1, mezzi punti) --------
 function buildGradeOptions() {
     const sel = document.getElementById('grading-grade');
@@ -2166,6 +2167,7 @@ function buildGradeOptions() {
         html += '<option value="' + label + '">' + label + '</option>';
     }
     newSel.innerHTML = html;
+
     sel.parentNode.replaceChild(newSel, sel);
     newSel.addEventListener('change', function () { autoSaveGrading(); });
 }
